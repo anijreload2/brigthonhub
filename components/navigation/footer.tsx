@@ -146,6 +146,13 @@ export function Footer() {
               <span className="text-xs text-gray-400 ml-2">Made in Nigeria</span>
             </div>
           </div>
+          
+          {/* Built by note */}
+          <div className="text-center mt-6 pt-4 border-t border-gray-800">
+            <p className="text-xs text-gray-500">
+              built by seededlifeco, email.. seededlifeco@gmail.com
+            </p>
+          </div>
         </div>
       </div>
     </footer>
