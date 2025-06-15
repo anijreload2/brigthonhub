@@ -1,8 +1,8 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { 
   Search, 
   Filter, 
@@ -22,465 +22,394 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StoreProduct, StoreCategory } from '@/lib/types';
 import { CURRENCY } from '@/lib/constants';
-
-// Sample store categories
-const sampleCategories: StoreCategory[] = [
-  {
-    id: '1',
-    name: 'Office Furniture',
-    description: 'Desks, chairs, cabinets and office equipment',
-    image: '{https://i.pinimg.com/originals/cc/ab/e5/ccabe593a089b34ba60f17723f023724.jpg}',
-    isActive: true
-  },
-  {
-    id: '2',
-    name: 'Building Materials',
-    description: 'Cement, steel, tiles and construction supplies',
-    image: '{https://i.pinimg.com/originals/5f/ab/ea/5fabea9a75a05942fbfc986b319efa10.jpg}',
-    isActive: true
-  },
-  {
-    id: '3',
-    name: 'Equipment Supply',
-    description: 'Tools, machinery and industrial equipment',
-    image: '{https://i.pinimg.com/736x/e9/ae/52/e9ae526f42d8af3960c268d043368886.jpg}',
-    isActive: true
-  },
-  {
-    id: '4',
-    name: 'Electronics',
-    description: 'Office electronics and technology solutions',
-    image: '{https://www.tds-office.com/wp-content/uploads/2018/10/office-electronics-printers-copiers.jpg}',
-    isActive: true
-  }
-];
-
-// Sample store products
-const sampleProducts: StoreProduct[] = [
-  {
-    id: '1',
-    name: 'Executive Office Desk',
-    description: 'Premium wooden executive desk with drawers and cable management. Perfect for modern offices.',
-    categoryId: '1',
-    price: 185000,
-    stock: 15,
-    images: [
-      '{https://i.pinimg.com/originals/57/07/a5/5707a598588e86e9fd900c5cb7b730c1.jpg}',
-      '{https://i.pinimg.com/originals/74/8a/24/748a2495c8d9d30a75ba2c4f8e2d64c4.png}'
-    ],
-    features: ['Solid Wood', 'Cable Management', 'Drawers', 'Scratch Resistant'],
-    brand: 'OfficePro',
-    model: 'EP-2024',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  },
-  {
-    id: '2',
-    name: 'Ergonomic Office Chair',
-    description: 'High-back ergonomic chair with lumbar support and adjustable height. Comfortable for long work hours.',
-    categoryId: '1',
-    price: 95000,
-    stock: 25,
-    images: [
-      '{https://jncodeals.com/wp-content/uploads/2020/10/81MvFPynoUL._AC_SL1500_-1.jpg}',
-      '{https://i.pinimg.com/originals/a5/64/7f/a5647f1f24dcd19a381d9975b4083f1c.jpg}'
-    ],
-    features: ['Lumbar Support', 'Adjustable Height', 'Mesh Back', 'Armrests'],
-    brand: 'ComfortSeating',
-    model: 'CS-Pro',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  },
-  {
-    id: '3',
-    name: 'Portland Cement (50kg)',
-    description: 'High-grade Portland cement suitable for all construction projects. Meets international standards.',
-    categoryId: '2',
-    price: 4200,
-    stock: 500,
-    images: [
-      '{https://c8.alamy.com/comp/2F142DY/cement-bags-stacked-in-warehouse-2F142DY.jpg}',
-      '{https://i.pinimg.com/originals/16/4f/95/164f95b30108063a7fdd5541072c5efe.jpg}'
-    ],
-    features: ['Grade 42.5', 'Fast Setting', 'High Strength', 'Weather Resistant'],
-    brand: 'Dangote',
-    model: '3X',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  },
-  {
-    id: '4',
-    name: 'Ceramic Floor Tiles',
-    description: 'Premium ceramic tiles with anti-slip surface. Available in various colors and patterns.',
-    categoryId: '2',
-    price: 3500,
-    stock: 200,
-    images: [
-      '{https://i.pinimg.com/originals/d0/be/9e/d0be9e70aea389258c59d74b6d7182bb.jpg}',
-      '{https://i.pinimg.com/originals/a6/83/25/a683259cfb919452ed62fc55684f49ac.jpg}'
-    ],
-    features: ['Anti-Slip', 'Water Resistant', 'Easy Clean', 'Durable'],
-    brand: 'TileMax',
-    model: 'TM-600',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  },
-  {
-    id: '5',
-    name: 'Power Drill Set',
-    description: 'Professional cordless drill with multiple bits and carrying case. Perfect for construction work.',
-    categoryId: '3',
-    price: 45000,
-    stock: 30,
-    images: [
-      '{https://m.media-amazon.com/images/I/71GhQ-RE6PL.jpg}',
-      '{https://i.ytimg.com/vi/1R4xYKL6nNM/maxresdefault.jpg}'
-    ],
-    features: ['Cordless', 'Multiple Bits', 'LED Light', 'Carrying Case'],
-    brand: 'PowerTools',
-    model: 'PT-18V',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  },
-  {
-    id: '6',
-    name: 'Desktop Computer',
-    description: 'Complete desktop computer system with monitor, keyboard and mouse. Ready for office use.',
-    categoryId: '4',
-    price: 320000,
-    stock: 12,
-    images: [
-      '{https://i.ytimg.com/vi/GeP31f9jtpk/maxresdefault.jpg}',
-      '{https://i.pinimg.com/originals/11/2c/e1/112ce1857d1438227b7d5696329b3c63.jpg}'
-    ],
-    features: ['Intel i5', '8GB RAM', '256GB SSD', '21" Monitor'],
-    brand: 'TechPro',
-    model: 'TP-Office',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }
-];
+import { supabase } from '@/lib/supabase';
 
 export default function StorePage() {
-  const [categories] = useState<StoreCategory[]>(sampleCategories);
-  const [products, setProducts] = useState<StoreProduct[]>(sampleProducts);
-  const [filteredProducts, setFilteredProducts] = useState<StoreProduct[]>(sampleProducts);
+  const [products, setProducts] = useState<StoreProduct[]>([]);
+  const [categories, setCategories] = useState<StoreCategory[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sortBy, setSortBy] = useState('name');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('name');
   const [cart, setCart] = useState<{[key: string]: number}>({});
 
   useEffect(() => {
-    let filtered = products;
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch categories
+        const { data: categoriesData, error: categoriesError } = await supabase
+          .from('store_categories')
+          .select('*')
+          .eq('isActive', true)
+          .order('name');
 
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.brand?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
+        if (categoriesError) {
+          console.error('Error fetching store categories:', categoriesError);
+        } else {
+          setCategories(categoriesData || []);
+        }
 
-    // Category filter
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(product => product.categoryId === selectedCategory);
-    }
+        // Fetch products
+        const { data: productsData, error: productsError } = await supabase
+          .from('store_products')
+          .select(`
+            *,
+            store_categories (
+              id,
+              name
+            )
+          `)
+          .eq('isActive', true)
+          .order('name');
 
-    // Sort
-    switch (sortBy) {
-      case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'name':
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      default:
-        break;
-    }
+        if (productsError) {
+          console.error('Error fetching store products:', productsError);
+        } else {
+          setProducts(productsData || []);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setFilteredProducts(filtered);
-  }, [products, searchTerm, selectedCategory, sortBy]);
+    fetchData();
+  }, []);
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
+  // Filter and sort products
+  const filteredAndSortedProducts = products
+    .filter(product => {
+      const matchesSearch = product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           product.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || product.categoryId === selectedCategory;
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'price':
+          return (a.price || 0) - (b.price || 0);
+        case 'name':
+        default:
+          return (a.name || '').localeCompare(b.name || '');
+      }
+    });
 
-  const addToCart = (productId: string, quantity: number = 1) => {
+  const addToCart = (productId: string) => {
     setCart(prev => ({
       ...prev,
-      [productId]: (prev[productId] || 0) + quantity
+      [productId]: (prev[productId] || 0) + 1
     }));
   };
 
   const removeFromCart = (productId: string) => {
-    setCart(prev => {
-      const newCart = { ...prev };
-      if (newCart[productId] > 1) {
-        newCart[productId] -= 1;
-      } else {
-        delete newCart[productId];
-      }
-      return newCart;
-    });
+    setCart(prev => ({
+      ...prev,
+      [productId]: Math.max((prev[productId] || 0) - 1, 0)
+    }));
   };
 
   const getTotalItems = () => {
     return Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       {/* Hero Section */}
-      <section className="bg-brand-gradient text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-            <h1 className="text-4xl md:text-5xl font-heading font-bold mb-4">
+      <section className="relative py-20 px-4 text-center">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               Business Marketplace
             </h1>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Office furniture, building materials, and equipment supply for all your business needs
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Complete business solutions from office furniture to building materials. 
+              Everything you need to equip and grow your business.
             </p>
-            
-            {/* Search Bar */}
-            <div className="max-w-2xl mx-auto">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder="Search for office furniture, building materials, equipment..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 pr-4 py-4 text-lg bg-white text-gray-900 border-0 rounded-lg shadow-lg"
-                />
-              </div>
+            <div className="flex justify-center gap-4 mb-8">
+              <Badge variant="secondary" className="flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                Quality Products
+              </Badge>
+              <Badge variant="secondary" className="flex items-center gap-2">
+                <Truck className="h-4 w-4" />
+                Fast Delivery
+              </Badge>
+              <Badge variant="secondary" className="flex items-center gap-2">
+                <Award className="h-4 w-4" />
+                Trusted Brands
+              </Badge>
             </div>
           </motion.div>
-          </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[
-              { icon: Package, title: 'Bulk Orders', description: 'Wholesale pricing available' },
-              { icon: Truck, title: 'Fast Delivery', description: 'Quick delivery nationwide' },
-              { icon: Shield, title: 'Quality Assured', description: 'Genuine products only' },
-              { icon: Award, title: 'Trusted Brands', description: 'Top quality brands' }
-            ].map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <div key={feature.title} className="text-center">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                  >
-                  <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Icon className="w-8 h-8 text-accent" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
-                  </motion.div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className="py-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-heading font-bold text-gray-900 mb-6">Shop by Category</h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-            <Button
-              variant={selectedCategory === 'all' ? 'default' : 'outline'}
-              onClick={() => setSelectedCategory('all')}
-              className="h-auto p-4 flex flex-col items-center space-y-2"
-            >
-              <span className="font-medium">All Products</span>
-            </Button>
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? 'default' : 'outline'}
-                onClick={() => setSelectedCategory(category.id)}
-                className="h-auto p-4 flex flex-col items-center space-y-2"
-              >
-                <span className="font-medium text-center">{category.name}</span>
-              </Button>
-            ))}
-          </div>
-
-          {/* Controls */}
-          <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
-            <div className="flex items-center space-x-4">
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Sort by" />
+      {/* Search and Filter Section */}
+      <section className="py-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div className="grid md:grid-cols-4 gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search products..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="name">Name A-Z</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              
-              <div className="text-sm text-gray-600">
-                {filteredProducts.length} products found
-              </div>
-            </div>
-
-            {getTotalItems() > 0 && (
-              <Button className="btn-accent">
-                <ShoppingCart className="w-4 h-4 mr-2" />
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sort by..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="price">Price</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                <ShoppingCart className="mr-2 h-4 w-4" />
                 Cart ({getTotalItems()})
               </Button>
+            </div>
+          </div>
+
+          {/* Categories Section */}
+          {categories.length > 0 && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Browse Categories</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {categories.map((category) => (
+                  <motion.div
+                    key={category.id}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="cursor-pointer"
+                    onClick={() => setSelectedCategory(category.id)}
+                  >
+                    <Card className="h-full hover:shadow-lg transition-shadow">
+                      <CardContent className="p-4 text-center">
+                        {category.image && (
+                          <div className="relative w-full h-32 mb-3 rounded-lg overflow-hidden">
+                            <Image
+                              src={category.image}
+                              alt={category.name}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        )}
+                        <h3 className="font-semibold text-gray-900 mb-1">{category.name}</h3>
+                        <p className="text-sm text-gray-600">{category.description}</p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Products Grid */}
+          <div className="mb-12">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Available Products</h2>
+              <p className="text-gray-600">{filteredAndSortedProducts.length} products found</p>
+            </div>
+            
+            {filteredAndSortedProducts.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
+                <Button 
+                  onClick={() => { setSearchTerm(''); setSelectedCategory('all'); }}
+                  className="mt-4"
+                  variant="outline"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredAndSortedProducts.map((product) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={{ y: -5 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Card className="h-full hover:shadow-xl transition-shadow">
+                      <CardHeader className="p-0">
+                        {product.images && product.images.length > 0 && (
+                          <div className="relative w-full h-48 rounded-t-lg overflow-hidden">
+                            <Image
+                              src={product.images[0]}
+                              alt={product.name}
+                              fill
+                              className="object-cover"
+                            />
+                            {product.brand && (
+                              <Badge className="absolute top-2 left-2 bg-blue-600">
+                                {product.brand}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </CardHeader>
+                      <CardContent className="p-6">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">{product.name}</h3>
+                        <p className="text-gray-600 mb-4 text-sm line-clamp-2">{product.description}</p>
+                        
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <span className="text-2xl font-bold text-blue-600">
+                              {CURRENCY.symbol}{product.price?.toLocaleString()}
+                            </span>
+                          </div>
+                          <Badge variant="outline">
+                            Stock: {product.stock}
+                          </Badge>
+                        </div>
+
+                        {product.model && (
+                          <p className="text-sm text-gray-500 mb-4">
+                            Model: {product.model}
+                          </p>
+                        )}
+
+                        {product.features && product.features.length > 0 && (
+                          <div className="mb-4">
+                            <p className="text-xs text-gray-500 font-medium mb-2">Features:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {product.features.slice(0, 3).map((feature, index) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {feature}
+                                </Badge>
+                              ))}
+                              {product.features.length > 3 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  +{product.features.length - 3} more
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {cart[product.id] ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => removeFromCart(product.id)}
+                                >
+                                  <Minus className="h-4 w-4" />
+                                </Button>
+                                <span className="text-sm font-medium px-2">
+                                  {cart[product.id]}
+                                </span>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => addToCart(product.id)}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </>
+                            ) : (
+                              <Button
+                                onClick={() => addToCart(product.id)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                              >
+                                <ShoppingCart className="mr-2 h-4 w-4" />
+                                Add to Cart
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
             )}
           </div>
 
-          {/* Products Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <Card className="card-hover border-0 shadow-md overflow-hidden h-full">
-                  <div className="relative h-48">
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-3 left-3">
-                      <Badge className="bg-accent text-white">
-                        {product.brand}
-                      </Badge>
-                    </div>
-                    {product.stock < 10 && (
-                      <div className="absolute top-3 right-3">
-                        <Badge variant="destructive">
-                          Low Stock
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <CardContent className="p-4 flex flex-col h-full">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        {product.name}
-                      </h3>
-                      
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                        {product.description}
-                      </p>
-
-                      <div className="text-2xl font-bold text-primary mb-3">
-                        {formatPrice(product.price)}
-                      </div>
-
-                      <div className="space-y-2 mb-4">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Brand:</span>
-                          <span className="font-medium">{product.brand}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Model:</span>
-                          <span className="font-medium">{product.model}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Stock:</span>
-                          <span className="font-medium">{product.stock} available</span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {product.features.slice(0, 3).map((feature) => (
-                          <Badge key={feature} variant="secondary" className="text-xs">
-                            {feature}
-                          </Badge>
-                        ))}
-                        {product.features.length > 3 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{product.features.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mt-auto">
-                      {cart[product.id] ? (
-                        <div className="flex items-center justify-between">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => removeFromCart(product.id)}
-                          >
-                            <Minus className="w-4 h-4" />
-                          </Button>
-                          <span className="font-medium">{cart[product.id]} items</span>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => addToCart(product.id)}
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button
-                          className="w-full btn-accent"
-                          onClick={() => addToCart(product.id)}
-                        >
-                          <ShoppingCart className="w-4 h-4 mr-2" />
-                          Add to Cart
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-
-          {filteredProducts.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-12 h-12 text-gray-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
-              <p className="text-gray-600 mb-4">Try adjusting your search or category filter</p>
-              <Button onClick={() => { setSearchTerm(''); setSelectedCategory('all'); }}>
-                Clear Filters
-              </Button>
+          {/* Features Section */}
+          <section className="py-12 bg-white rounded-xl shadow-lg">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Our Marketplace?</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Your one-stop destination for all business needs. From office setup to construction materials, 
+                we have everything to help your business succeed.
+              </p>
             </div>
-          )}
+            <div className="grid md:grid-cols-4 gap-6 px-6">
+              <div className="text-center">
+                <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Package className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Quality Products</h3>
+                <p className="text-gray-600 text-sm">
+                  Carefully curated products from trusted manufacturers and suppliers
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Truck className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Fast Delivery</h3>
+                <p className="text-gray-600 text-sm">
+                  Quick delivery across Nigeria with tracking and insurance options
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Award className="h-8 w-8 text-yellow-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Trusted Brands</h3>
+                <p className="text-gray-600 text-sm">
+                  Partner with leading brands and certified suppliers for genuine products
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-8 w-8 text-purple-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Warranty Support</h3>
+                <p className="text-gray-600 text-sm">
+                  Comprehensive warranty and after-sales support for all products
+                </p>
+              </div>
+            </div>
+          </section>
         </div>
       </section>
     </div>

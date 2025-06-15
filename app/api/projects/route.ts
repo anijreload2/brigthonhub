@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminClient } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,14 +9,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '6');
     const offset = parseInt(searchParams.get('offset') || '0');
-    const categoryId = searchParams.get('categoryId');    const status = searchParams.get('status');
-
-    const supabaseAdmin = getAdminClient();
-    let query = supabaseAdmin
+    const categoryId = searchParams.get('categoryId');
+    const status = searchParams.get('status');    let query = supabase
       .from('projects')
       .select(`
         *,
-        category:project_categories(*)
+        project_categories(*)
       `)
       .eq('isActive', true)
       .order('createdAt', { ascending: false })

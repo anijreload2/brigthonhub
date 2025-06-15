@@ -2,8 +2,9 @@ const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  distDir: process.env.NEXT_DIST_DIR || '.next',
-  output: process.env.NEXT_OUTPUT_MODE,
+  output: 'export',
+  trailingSlash: true,
+  distDir: 'out',
   experimental: {
     outputFileTracingRoot: path.join(__dirname, '../'),
   },
@@ -13,7 +14,23 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  images: { unoptimized: true },
+  images: { 
+    unoptimized: true,
+    domains: [
+      'images.pexels.com',
+      'i.pinimg.com',
+      'thumbs.dreamstime.com',
+      'c8.alamy.com',
+      'blogger.googleusercontent.com',
+      'images.unsplash.com'
+    ],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
+  },
 };
 
 module.exports = nextConfig;

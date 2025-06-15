@@ -5,16 +5,16 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('Food API: Starting request');
+    console.log('Store API: Starting request');
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '6');
     const offset = parseInt(searchParams.get('offset') || '0');
     const categoryId = searchParams.get('categoryId');
       let query = supabase
-      .from('food_items')
+      .from('store_products')
       .select(`
         *,
-        food_categories(*)
+        store_categories(*)
       `)
       .eq('isActive', true)
       .order('createdAt', { ascending: false })
@@ -25,28 +25,27 @@ export async function GET(request: NextRequest) {
       query = query.eq('categoryId', categoryId);
     }
 
-    console.log('Food API: Executing Supabase query');
-    const { data: foodItems, error } = await query;
+    console.log('Store API: Executing Supabase query');
+    const { data: products, error } = await query;
 
     if (error) {
-      console.error('Supabase query error:', error);
+      console.error('Store API: Supabase error:', error);
       return NextResponse.json(
-        { error: 'Failed to fetch food items', details: error.message },
+        { error: 'Failed to fetch store products', details: error.message },
         { status: 500 }
       );
     }
 
-    console.log('Food API: Found', foodItems?.length || 0, 'food items');
-
+    console.log(`Store API: Retrieved ${products?.length || 0} products`);
     return NextResponse.json({
-      foodItems: foodItems || [],
-      count: foodItems?.length || 0
+      products: products || [],
+      total: products?.length || 0
     });
 
   } catch (error) {
-    console.error('Food API Error:', error);
+    console.error('Store API: Unexpected error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch food items', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

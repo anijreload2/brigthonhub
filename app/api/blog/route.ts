@@ -5,19 +5,19 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('Food API: Starting request');
+    console.log('Blog API: Starting request');
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '6');
     const offset = parseInt(searchParams.get('offset') || '0');
     const categoryId = searchParams.get('categoryId');
       let query = supabase
-      .from('food_items')
+      .from('blog_posts')
       .select(`
         *,
-        food_categories(*)
+        blog_categories(*)
       `)
-      .eq('isActive', true)
-      .order('createdAt', { ascending: false })
+      .eq('isPublished', true)
+      .order('publishedAt', { ascending: false })
       .range(offset, offset + limit - 1);
 
     // Apply category filter if provided
@@ -25,28 +25,27 @@ export async function GET(request: NextRequest) {
       query = query.eq('categoryId', categoryId);
     }
 
-    console.log('Food API: Executing Supabase query');
-    const { data: foodItems, error } = await query;
+    console.log('Blog API: Executing Supabase query');
+    const { data: posts, error } = await query;
 
     if (error) {
-      console.error('Supabase query error:', error);
+      console.error('Blog API: Supabase error:', error);
       return NextResponse.json(
-        { error: 'Failed to fetch food items', details: error.message },
+        { error: 'Failed to fetch blog posts', details: error.message },
         { status: 500 }
       );
     }
 
-    console.log('Food API: Found', foodItems?.length || 0, 'food items');
-
+    console.log(`Blog API: Retrieved ${posts?.length || 0} posts`);
     return NextResponse.json({
-      foodItems: foodItems || [],
-      count: foodItems?.length || 0
+      posts: posts || [],
+      total: posts?.length || 0
     });
 
   } catch (error) {
-    console.error('Food API Error:', error);
+    console.error('Blog API: Unexpected error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch food items', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
