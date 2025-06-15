@@ -14,10 +14,6 @@ function getEnvVars() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  // During build time, if env vars are missing, provide fallback values
-  const fallbackUrl = 'https://placeholder.supabase.co'
-  const fallbackKey = 'placeholder-key'
-
   if (typeof window !== 'undefined') {
     // Client-side: log for debugging
     console.log('Client-side env check:', {
@@ -28,10 +24,17 @@ function getEnvVars() {
     })
   }
 
-  // Return actual values if available, otherwise fallbacks for build time
+  // Ensure required environment variables are present
+  if (!supabaseUrl || !supabaseAnonKey) {
+    const missing = []
+    if (!supabaseUrl) missing.push('NEXT_PUBLIC_SUPABASE_URL')
+    if (!supabaseAnonKey) missing.push('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+    throw new Error(`Missing required Supabase environment variables: ${missing.join(', ')}`)
+  }
+
   return { 
-    supabaseUrl: supabaseUrl || fallbackUrl, 
-    supabaseAnonKey: supabaseAnonKey || fallbackKey, 
+    supabaseUrl, 
+    supabaseAnonKey, 
     supabaseServiceRoleKey 
   }
 }
