@@ -12,7 +12,8 @@ import {
   Eye,
   Download,
   Image,
-  Brain
+  Brain,
+  Layers
 } from 'lucide-react';
 import { useAuth } from '../auth/auth-provider';
 import { useRouter } from 'next/navigation';
@@ -27,6 +28,7 @@ import BlogTab from './BlogTab';
 import SettingsTab from './SettingsTab';
 import HeroTab from './HeroTab';
 import AITrainingTab from './AITrainingTab';
+import DetailsTab from './DetailsTab';
 import AdminModal from './AdminModal';
 
 const AdminDashboard: React.FC = () => {
@@ -260,10 +262,10 @@ const AdminDashboard: React.FC = () => {
 
     fetchAdminData();
   }, [user, router, authLoading]);
-
   const sidebarItems = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'hero', label: 'Hero Sections', icon: Image },
+    { id: 'details', label: 'Detail Pages', icon: Layers },
     { id: 'users', label: 'User Management', icon: Users },
     { id: 'properties', label: 'Properties', icon: Home },
     { id: 'food', label: 'Food Services', icon: ShoppingCart },
@@ -340,18 +342,17 @@ const AdminDashboard: React.FC = () => {
                 ))}
               </nav>
             </div>
-          </div>
-
-          {/* Main Content */}
+          </div>          {/* Main Content */}
           <div className="lg:col-span-3">            {activeTab === 'overview' && <OverviewTab data={adminData} />}
-            {activeTab === 'hero' && <HeroTab onAdd={() => handleAdd('content_blocks')} onEdit={(data) => handleEdit('content_blocks', data)} onView={(data) => handleView('content_blocks', data)} onDelete={createDeleteHandler('content_blocks')} />}
+            {activeTab === 'hero' && <HeroTab onAdd={() => handleAdd('content_blocks')} onEdit={(data: any) => handleEdit('content_blocks', data)} onView={(data: any) => handleView('content_blocks', data)} onDelete={createDeleteHandler('content_blocks')} />}
+            {activeTab === 'details' && <DetailsTab onAdd={() => handleAdd('details')} onEdit={(data: any) => handleEdit('details', data)} onView={(data: any) => handleView('details', data)} onDelete={createDeleteHandler('details')} />}
             {activeTab === 'users' && <UsersTab key={refreshTrigger} onAdd={() => handleAdd('users')} onEdit={(data: any) => handleEdit('users', data)} onView={(data: any) => handleView('users', data)} onDelete={createDeleteHandler('users')} />}
-            {activeTab === 'properties' && <PropertiesTab key={refreshTrigger} onAdd={() => handleAdd('properties')} onEdit={(data) => handleEdit('properties', data)} onView={(data) => handleView('properties', data)} onDelete={createDeleteHandler('properties')} />}
-            {activeTab === 'food' && <FoodTab key={refreshTrigger} onAdd={() => handleAdd('food_items')} onEdit={(data) => handleEdit('food_items', data)} onView={(data) => handleView('food_items', data)} onDelete={createDeleteHandler('food_items')} />}
-            {activeTab === 'marketplace' && <MarketplaceTab key={refreshTrigger} onAdd={() => handleAdd('store_products')} onEdit={(data) => handleEdit('store_products', data)} onView={(data) => handleView('store_products', data)} onDelete={createDeleteHandler('store_products')} />}
-            {activeTab === 'projects' && <ProjectsTab key={refreshTrigger} onAdd={() => handleAdd('projects')} onEdit={(data) => handleEdit('projects', data)} onView={(data) => handleView('projects', data)} onDelete={createDeleteHandler('projects')} />}
-            {activeTab === 'blog' && <BlogTab key={refreshTrigger} onAdd={() => handleAdd('blog_posts')} onEdit={(data) => handleEdit('blog_posts', data)} onView={(data) => handleView('blog_posts', data)} onDelete={createDeleteHandler('blog_posts')} />}            {activeTab === 'ai-training' && <AITrainingTab key={refreshTrigger} onAdd={() => handleAdd('ai_training_data')} onEdit={(data) => handleEdit('ai_training_data', data)} onView={(data) => handleView('ai_training_data', data)} onDelete={createDeleteHandler('ai_training_data')} />}
-            {activeTab === 'settings' && <SettingsTab key={refreshTrigger} onAdd={() => handleAdd('site_settings')} onEdit={(data) => handleEdit('site_settings', data)} onView={(data) => handleView('site_settings', data)} onDelete={createDeleteHandler('site_settings')} />}
+            {activeTab === 'properties' && <PropertiesTab key={refreshTrigger} onAdd={() => handleAdd('properties')} onEdit={(data: any) => handleEdit('properties', data)} onView={(data: any) => handleView('properties', data)} onDelete={createDeleteHandler('properties')} />}
+            {activeTab === 'food' && <FoodTab key={refreshTrigger} onAdd={() => handleAdd('food_items')} onEdit={(data: any) => handleEdit('food_items', data)} onView={(data: any) => handleView('food_items', data)} onDelete={createDeleteHandler('food_items')} />}
+            {activeTab === 'marketplace' && <MarketplaceTab key={refreshTrigger} onAdd={() => handleAdd('store_products')} onEdit={(data: any) => handleEdit('store_products', data)} onView={(data: any) => handleView('store_products', data)} onDelete={createDeleteHandler('store_products')} />}
+            {activeTab === 'projects' && <ProjectsTab key={refreshTrigger} onAdd={() => handleAdd('projects')} onEdit={(data: any) => handleEdit('projects', data)} onView={(data: any) => handleView('projects', data)} onDelete={createDeleteHandler('projects')} />}
+            {activeTab === 'blog' && <BlogTab key={refreshTrigger} onAdd={() => handleAdd('blog_posts')} onEdit={(data: any) => handleEdit('blog_posts', data)} onView={(data: any) => handleView('blog_posts', data)} onDelete={createDeleteHandler('blog_posts')} />}            {activeTab === 'ai-training' && <AITrainingTab key={refreshTrigger} onAdd={() => handleAdd('ai_training_data')} onEdit={(data: any) => handleEdit('ai_training_data', data)} onView={(data: any) => handleView('ai_training_data', data)} onDelete={createDeleteHandler('ai_training_data')} />}
+            {activeTab === 'settings' && <SettingsTab key={refreshTrigger} onAdd={() => handleAdd('site_settings')} onEdit={(data: any) => handleEdit('site_settings', data)} onView={(data: any) => handleView('site_settings', data)} onDelete={createDeleteHandler('site_settings')} />}
           </div>
         </div>
       </div>      {/* Modal */}
