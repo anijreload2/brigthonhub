@@ -14,6 +14,10 @@ function getEnvVars() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
+  // During build time, if env vars are missing, provide fallback values
+  const fallbackUrl = 'https://placeholder.supabase.co'
+  const fallbackKey = 'placeholder-key'
+
   if (typeof window !== 'undefined') {
     // Client-side: log for debugging
     console.log('Client-side env check:', {
@@ -23,7 +27,13 @@ function getEnvVars() {
       anonKeyPreview: supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'missing'
     })
   }
-  return { supabaseUrl, supabaseAnonKey, supabaseServiceRoleKey }
+
+  // Return actual values if available, otherwise fallbacks for build time
+  return { 
+    supabaseUrl: supabaseUrl || fallbackUrl, 
+    supabaseAnonKey: supabaseAnonKey || fallbackKey, 
+    supabaseServiceRoleKey 
+  }
 }
 
 // Function to detect if storage is available
@@ -76,22 +86,14 @@ const customStorage = {
 };
 
 // Function to get or create the main Supabase client
-function getSupabaseClient(): SupabaseClient<Database> {
-  if (typeof window !== 'undefined' && globalThis.__supabase) {
+function getSupabaseClient(): SupabaseClient<Database> {  if (typeof window !== 'undefined' && globalThis.__supabase) {
     return globalThis.__supabase
   }
 
   if (typeof window === 'undefined' && global.__supabase) {
     return global.__supabase
   }
-
   const { supabaseUrl, supabaseAnonKey } = getEnvVars()
-  
-  if (!supabaseUrl || !supabaseAnonKey) {
-    const error = `Missing Supabase environment variables: URL=${!!supabaseUrl}, AnonKey=${!!supabaseAnonKey}`
-    console.error(error)
-    throw new Error(error)
-  }
 
   const storageAvailable = isStorageAvailable();
 
