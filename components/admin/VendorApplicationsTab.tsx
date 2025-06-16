@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { supabase } from '@/lib/supabase';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
+import { supabase } from '../../lib/supabase';
 import { 
   Clock, CheckCircle, XCircle, Eye, 
   Store, Home, Utensils, Briefcase,
