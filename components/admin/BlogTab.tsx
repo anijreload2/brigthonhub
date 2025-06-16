@@ -21,12 +21,11 @@ const BlogTab: React.FC<BlogTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
 
   const fetchBlogPosts = async () => {
     try {
-      setLoading(true);
-      const { data, error } = await supabase
+      setLoading(true);      const { data, error } = await supabase
         .from('blog_posts')
         .select(`
           *,
-          blog_categories (
+          blog_categories:categoryId (
             id,
             name
           )

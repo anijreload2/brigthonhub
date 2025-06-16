@@ -53,7 +53,7 @@ export default function BlogPage() {
           .from('blog_posts')
           .select(`
             *,
-            blog_categories (
+            blog_categories:categoryId (
               id,
               name
             )

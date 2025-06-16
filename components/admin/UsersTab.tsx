@@ -16,7 +16,6 @@ const UsersTab: React.FC<UsersTabProps> = ({ onAdd, onEdit, onView, onDelete }) 
   const [filterRole, setFilterRole] = useState('all');
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
   const fetchUsers = async () => {
     try {
       setLoading(true);

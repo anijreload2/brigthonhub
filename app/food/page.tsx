@@ -50,14 +50,12 @@ export default function FoodPage() {  const [items, setItems] = useState<FoodIte
           console.error('Error fetching food categories:', categoriesError);
         } else {
           setCategories(categoriesData || []);
-        }
-
-        // Fetch food items
+        }        // Fetch food items
         const { data: itemsData, error: itemsError } = await supabase
           .from('food_items')
           .select(`
             *,
-            food_categories (
+            food_categories:categoryId (
               id,
               name
             )

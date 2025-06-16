@@ -58,7 +58,7 @@ export default function StorePage() {
           .from('store_products')
           .select(`
             *,
-            store_categories (
+            store_categories:categoryId (
               id,
               name
             )

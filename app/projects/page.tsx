@@ -81,7 +81,7 @@ export default function ProjectsPage() {
           .from('projects')
           .select(`
             *,
-            project_categories (
+            project_categories:categoryId (
               id,
               name
             )

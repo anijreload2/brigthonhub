@@ -21,11 +21,10 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ onAdd, onEdit, onView, onDele
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('projects')
+      const { data, error } = await supabase        .from('projects')
         .select(`
           *,
-          project_categories (
+          project_categories:categoryId (
             id,
             name
           )

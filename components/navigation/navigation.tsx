@@ -19,7 +19,10 @@ import {
   LogIn,
   UserPlus,
   Settings,
-  LogOut
+  LogOut,
+  Heart,
+  Store,
+  MessageCircle
 } from 'lucide-react';
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
@@ -124,11 +127,31 @@ export function Navigation() {
                       <span>Profile</span>
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/bookmarks" className="flex items-center">
+                      <Heart className="mr-2 h-4 w-4" />
+                      <span>My Bookmarks</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/messages" className="flex items-center">
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      <span>Messages</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  {(user.role === UserRole.VENDOR || user.role === UserRole.ADMIN) && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/vendor/dashboard" className="flex items-center">
+                        <Store className="mr-2 h-4 w-4" />
+                        <span>Vendor Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   {(user.role === UserRole.ADMIN || user.role === UserRole.AGENT || user.role === UserRole.VENDOR) && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin" className="flex items-center">
                         <Settings className="mr-2 h-4 w-4" />
-                        <span>Dashboard</span>
+                        <span>Admin Dashboard</span>
                       </Link>
                     </DropdownMenuItem>
                   )}

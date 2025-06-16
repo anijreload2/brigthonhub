@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminClient } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,12 +11,10 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
     const categoryId = searchParams.get('categoryId');
     const propertyType = searchParams.get('propertyType');
-    const listingType = searchParams.get('listingType');
-    
+    const listingType = searchParams.get('listingType');    
     console.log('Properties API: Limit set to', limit, 'offset:', offset);
     
-    const supabaseAdmin = getAdminClient();
-    let query = supabaseAdmin
+    let query = supabase
       .from('properties')
       .select(`
         *,

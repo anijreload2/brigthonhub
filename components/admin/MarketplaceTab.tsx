@@ -21,11 +21,10 @@ const MarketplaceTab: React.FC<MarketplaceTabProps> = ({ onAdd, onEdit, onView, 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('store_products')
+      const { data, error } = await supabase        .from('store_products')
         .select(`
           *,
-          store_categories (
+          store_categories:categoryId (
             id,
             name
           )

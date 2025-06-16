@@ -45,7 +45,6 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ onAdd, onEdit, onView, onDele
     const searchText = `${setting.key} ${setting.value}`.toLowerCase();
     return searchText.includes(searchTerm.toLowerCase());
   });
-
   const handleQuickUpdate = async (id: string, value: string) => {
     try {
       const { error } = await supabase
@@ -67,14 +66,81 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ onAdd, onEdit, onView, onDele
     }
   };
 
+  const addOpenRouterDefaults = async () => {
+    const openRouterDefaults = [
+      { key: 'openrouter_api_key', value: '', type: 'password' },
+      { key: 'openrouter_model', value: 'microsoft/wizardlm-2-8x22b', type: 'string' },
+      { key: 'ai_system_prompt', value: 'You are a helpful AI assistant for BrightonHub, a real estate and business services platform in Lagos, Nigeria. Help users with property searches, food supply, marketplace needs, and project planning. Be professional, helpful, and knowledgeable about Nigerian business practices.', type: 'text' }
+    ];
+
+    try {
+      for (const setting of openRouterDefaults) {
+        // Check if setting already exists
+        const exists = settings.find(s => s.key === setting.key);
+        if (!exists) {
+          const { error } = await supabase
+            .from('site_settings')
+            .insert([{
+              id: crypto.randomUUID(),
+              key: setting.key,
+              value: setting.value,
+              type: setting.type,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }]);
+
+          if (error) throw error;
+        }
+      }
+      
+      alert('OpenRouter settings initialized successfully!');
+      fetchSettings(); // Refresh the list
+    } catch (error: any) {
+      console.error('Error adding OpenRouter defaults:', error);
+      alert(`Error: ${error.message}`);
+    }
+  };
+
+  const openRouterModels = [
+    'microsoft/wizardlm-2-8x22b',
+    'anthropic/claude-3-sonnet',
+    'openai/gpt-4o',
+    'openai/gpt-3.5-turbo',
+    'google/gemini-pro',
+    'meta-llama/llama-3-70b-instruct',
+    'mistralai/mistral-7b-instruct'
+  ];
   return (
     <div className="bg-white rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-text-primary">Site Settings</h2>
-        <button onClick={onAdd} className="btn btn-primary">
-          <Plus className="w-4 h-4" />
-          Add Setting
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={addOpenRouterDefaults}
+            className="btn btn-secondary text-sm"
+          >
+            <Settings className="w-4 h-4" />
+            Add AI Settings
+          </button>
+          <button onClick={onAdd} className="btn btn-primary">
+            <Plus className="w-4 h-4" />
+            Add Setting
+          </button>
+        </div>
+      </div>
+
+      {/* OpenRouter Quick Setup Guide */}
+      <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <h3 className="font-semibold text-blue-900 mb-2">🤖 AI Assistant Setup</h3>
+        <p className="text-blue-800 text-sm mb-3">
+          Configure OpenRouter to enable intelligent AI responses. 
+          <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="underline ml-1">
+            Get your API key here →
+          </a>
+        </p>
+        <div className="text-xs text-blue-700">
+          <strong>Required settings:</strong> openrouter_api_key, openrouter_model, ai_system_prompt
+        </div>
       </div>
 
       {/* Search */}

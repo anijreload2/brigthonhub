@@ -17,7 +17,6 @@ const FoodTab: React.FC<FoodTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
-
   const fetchFoodItems = async () => {
     try {
       setLoading(true);
@@ -25,7 +24,7 @@ const FoodTab: React.FC<FoodTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
         .from('food_items')
         .select(`
           *,
-          food_categories (
+          food_categories:categoryId (
             id,
             name
           )
