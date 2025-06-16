@@ -23,33 +23,54 @@ export async function POST(request: NextRequest) {
 
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
-    }    // Get OpenRouter settings from site_settings using admin client
-    const adminClient = getAdminClient();
-    const { data: settings, error: settingsError } = await adminClient
-      .from('site_settings')
-      .select('key, value')
-      .in('key', ['openrouter_api_key', 'openrouter_model', 'ai_system_prompt']);
-
-    if (settingsError) {
-      console.error('Error fetching OpenRouter settings:', settingsError);
-      return NextResponse.json({ error: 'Failed to get AI settings' }, { status: 500 });
     }
 
-    const settingsMap = settings?.reduce((acc: Record<string, string>, setting: { key: string; value: string }) => {
-      acc[setting.key] = setting.value;
-      return acc;
-    }, {} as Record<string, string>) || {};const openrouterApiKey = settingsMap.openrouter_api_key;
-    const model = settingsMap.openrouter_model || 'mistralai/mistral-7b-instruct:free';
-    const systemPrompt = settingsMap.ai_system_prompt || 'You are a helpful AI assistant for BrightonHub, a real estate and business services platform in Lagos, Nigeria. Help users with property searches, food supply, marketplace needs, and project planning.';
+    // Initialize with fallback values
+    let openrouterApiKey = process.env.OPENROUTER_API_KEY;
+    let model = 'mistralai/mistral-7b-instruct:free';
+    let systemPrompt = 'You are a helpful AI assistant for BrightonHub, a real estate and business services platform in Lagos, Nigeria. Help users with property searches, food supply, marketplace needs, and project planning.';
+
+    // Try to get OpenRouter settings from site_settings using admin client
+    try {
+      const adminClient = getAdminClient();
+      const { data: settings, error: settingsError } = await adminClient
+        .from('site_settings')
+        .select('key, value')
+        .in('key', ['openrouter_api_key', 'openrouter_model', 'ai_system_prompt']);
+
+      if (!settingsError && settings && settings.length > 0) {
+        const settingsMap = settings.reduce((acc: Record<string, string>, setting: { key: string; value: string }) => {
+          acc[setting.key] = setting.value;
+          return acc;
+        }, {} as Record<string, string>);
+
+        // Use database settings if available, otherwise keep fallbacks
+        if (settingsMap.openrouter_api_key) {
+          openrouterApiKey = settingsMap.openrouter_api_key;
+        }
+        if (settingsMap.openrouter_model) {
+          model = settingsMap.openrouter_model;
+        }
+        if (settingsMap.ai_system_prompt) {
+          systemPrompt = settingsMap.ai_system_prompt;
+        }
+      } else {
+        console.log('Using fallback settings due to database error:', settingsError);
+      }
+    } catch (error) {
+      console.log('Failed to fetch admin settings, using fallbacks:', error);
+    }
 
     if (!openrouterApiKey) {
       return NextResponse.json({ 
-        error: 'OpenRouter API key not configured. Please set it in the admin panel.' 
+        error: 'OpenRouter API key not configured. Please set it in the admin panel or environment variables.' 
       }, { status: 400 });
-    }    // Get training data context if available
+    }
+
+    // Try to get training data context if available
     let trainingContext = '';
     try {
-      // Direct database query instead of internal API call for better Netlify compatibility
+      const adminClient = getAdminClient();
       const { data: trainingData, error: trainingError } = await adminClient
         .from('ai_training_data')
         .select('question, answer, category, keywords')
@@ -125,9 +146,15 @@ export async function POST(request: NextRequest) {
       model: model,
       hasTrainingContext: !!trainingContext
     });
-
   } catch (error: any) {
-    console.error('Error in AI chat:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Error in AI chat API:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    }, { status: 500 });
   }
 }

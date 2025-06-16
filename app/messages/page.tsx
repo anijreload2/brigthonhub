@@ -22,8 +22,9 @@ interface ContactMessage {
   subject: string;
   message: string;
   status: 'unread' | 'read' | 'replied' | 'archived';
-  item_type: 'property' | 'food' | 'store' | 'project';
+  item_type: 'property' | 'food' | 'store' | 'project' | 'blog';
   item_id: string;
+  thread_id: string;
   created_at: string;
   updated_at: string;
   // Joined data
@@ -102,14 +103,13 @@ function MessagesPageContent() {
 
     try {
       setLoading(true);
-      
-      // Fetch all messages where user is sender or recipient
+        // Fetch all messages where user is sender or recipient
       const { data: messagesData, error } = await supabase
-        .from('contact_messages')
+        .from('user_messages')
         .select(`
           *,
-          sender:users!contact_messages_sender_id_fkey(name, email, phone),
-          recipient:users!contact_messages_recipient_id_fkey(name, email, phone)
+          sender:users!user_messages_sender_id_fkey(name, email, phone),
+          recipient:users!user_messages_recipient_id_fkey(name, email, phone)
         `)
         .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
@@ -121,16 +121,14 @@ function MessagesPageContent() {
 
       // Group messages into threads
       const threadsMap = new Map<string, MessageThread>();
-      
-      messages.forEach(message => {
-        // Create a unique thread ID based on participants and item
-        const participants = [message.sender_id, message.recipient_id].sort();
-        const threadKey = `${participants.join('-')}-${message.item_type}-${message.item_id}`;
+        messages.forEach(message => {
+        // Use the thread_id from the database, or create one if missing
+        const threadKey = message.thread_id || `${[message.sender_id, message.recipient_id].sort().join('-')}-${message.item_type}-${message.item_id}`;
         
         if (!threadsMap.has(threadKey)) {
           threadsMap.set(threadKey, {
             id: threadKey,
-            participants,
+            participants: [message.sender_id, message.recipient_id],
             last_message: message,
             unread_count: 0,
             messages: []
@@ -170,9 +168,8 @@ function MessagesPageContent() {
     try {
       const recipientId = selectedThread.participants.find(p => p !== user.id);
       const lastMessage = selectedThread.last_message;
-      
-      const { error } = await supabase
-        .from('contact_messages')
+        const { error } = await supabase
+        .from('user_messages')
         .insert({
           sender_id: user.id,
           recipient_id: recipientId,
@@ -180,7 +177,8 @@ function MessagesPageContent() {
           message: newMessage.trim(),
           status: 'unread',
           item_type: lastMessage.item_type,
-          item_id: lastMessage.item_id
+          item_id: lastMessage.item_id,
+          thread_id: lastMessage.thread_id
         });
 
       if (error) throw error;
@@ -195,9 +193,8 @@ function MessagesPageContent() {
   };
 
   const markAsRead = async (messageId: string) => {
-    try {
-      const { error } = await supabase
-        .from('contact_messages')
+    try {      const { error } = await supabase
+        .from('user_messages')
         .update({ status: 'read', updated_at: new Date().toISOString() })
         .eq('id', messageId)
         .eq('recipient_id', user?.id); // Only mark as read if current user is recipient
@@ -210,9 +207,8 @@ function MessagesPageContent() {
   };
 
   const updateMessageStatus = async (messageId: string, status: string) => {
-    try {
-      const { error } = await supabase
-        .from('contact_messages')
+    try {      const { error } = await supabase
+        .from('user_messages')
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', messageId);
 
