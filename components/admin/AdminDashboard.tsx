@@ -27,9 +27,12 @@ import ProjectsTab from './ProjectsTab';
 import BlogTab from './BlogTab';
 import SettingsTab from './SettingsTab';
 import TestimonialsTab from './TestimonialsTab';
+import VendorApplicationsTab from './VendorApplicationsTab';
 import HeroTab from './HeroTab';
 import AITrainingTab from './AITrainingTab';
 import DetailsTab from './DetailsTab';
+import AnalyticsTab from './AnalyticsTab';
+import ImageManagementTab from './ImageManagementTab';
 import AdminModal from './AdminModal';
 
 const AdminDashboard: React.FC = () => {
@@ -70,10 +73,11 @@ const AdminDashboard: React.FC = () => {
     setModalType('view');
     setModalData(data);
     setShowModal(true);
-  };
-  const handleDelete = async (table: string, id: string, refreshCallback?: () => void) => {
+  };  const handleDelete = async (table: string, id: string, refreshCallback?: () => void) => {
     if (confirm('Are you sure you want to delete this item?')) {
       try {
+        console.log(`🗑️ Attempting to delete from ${table} with ID: ${id}`);
+        
         if (table === 'users') {
           // For users, we need to delete both user and user_profile (handled by CASCADE)
           const { error } = await supabase
@@ -82,29 +86,64 @@ const AdminDashboard: React.FC = () => {
             .eq('id', id);
 
           if (error) {
-            console.error('Error deleting user:', error);
+            console.error('❌ Error deleting user:', error);
             alert(`Error deleting user: ${error.message}`);
           } else {
+            console.log('✅ User deleted successfully');
             alert('User deleted successfully!');
             refreshData();
-          }
-        } else {
+          }        } else {
           // Regular deletion for other tables
-          const { error } = await supabase
+          console.log(`🔍 Before delete - checking ${table} with ID: ${id}`);
+          
+          // First, verify the record exists
+          const { data: beforeDelete, error: checkError } = await supabase
+            .from(table)
+            .select('*')
+            .eq('id', id);
+          
+          if (checkError) {
+            console.error(`❌ Error checking record before delete:`, checkError);
+          } else {
+            console.log(`📋 Record before delete:`, beforeDelete);
+          }
+
+          // Now attempt deletion
+          const { data, error } = await supabase
             .from(table)
             .delete()
-            .eq('id', id);
+            .eq('id', id)
+            .select(); // Add select to see what was deleted
 
           if (error) {
-            console.error(`Error deleting from ${table}:`, error);
+            console.error(`❌ Error deleting from ${table}:`, error);
             alert(`Error deleting item: ${error.message}`);
           } else {
+            console.log(`✅ Successfully deleted from ${table}:`, data);
+            
+            // Verify the record is actually gone
+            const { data: afterDelete, error: verifyError } = await supabase
+              .from(table)
+              .select('*')
+              .eq('id', id);
+            
+            if (verifyError) {
+              console.error(`❌ Error verifying deletion:`, verifyError);
+            } else {
+              console.log(`🔍 Records with same ID after delete:`, afterDelete);
+              if (afterDelete && afterDelete.length > 0) {
+                console.error(`🚨 PROBLEM: Record still exists after deletion!`);
+              } else {
+                console.log(`✅ Confirmed: Record successfully deleted`);
+              }
+            }
+            
             alert('Item deleted successfully');
             refreshData();
           }
         }
       } catch (error) {
-        console.error(`Error deleting from ${table}:`, error);
+        console.error(`💥 Exception while deleting from ${table}:`, error);
         alert('Error deleting item');
       }
     }
@@ -264,9 +303,12 @@ const AdminDashboard: React.FC = () => {
     fetchAdminData();
   }, [user, router, authLoading]);  const sidebarItems = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'images', label: 'Image Management', icon: Image },
     { id: 'hero', label: 'Hero Sections', icon: Image },
     { id: 'details', label: 'Detail Pages', icon: Layers },
     { id: 'users', label: 'User Management', icon: Users },
+    { id: 'vendor-applications', label: 'Vendor Applications', icon: Users },
     { id: 'properties', label: 'Properties', icon: Home },
     { id: 'food', label: 'Food Services', icon: ShoppingCart },
     { id: 'marketplace', label: 'Marketplace', icon: Package },
@@ -345,9 +387,11 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>          {/* Main Content */}
           <div className="lg:col-span-3">            {activeTab === 'overview' && <OverviewTab data={adminData} />}
+            {activeTab === 'analytics' && <AnalyticsTab />}
+            {activeTab === 'images' && <ImageManagementTab />}
             {activeTab === 'hero' && <HeroTab onAdd={() => handleAdd('content_blocks')} onEdit={(data: any) => handleEdit('content_blocks', data)} onView={(data: any) => handleView('content_blocks', data)} onDelete={createDeleteHandler('content_blocks')} />}
-            {activeTab === 'details' && <DetailsTab onAdd={() => handleAdd('details')} onEdit={(data: any) => handleEdit('details', data)} onView={(data: any) => handleView('details', data)} onDelete={createDeleteHandler('details')} />}
-            {activeTab === 'users' && <UsersTab key={refreshTrigger} onAdd={() => handleAdd('users')} onEdit={(data: any) => handleEdit('users', data)} onView={(data: any) => handleView('users', data)} onDelete={createDeleteHandler('users')} />}
+            {activeTab === 'details' && <DetailsTab onAdd={() => handleAdd('details')} onEdit={(data: any) => handleEdit('details', data)} onView={(data: any) => handleView('details', data)} onDelete={createDeleteHandler('details')} />}            {activeTab === 'users' && <UsersTab key={refreshTrigger} onAdd={() => handleAdd('users')} onEdit={(data: any) => handleEdit('users', data)} onView={(data: any) => handleView('users', data)} onDelete={createDeleteHandler('users')} />}
+            {activeTab === 'vendor-applications' && <VendorApplicationsTab key={refreshTrigger} />}
             {activeTab === 'properties' && <PropertiesTab key={refreshTrigger} onAdd={() => handleAdd('properties')} onEdit={(data: any) => handleEdit('properties', data)} onView={(data: any) => handleView('properties', data)} onDelete={createDeleteHandler('properties')} />}
             {activeTab === 'food' && <FoodTab key={refreshTrigger} onAdd={() => handleAdd('food_items')} onEdit={(data: any) => handleEdit('food_items', data)} onView={(data: any) => handleView('food_items', data)} onDelete={createDeleteHandler('food_items')} />}
             {activeTab === 'marketplace' && <MarketplaceTab key={refreshTrigger} onAdd={() => handleAdd('store_products')} onEdit={(data: any) => handleEdit('store_products', data)} onView={(data: any) => handleView('store_products', data)} onDelete={createDeleteHandler('store_products')} />}

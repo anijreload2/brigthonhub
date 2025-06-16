@@ -90,6 +90,8 @@ export default function HomePage() {
         const response = await fetch('/api/testimonials');
         if (response.ok) {
           const data = await response.json();
+          console.log('Testimonials API response:', data); // Debug log
+          
           // Filter for featured testimonials or take first 3
           const displayTestimonials = data.testimonials
             .filter((t: any) => t.is_featured)
@@ -103,34 +105,18 @@ export default function HomePage() {
             displayTestimonials.push(...remaining);
           }
           
+          console.log('Display testimonials:', displayTestimonials); // Debug log
+          console.log('First testimonial structure:', displayTestimonials[0]); // Debug log
           setTestimonials(displayTestimonials);
+        } else {
+          console.warn('Testimonials API failed, using fallback data');
+          // Only use fallback if API fails
+          setTestimonials([]);
         }
       } catch (error) {
         console.error('Error fetching testimonials:', error);
-        // Fallback to static testimonials
-        setTestimonials([
-          {
-            name: 'Adebayo Johnson',
-            role: 'Property Developer',
-            content: 'BrightonHub transformed our property development process. Their platform is intuitive and their service is exceptional.',
-            rating: 5,
-            company: 'Lagos Properties'
-          },
-          {
-            name: 'Fatima Abdullahi',
-            role: 'Restaurant Owner',
-            content: 'The food services platform has revolutionized how we source our ingredients. Fresh, reliable, and cost-effective.',
-            rating: 5,
-            company: 'Abuja Delights'
-          },
-          {
-            name: 'Chinedu Okafor',
-            role: 'Construction Manager',
-            content: 'From office furniture to building materials, BrightonHub is our one-stop solution for all project needs.',
-            rating: 5,
-            company: 'BuildRight Ltd'
-          }
-        ]);
+        // Only use fallback if there's an actual error
+        setTestimonials([]);
       } finally {
         setTestimonialsLoading(false);
       }
@@ -285,7 +271,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {testimonials.map((testimonial, index) => (
               <motion.div
-                key={testimonial.name}
+                key={testimonial.id || testimonial.name || index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -293,15 +279,15 @@ export default function HomePage() {
               >
                 <Card className="h-full border-0 shadow-lg">
                   <CardContent className="p-6">
-                    {testimonial.rating > 0 && (
+                    {(testimonial.rating || 0) > 0 && (
                       <div className="flex items-center space-x-1 mb-4">
-                        {[...Array(testimonial.rating)].map((_, i) => (
+                        {[...Array(testimonial.rating || 5)].map((_, i) => (
                           <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
                         ))}
                       </div>
                     )}
                     <p className="text-gray-700 mb-6 leading-relaxed">
-                      "{testimonial.content}"
+                      "{testimonial.content || 'Great service!'}"
                     </p>
                     <div className="flex items-center space-x-3">
                       {testimonial.avatar_url ? (
@@ -313,16 +299,16 @@ export default function HomePage() {
                       ) : (
                         <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
                           <span className="text-white font-semibold">
-                            {testimonial.name.charAt(0)}
+                            {(testimonial.name || '?').charAt(0)}
                           </span>
                         </div>
                       )}
                       <div>
                         <div className="font-semibold text-gray-900">
-                          {testimonial.name}
+                          {testimonial.name || 'Anonymous'}
                         </div>
                         <div className="text-sm text-gray-600">
-                          {testimonial.role}
+                          {testimonial.role || 'Customer'}
                           {(testimonial.company || testimonial.location) && ' • '}
                           {testimonial.company || testimonial.location}
                         </div>

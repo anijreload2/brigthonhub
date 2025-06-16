@@ -38,20 +38,30 @@ export default function FeaturedProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     const fetchProjects = async () => {
-      try {        const response = await fetch('/api/projects?limit=3');
+      try {
+        // Add cache-busting timestamp
+        const timestamp = new Date().getTime();
+        const response = await fetch(`/api/projects?limit=3&_t=${timestamp}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch projects');
         }
         const data = await response.json();
+        console.log('💼 Projects API Response:', data); // Debug log
+        
         // Handle both old format (array) and new format (object with projects array)
         const projectsData = Array.isArray(data) ? data : (data.projects || []);
+        console.log('💼 Projects Data:', projectsData); // Debug log
         setProjects(projectsData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
-        console.error('Error fetching projects:', err);
+        console.error('❌ Error fetching projects:', err);
       } finally {
         setLoading(false);
       }

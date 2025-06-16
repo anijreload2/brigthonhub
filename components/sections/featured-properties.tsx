@@ -36,20 +36,30 @@ export default function FeaturedProperties() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     const fetchProperties = async () => {
-      try {        const response = await fetch('/api/properties?limit=3');
+      try {
+        // Add cache-busting timestamp
+        const timestamp = new Date().getTime();
+        const response = await fetch(`/api/properties?limit=3&_t=${timestamp}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch properties');
         }
         const data = await response.json();
+        console.log('🏠 Properties API Response:', data); // Debug log
+        
         // Handle both old format (array) and new format (object with properties array)
         const propertiesData = Array.isArray(data) ? data : (data.properties || []);
+        console.log('🏠 Properties Data:', propertiesData); // Debug log
         setProperties(propertiesData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
-        console.error('Error fetching properties:', err);
+        console.error('❌ Error fetching properties:', err);
       } finally {
         setLoading(false);
       }

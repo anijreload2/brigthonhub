@@ -133,15 +133,14 @@ const tableConfigs: Record<string, any> = {
   testimonials: {
     title: 'Testimonial',
     fields: [
-      { name: 'name', label: 'Name', type: 'text', required: true },
+      { name: 'name', label: 'Client Name', type: 'text', required: true },
       { name: 'role', label: 'Role/Position', type: 'text' },
       { name: 'company', label: 'Company', type: 'text' },
       { name: 'content', label: 'Testimonial Content', type: 'textarea', required: true },
       { name: 'avatar_url', label: 'Avatar URL', type: 'url' },
       { name: 'rating', label: 'Rating (1-5)', type: 'number', min: 1, max: 5 },
       { name: 'is_featured', label: 'Featured', type: 'boolean' },
-      { name: 'is_active', label: 'Active', type: 'boolean' },
-      { name: 'display_order', label: 'Display Order', type: 'number' }
+      { name: 'is_active', label: 'Active', type: 'boolean' }
     ]
   },
   site_settings: {

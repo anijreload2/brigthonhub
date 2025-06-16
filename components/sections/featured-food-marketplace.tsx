@@ -33,20 +33,30 @@ export default function FeaturedFoodMarketplace() {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     const fetchFoodItems = async () => {
-      try {        const response = await fetch('/api/food?limit=3');
+      try {
+        // Add cache-busting timestamp
+        const timestamp = new Date().getTime();
+        const response = await fetch(`/api/food?limit=3&_t=${timestamp}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch food items');
         }
         const data = await response.json();
+        console.log('🍽️ Food API Response:', data); // Debug log
+        
         // Handle both old format (array) and new format (object with foodItems array)
         const foodData = Array.isArray(data) ? data : (data.foodItems || []);
+        console.log('🍽️ Food Data:', foodData); // Debug log
         setFoodItems(foodData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
-        console.error('Error fetching food items:', err);
+        console.error('❌ Error fetching food items:', err);
       } finally {
         setLoading(false);
       }
