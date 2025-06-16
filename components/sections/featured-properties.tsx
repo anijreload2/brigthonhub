@@ -10,8 +10,6 @@ import {
   Bath, 
   Square,
   Star,
-  TrendingUp,
-  Award,
   Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -34,12 +32,6 @@ interface Property {
   createdAt: string;
 }
 
-const propertyStats = [
-  { icon: TrendingUp, title: 'Properties Listed', value: '', color: 'text-primary' },
-  { icon: Award, title: 'Successful Sales', value: '', color: 'text-secondary' },
-  { icon: Star, title: 'Client Satisfied', value: '', color: 'text-accent' }
-];
-
 export default function FeaturedProperties() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +39,7 @@ export default function FeaturedProperties() {
 
   useEffect(() => {
     const fetchProperties = async () => {
-      try {        const response = await fetch('/api/properties?limit=6');
+      try {        const response = await fetch('/api/properties?limit=3');
         if (!response.ok) {
           throw new Error('Failed to fetch properties');
         }
@@ -125,31 +117,7 @@ export default function FeaturedProperties() {
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">            Discover exceptional properties that combine luxury, comfort, and prime locations. 
             Each property is carefully selected to meet the highest standards of quality and value.
           </p>
-          </motion.div>
-        </div>
-
-        {/* Statistics */}
-        <div className="mb-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {propertyStats.map((stat, index) => (
-              <motion.div
-                key={stat.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <CardContent className="p-6 text-center">                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 mb-4`}>
-                      <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                    </div>
-                    {stat.value && <h3 className="text-2xl font-bold text-gray-800 mb-2">{stat.value}</h3>}
-                    <p className="text-gray-600">{stat.title}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+          </motion.div>        </div>
 
         {/* Properties Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">

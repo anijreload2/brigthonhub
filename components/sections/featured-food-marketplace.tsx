@@ -6,13 +6,9 @@ import { motion } from 'framer-motion';
 import { 
   ArrowRight, 
   Leaf, 
-  Truck, 
   Shield, 
-  Clock,
-  Star,
   Package,
-  Utensils,
-  Award
+  Utensils
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -33,12 +29,6 @@ interface FoodItem {
   createdAt: string;
 }
 
-const foodStats = [
-  { icon: Package, title: 'Fresh Products', value: '', color: 'text-green-600' },
-  { icon: Truck, title: 'Daily Deliveries', value: '', color: 'text-blue-600' },
-  { icon: Award, title: 'Customer Satisfied', value: '', color: 'text-yellow-600' }
-];
-
 export default function FeaturedFoodMarketplace() {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +36,7 @@ export default function FeaturedFoodMarketplace() {
 
   useEffect(() => {
     const fetchFoodItems = async () => {
-      try {        const response = await fetch('/api/food?limit=6');
+      try {        const response = await fetch('/api/food?limit=3');
         if (!response.ok) {
           throw new Error('Failed to fetch food items');
         }
@@ -127,31 +117,7 @@ export default function FeaturedFoodMarketplace() {
               Connect directly with local farmers and suppliers for the freshest produce, grains, and food items. 
               Quality guaranteed, prices unbeatable.
             </p>
-          </motion.div>
-        </div>
-
-        {/* Statistics */}
-        <div className="mb-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {foodStats.map((stat, index) => (
-              <motion.div
-                key={stat.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <CardContent className="p-6 text-center">                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 mb-4`}>
-                      <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                    </div>
-                    {stat.value && <h3 className="text-2xl font-bold text-gray-800 mb-2">{stat.value}</h3>}
-                    <p className="text-gray-600">{stat.title}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+          </motion.div>        </div>
 
         {/* Food Items Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
@@ -228,15 +194,13 @@ export default function FeaturedFoodMarketplace() {
                       <Shield className="w-4 h-4" />
                       Fresh
                     </div>
-                  </div>
-
-                  <Button 
+                  </div>                  <Button 
                     asChild
                     className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
                     disabled={item.stock === 0}
                   >
                     <Link href={`/food/${item.id}`}>
-                      {item.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                      {item.stock > 0 ? 'View Details' : 'Out of Stock'}
                       {item.stock > 0 && <ArrowRight className="w-4 h-4 ml-2" />}
                     </Link>
                   </Button>
