@@ -9,15 +9,13 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '6');
     const offset = parseInt(searchParams.get('offset') || '0');
-    const categoryId = searchParams.get('categoryId');
-      let query = supabase
+    const categoryId = searchParams.get('categoryId');      let query = supabase
       .from('blog_posts')
       .select(`
         *,
         blog_categories(*)
       `)
-      .eq('isPublished', true)
-      .order('publishedAt', { ascending: false })
+      .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
     // Apply category filter if provided

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import { 
   Search, 
   Filter, 
@@ -31,7 +32,8 @@ export default function StorePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('name');
-  const [cart, setCart] = useState<{[key: string]: number}>({});
+  // Cart functionality temporarily disabled - contact sellers directly for orders
+  // const [cart, setCart] = useState<{[key: string]: number}>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -97,6 +99,8 @@ export default function StorePage() {
       }
     });
 
+  // Cart functionality temporarily disabled - contact sellers directly for orders
+  /*
   const addToCart = (productId: string) => {
     setCart(prev => ({
       ...prev,
@@ -114,6 +118,7 @@ export default function StorePage() {
   const getTotalItems = () => {
     return Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
   };
+  */
 
   if (loading) {
     return (
@@ -194,47 +199,14 @@ export default function StorePage() {
                   <SelectItem value="price">Price</SelectItem>
                 </SelectContent>
               </Select>
+              {/* Cart button temporarily disabled - contact sellers directly
               <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                 <ShoppingCart className="mr-2 h-4 w-4" />
                 Cart ({getTotalItems()})
               </Button>
+              */}
             </div>
           </div>
-
-          {/* Categories Section */}
-          {categories.length > 0 && (
-            <div className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Browse Categories</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {categories.map((category) => (
-                  <motion.div
-                    key={category.id}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="cursor-pointer"
-                    onClick={() => setSelectedCategory(category.id)}
-                  >
-                    <Card className="h-full hover:shadow-lg transition-shadow">
-                      <CardContent className="p-4 text-center">
-                        {category.image && (
-                          <div className="relative w-full h-32 mb-3 rounded-lg overflow-hidden">
-                            <Image
-                              src={category.image}
-                              alt={category.name}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        )}
-                        <h3 className="font-semibold text-gray-900 mb-1">{category.name}</h3>
-                        <p className="text-sm text-gray-600">{category.description}</p>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Products Grid */}
           <div className="mb-12">
@@ -321,38 +293,47 @@ export default function StorePage() {
                           </div>
                         )}
 
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            {cart[product.id] ? (
-                              <>
+                        <div className="space-y-3">
+                          {/* Cart functionality temporarily disabled - contact sellers directly
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {cart[product.id] ? (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => removeFromCart(product.id)}
+                                  >
+                                    <Minus className="h-4 w-4" />
+                                  </Button>
+                                  <span className="text-sm font-medium px-2">
+                                    {cart[product.id]}
+                                  </span>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => addToCart(product.id)}
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              ) : (
                                 <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => removeFromCart(product.id)}
-                                >
-                                  <Minus className="h-4 w-4" />
-                                </Button>
-                                <span className="text-sm font-medium px-2">
-                                  {cart[product.id]}
-                                </span>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
                                   onClick={() => addToCart(product.id)}
+                                  className="bg-blue-600 hover:bg-blue-700 text-white"
                                 >
-                                  <Plus className="h-4 w-4" />
+                                  <ShoppingCart className="mr-2 h-4 w-4" />
+                                  Add to Cart
                                 </Button>
-                              </>
-                            ) : (
-                              <Button
-                                onClick={() => addToCart(product.id)}
-                                className="bg-blue-600 hover:bg-blue-700 text-white"
-                              >
-                                <ShoppingCart className="mr-2 h-4 w-4" />
-                                Add to Cart
-                              </Button>
-                            )}
+                              )}
+                            </div>
                           </div>
+                          */}
+                          <Link href={`/store/${product.id}`} className="block">
+                            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                              View Details & Contact Seller
+                            </Button>
+                          </Link>
                         </div>
                       </CardContent>
                     </Card>

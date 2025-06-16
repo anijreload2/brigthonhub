@@ -50,6 +50,11 @@ interface StoreProduct {
   reviewCount?: number;
   isActive: boolean;
   isFeatured: boolean;
+  sellerName?: string;
+  sellerPhone?: string;
+  sellerEmail?: string;
+  sellerAddress?: string;
+  sellerDescription?: string;
 }
 
 interface ProductDetailPageProps {
@@ -121,7 +126,6 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     }
     return 0;
   };
-
   const incrementQuantity = () => {
     setQuantity(prev => Math.min(prev + 1, product?.stock || 999));
   };
@@ -130,6 +134,8 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     setQuantity(prev => Math.max(prev - 1, 1));
   };
 
+  // Cart functionality temporarily disabled - contact sellers directly
+  /*
   const handleAddToCart = () => {
     // Add to cart logic here
     alert(`Added ${quantity} ${product?.name} to cart!`);
@@ -138,6 +144,12 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const handleBuyNow = () => {
     // Buy now logic here
     alert(`Proceeding to checkout with ${quantity} ${product?.name}`);
+  };
+  */
+
+  const handleContactSeller = () => {
+    // Contact seller logic here
+    alert(`Contact form for ${product?.name} will open here`);
   };
 
   if (loading) {
@@ -407,43 +419,32 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               </div>
             </div>
 
-            <Separator />
-
-            {/* Action Buttons */}
+            <Separator />            {/* Action Buttons */}
             <div className="space-y-3">
               <Button 
-                onClick={handleAddToCart}
+                onClick={handleContactSeller}
                 className="w-full"
                 size="lg"
-                disabled={quantity > product.stock}
               >
-                <ShoppingCart className="w-5 h-5 mr-2" />
-                Add to Cart
+                <Package className="w-5 h-5 mr-2" />
+                Contact Seller
               </Button>
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                size="lg"
-                onClick={handleBuyNow}
-              >
-                <Zap className="w-5 h-5 mr-2" />
-                Buy Now
-              </Button>
-            </div>
-
-            {/* Features */}
+              <div className="text-center text-sm text-gray-500">
+                Contact seller directly for pricing and availability
+              </div>
+            </div>            {/* Features */}
             <div className="grid grid-cols-2 gap-4 pt-4">
               <div className="flex items-center space-x-2 text-sm">
                 <Truck className="w-4 h-4 text-green-500" />
-                <span>Free shipping</span>
+                <span>Direct delivery</span>
               </div>
               <div className="flex items-center space-x-2 text-sm">
                 <Shield className="w-4 h-4 text-blue-500" />
-                <span>Secure payment</span>
+                <span>Verified seller</span>
               </div>
               <div className="flex items-center space-x-2 text-sm">
                 <RotateCcw className="w-4 h-4 text-purple-500" />
-                <span>Easy returns</span>
+                <span>Flexible terms</span>
               </div>
               <div className="flex items-center space-x-2 text-sm">
                 <Award className="w-4 h-4 text-yellow-500" />
@@ -455,11 +456,11 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
 
         {/* Product Details Tabs */}
         <Card className="mb-8">
-          <CardContent className="p-6">
-            <Tabs defaultValue="description" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+          <CardContent className="p-6">            <Tabs defaultValue="description" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="description">Description</TabsTrigger>
                 <TabsTrigger value="specifications">Specifications</TabsTrigger>
+                <TabsTrigger value="seller">Seller Info</TabsTrigger>
                 <TabsTrigger value="reviews">Reviews</TabsTrigger>
               </TabsList>
               
@@ -492,6 +493,72 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                         <span className="font-medium">{product.dimensions}</span>
                       </div>
                     )}
+                  </div>
+                </div>              </TabsContent>
+              
+              <TabsContent value="seller" className="mt-6">
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-gray-900">Seller Information</h3>
+                  
+                  {product.sellerName || product.sellerPhone || product.sellerEmail ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        {product.sellerName && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Seller Name</label>
+                            <p className="text-gray-900">{product.sellerName}</p>
+                          </div>
+                        )}
+                        
+                        {product.sellerPhone && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Phone</label>
+                            <p className="text-gray-900">
+                              <a href={`tel:${product.sellerPhone}`} className="text-blue-600 hover:underline">
+                                {product.sellerPhone}
+                              </a>
+                            </p>
+                          </div>
+                        )}
+                        
+                        {product.sellerEmail && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Email</label>
+                            <p className="text-gray-900">
+                              <a href={`mailto:${product.sellerEmail}`} className="text-blue-600 hover:underline">
+                                {product.sellerEmail}
+                              </a>
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-4">
+                        {product.sellerAddress && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Address</label>
+                            <p className="text-gray-900">{product.sellerAddress}</p>
+                          </div>
+                        )}
+                        
+                        {product.sellerDescription && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">About Seller</label>
+                            <p className="text-gray-700 leading-relaxed">{product.sellerDescription}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-600">Seller information not available</p>
+                    </div>
+                  )}
+                  
+                  <div className="pt-4 border-t">
+                    <p className="text-xs text-gray-500">
+                      Contact the seller directly for bulk orders, custom requirements, or any questions about this product.
+                    </p>
                   </div>
                 </div>
               </TabsContent>

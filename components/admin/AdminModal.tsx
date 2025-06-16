@@ -68,6 +68,11 @@ const tableConfigs: Record<string, any> = {
       { name: 'stock', label: 'Stock', type: 'number' },
       { name: 'images', label: 'Image URLs (comma-separated)', type: 'textarea' },
       { name: 'origin', label: 'Origin', type: 'text' },
+      { name: 'sellerName', label: 'Seller Name', type: 'text' },
+      { name: 'sellerPhone', label: 'Seller Phone', type: 'tel' },
+      { name: 'sellerEmail', label: 'Seller Email', type: 'email' },
+      { name: 'sellerAddress', label: 'Seller Address', type: 'textarea' },
+      { name: 'sellerDescription', label: 'Seller Description', type: 'textarea' },
       { name: 'isActive', label: 'Active', type: 'boolean' }
     ]
   },
@@ -81,6 +86,11 @@ const tableConfigs: Record<string, any> = {
       { name: 'stock', label: 'Stock', type: 'number' },
       { name: 'images', label: 'Image URLs (comma-separated)', type: 'textarea' },
       { name: 'specifications', label: 'Specifications (JSON)', type: 'textarea' },
+      { name: 'sellerName', label: 'Seller Name', type: 'text' },
+      { name: 'sellerPhone', label: 'Seller Phone', type: 'tel' },
+      { name: 'sellerEmail', label: 'Seller Email', type: 'email' },
+      { name: 'sellerAddress', label: 'Seller Address', type: 'textarea' },
+      { name: 'sellerDescription', label: 'Seller Description', type: 'textarea' },
       { name: 'isActive', label: 'Active', type: 'boolean' }
     ]
   },
@@ -96,6 +106,10 @@ const tableConfigs: Record<string, any> = {
       { name: 'startDate', label: 'Start Date', type: 'date' },
       { name: 'endDate', label: 'End Date', type: 'date' },
       { name: 'images', label: 'Image URLs (comma-separated)', type: 'textarea' },
+      { name: 'contactName', label: 'Contact Name', type: 'text' },
+      { name: 'contactPhone', label: 'Contact Phone', type: 'tel' },
+      { name: 'contactEmail', label: 'Contact Email', type: 'email' },
+      { name: 'contactAddress', label: 'Contact Address', type: 'textarea' },
       { name: 'isActive', label: 'Active', type: 'boolean' }
     ]
   },
@@ -109,7 +123,25 @@ const tableConfigs: Record<string, any> = {
       { name: 'categoryId', label: 'Category ID', type: 'text', required: true },
       { name: 'featuredImage', label: 'Featured Image URL', type: 'url' },
       { name: 'tags', label: 'Tags (comma-separated)', type: 'text' },
+      { name: 'authorName', label: 'Author Name', type: 'text' },
+      { name: 'authorEmail', label: 'Author Email', type: 'email' },
+      { name: 'authorPhone', label: 'Author Phone', type: 'tel' },
+      { name: 'authorBio', label: 'Author Bio', type: 'textarea' },
       { name: 'isPublished', label: 'Published', type: 'boolean' }
+    ]
+  },
+  testimonials: {
+    title: 'Testimonial',
+    fields: [
+      { name: 'name', label: 'Name', type: 'text', required: true },
+      { name: 'role', label: 'Role/Position', type: 'text' },
+      { name: 'company', label: 'Company', type: 'text' },
+      { name: 'content', label: 'Testimonial Content', type: 'textarea', required: true },
+      { name: 'avatar_url', label: 'Avatar URL', type: 'url' },
+      { name: 'rating', label: 'Rating (1-5)', type: 'number', min: 1, max: 5 },
+      { name: 'is_featured', label: 'Featured', type: 'boolean' },
+      { name: 'is_active', label: 'Active', type: 'boolean' },
+      { name: 'display_order', label: 'Display Order', type: 'number' }
     ]
   },
   site_settings: {
@@ -272,8 +304,17 @@ const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, type, table, d
     const value = formData[name] || '';
     const disabled = type === 'view';
 
+    // For date inputs, extract just the date part (YYYY-MM-DD) from ISO datetime
+    const getDateValue = (val: string) => {
+      if (!val) return '';
+      if (val.includes('T')) {
+        return val.split('T')[0]; // Extract date part from ISO datetime
+      }
+      return val;
+    };
+
     const commonProps = {
-      value,
+      value: type === 'date' ? getDateValue(value) : value,
       disabled,
       className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-primary focus:outline-none",
       placeholder: label,
@@ -337,6 +378,8 @@ const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, type, table, d
             {...commonProps}
             type="number"
             step="0.01"
+            min={field.min}
+            max={field.max}
             onChange={(e) => setFormData({ ...formData, [name]: e.target.value })}
             required={required}
           />

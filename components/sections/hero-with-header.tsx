@@ -129,13 +129,12 @@ const HeroWithHeader: React.FC = () => {
             className={`absolute inset-0 transition-opacity duration-1000 ${
               index === currentSlide ? 'opacity-100' : 'opacity-0'
             }`}
-          >
-            <Image
+          >            <Image
               src={slide.backgroundUrl}
               alt={slide.title}
               fill
               className="object-cover"
-              priority={index === 0}
+              priority={index === currentSlide}
             />
             <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
           </div>
@@ -427,11 +426,11 @@ const HeroWithHeader: React.FC = () => {
                   </div>
 
                   <form onSubmit={handleSearch} className="space-y-4">
-                    <div>
-                      <select
+                    <div>                      <select
                         value={searchCategory}
                         onChange={(e) => setSearchCategory(e.target.value)}
                         className="w-full p-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/70 focus:bg-white/30 focus:border-white/50 transition-all duration-200"
+                        aria-label="Search category"
                       >
                         <option value="all" className="text-gray-900">All Services</option>
                         <option value="properties" className="text-gray-900">Properties</option>
@@ -489,29 +488,29 @@ const HeroWithHeader: React.FC = () => {
 
       {/* Slide Navigation */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-50">
-        <div className="flex items-center space-x-4">
-          <button
+        <div className="flex items-center space-x-4">          <button
             onClick={prevSlide}
             className="p-2 glass rounded-full text-white hover:bg-white/20 transition-all duration-200"
+            aria-label="Previous slide"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
           
-          <div className="flex space-x-2">
-            {slides.map((_, index) => (
+          <div className="flex space-x-2">            {slides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
                 className={`w-3 h-3 rounded-full transition-all duration-200 ${
                   index === currentSlide ? 'bg-[#8CC63F]' : 'bg-white/50 hover:bg-white/70'
                 }`}
+                aria-label={`Go to slide ${index + 1}`}
               />
             ))}
           </div>
-          
-          <button
+            <button
             onClick={nextSlide}
             className="p-2 glass rounded-full text-white hover:bg-white/20 transition-all duration-200"
+            aria-label="Next slide"
           >
             <ChevronRight className="w-6 h-6" />
           </button>

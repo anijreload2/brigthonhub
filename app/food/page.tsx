@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import { 
   Search, 
   Filter, 
@@ -24,14 +25,14 @@ import { FoodItem, FoodCategory } from '@/lib/types';
 import { CURRENCY } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
 
-export default function FoodPage() {
-  const [items, setItems] = useState<FoodItem[]>([]);
+export default function FoodPage() {  const [items, setItems] = useState<FoodItem[]>([]);
   const [categories, setCategories] = useState<FoodCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('name');
-  const [cart, setCart] = useState<{ [key: string]: number }>({});
+  // Cart functionality temporarily disabled - contact sellers directly for orders
+  // const [cart, setCart] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -96,7 +97,8 @@ export default function FoodPage() {
           return (a.name || '').localeCompare(b.name || '');
       }
     });
-
+  // Cart functionality temporarily disabled - contact sellers directly for orders
+  /*
   const addToCart = (itemId: string) => {
     setCart(prev => ({
       ...prev,
@@ -121,6 +123,7 @@ export default function FoodPage() {
   const getTotalItems = () => {
     return Object.values(cart).reduce((total, quantity) => total + quantity, 0);
   };
+  */
 
   if (loading) {
     return (
@@ -202,51 +205,12 @@ export default function FoodPage() {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          {/* Categories Section */}
-          {categories.length > 0 && (
-            <div className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Browse Categories</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {categories.map((category) => (
-                  <motion.div
-                    key={category.id}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Card 
-                      className="h-full hover:shadow-lg transition-shadow cursor-pointer"
-                      onClick={() => setSelectedCategory(category.id)}
-                    >
-                      <CardContent className="p-4 text-center">
-                        {category.image && (
-                          <div className="relative w-full h-32 mb-3 rounded-lg overflow-hidden">
-                            <Image
-                              src={category.image}
-                              alt={category.name}
-                              fill
-                              className="object-cover"
-                              priority={false}
-                            />
-                          </div>
-                        )}
-                        <h3 className="font-semibold text-gray-900 mb-1">{category.name}</h3>
-                        <p className="text-sm text-gray-600">{category.description}</p>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Food Items Grid */}
-          <div className="mb-12">
-            <div className="flex justify-between items-center mb-6">
+          </div>          {/* Food Items Grid */}
+          <div className="mb-12">            <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Available Items</h2>
               <div className="flex items-center gap-4">
                 <p className="text-gray-600">{filteredAndSortedItems.length} items found</p>
+                {/* Cart UI temporarily disabled - contact sellers directly for orders
                 {getTotalItems() > 0 && (
                   <div className="flex items-center gap-2 bg-green-100 px-4 py-2 rounded-lg">
                     <ShoppingCart className="h-4 w-4 text-green-600" />
@@ -255,6 +219,7 @@ export default function FoodPage() {
                     </span>
                   </div>
                 )}
+                */}
               </div>
             </div>
             
@@ -319,34 +284,41 @@ export default function FoodPage() {
                               <span>4.8</span>
                             </div>
                           </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
+                        </div>                        <div className="space-y-3">
+                          {/* Cart functionality temporarily disabled - contact sellers directly 
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => removeFromCart(item.id)}
+                                disabled={!cart[item.id]}
+                              >
+                                <Minus className="h-4 w-4" />
+                              </Button>
+                              <span className="w-8 text-center">{cart[item.id] || 0}</span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => addToCart(item.id)}
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </div>
                             <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => removeFromCart(item.id)}
-                              disabled={!cart[item.id]}
-                            >
-                              <Minus className="h-4 w-4" />
-                            </Button>
-                            <span className="w-8 text-center">{cart[item.id] || 0}</span>
-                            <Button
-                              variant="outline"
-                              size="sm"
+                              className="bg-green-600 hover:bg-green-700"
                               onClick={() => addToCart(item.id)}
                             >
-                              <Plus className="h-4 w-4" />
+                              <ShoppingCart className="h-4 w-4 mr-2" />
+                              Add to Cart
                             </Button>
                           </div>
-                          <Button
-                            className="bg-green-600 hover:bg-green-700"
-                            onClick={() => addToCart(item.id)}
-                          >
-                            <ShoppingCart className="h-4 w-4 mr-2" />
-                            Add to Cart
-                          </Button>
+                          */}
+                          <Link href={`/food/${item.id}`} className="block">
+                            <Button className="w-full bg-green-600 hover:bg-green-700">
+                              View Details & Contact Seller
+                            </Button>
+                          </Link>
                         </div>
                       </CardContent>
                     </Card>

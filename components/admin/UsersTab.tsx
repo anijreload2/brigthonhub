@@ -114,7 +114,8 @@ const UsersTab: React.FC<UsersTabProps> = ({ onAdd, onEdit, onView, onDelete }) 
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">                  <th className="text-left py-3 px-4 font-semibold text-text-primary">User</th>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 font-semibold text-text-primary">User</th>
                   <th className="text-left py-3 px-4 font-semibold text-text-primary">Email</th>
                   <th className="text-left py-3 px-4 font-semibold text-text-primary">Role</th>
                   <th className="text-left py-3 px-4 font-semibold text-text-primary">Status</th>
@@ -122,7 +123,8 @@ const UsersTab: React.FC<UsersTabProps> = ({ onAdd, onEdit, onView, onDelete }) 
                   <th className="text-left py-3 px-4 font-semibold text-text-primary">Actions</th>
                 </tr>
               </thead>
-              <tbody>                {filteredUsers.length > 0 ? (
+              <tbody>
+                {filteredUsers.length > 0 ? (
                   filteredUsers.map((user) => {
                     const profile = user.user_profiles?.[0]; // Get the first profile if it exists
                     return (

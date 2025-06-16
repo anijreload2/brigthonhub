@@ -37,6 +37,11 @@ ALTER TABLE food_items ADD COLUMN IF NOT EXISTS seasonal_availability JSONB;
 ALTER TABLE food_items ADD COLUMN IF NOT EXISTS rating DECIMAL(3,2) DEFAULT 0;
 ALTER TABLE food_items ADD COLUMN IF NOT EXISTS review_count INTEGER DEFAULT 0;
 ALTER TABLE food_items ADD COLUMN IF NOT EXISTS views_count INTEGER DEFAULT 0;
+ALTER TABLE food_items ADD COLUMN IF NOT EXISTS seller_name TEXT;
+ALTER TABLE food_items ADD COLUMN IF NOT EXISTS seller_phone TEXT;
+ALTER TABLE food_items ADD COLUMN IF NOT EXISTS seller_email TEXT;
+ALTER TABLE food_items ADD COLUMN IF NOT EXISTS seller_address TEXT;
+ALTER TABLE food_items ADD COLUMN IF NOT EXISTS seller_description TEXT;
 
 -- PROJECTS TABLE ENHANCEMENTS
 -- Add missing fields for detailed project showcases
@@ -91,6 +96,11 @@ ALTER TABLE store_products ADD COLUMN IF NOT EXISTS review_count INTEGER DEFAULT
 ALTER TABLE store_products ADD COLUMN IF NOT EXISTS views_count INTEGER DEFAULT 0;
 ALTER TABLE store_products ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT false;
 ALTER TABLE store_products ADD COLUMN IF NOT EXISTS vendor_id TEXT;
+ALTER TABLE store_products ADD COLUMN IF NOT EXISTS seller_name TEXT;
+ALTER TABLE store_products ADD COLUMN IF NOT EXISTS seller_phone TEXT;
+ALTER TABLE store_products ADD COLUMN IF NOT EXISTS seller_email TEXT;
+ALTER TABLE store_products ADD COLUMN IF NOT EXISTS seller_address TEXT;
+ALTER TABLE store_products ADD COLUMN IF NOT EXISTS seller_description TEXT;
 
 -- CREATE REVIEWS TABLE FOR ALL CONTENT TYPES
 CREATE TABLE IF NOT EXISTS reviews (
@@ -209,17 +219,44 @@ CREATE INDEX IF NOT EXISTS idx_leads_source ON leads(source_type, source_id);
 CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
 CREATE INDEX IF NOT EXISTS idx_seo_content ON seo_metadata(content_type, content_id);
 
--- ADD FOREIGN KEY CONSTRAINTS FOR REVIEWS
-ALTER TABLE reviews ADD CONSTRAINT fk_reviews_users 
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+-- ADD FOREIGN KEY CONSTRAINTS FOR REVIEWS (with error handling)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'fk_reviews_users' 
+        AND table_name = 'reviews'
+    ) THEN
+        ALTER TABLE reviews ADD CONSTRAINT fk_reviews_users 
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+    END IF;
+END $$;
 
--- ADD FOREIGN KEY CONSTRAINTS FOR CONTENT TAGS
-ALTER TABLE content_tags ADD CONSTRAINT fk_content_tags_tags 
-    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE;
+-- ADD FOREIGN KEY CONSTRAINTS FOR CONTENT TAGS (with error handling)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'fk_content_tags_tags' 
+        AND table_name = 'content_tags'
+    ) THEN
+        ALTER TABLE content_tags ADD CONSTRAINT fk_content_tags_tags 
+            FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE;
+    END IF;
+END $$;
 
--- ADD FOREIGN KEY CONSTRAINTS FOR LEADS
-ALTER TABLE leads ADD CONSTRAINT fk_leads_assigned 
-    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL;
+-- ADD FOREIGN KEY CONSTRAINTS FOR LEADS (with error handling)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'fk_leads_assigned' 
+        AND table_name = 'leads'
+    ) THEN
+        ALTER TABLE leads ADD CONSTRAINT fk_leads_assigned 
+            FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL;
+    END IF;
+END $$;
 
 -- CREATE FUNCTIONS FOR AUTO-UPDATING TIMESTAMPS
 CREATE OR REPLACE FUNCTION update_updated_at_column()

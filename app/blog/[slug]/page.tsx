@@ -36,6 +36,10 @@ interface BlogPost {
   excerpt: string;
   featuredImage: string;
   author: string;
+  authorName?: string;
+  authorEmail?: string;
+  authorPhone?: string;
+  authorBio?: string;
   publishedAt: string;
   readingTime?: number;
   tags?: string[];
@@ -270,24 +274,49 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
                   </Button>
                 </div>
               </CardContent>
-            </Card>
-
-            {/* Author Bio */}
+            </Card>            {/* Author Bio */}
             <Card>
-              <CardContent className="p-6">
-                <div className="flex items-start space-x-4">
+              <CardContent className="p-6">                <div className="flex items-start space-x-4">
                   <Avatar className="w-16 h-16">
-                    <AvatarImage src="/placeholder-avatar.jpg" alt={post.author} />
-                    <AvatarFallback>{post.author.charAt(0)}</AvatarFallback>
+                    <AvatarImage src="/placeholder-avatar.jpg" alt={post.authorName || post.author || 'Author'} />
+                    <AvatarFallback>{(post.authorName || post.author || 'A').charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      About {post.author}
+                      About {post.authorName || post.author || 'Author'}
                     </h3>
                     <p className="text-gray-600 mb-4">
-                      {post.author} is a content writer and industry expert at BrightonHub, 
-                      passionate about sharing insights on real estate, food, and lifestyle topics.
+                      {post.authorBio || `${post.authorName || post.author || 'This author'} is a content writer and industry expert at BrightonHub, passionate about sharing insights on real estate, food, and lifestyle topics.`}
                     </p>
+                    
+                    {/* Author Contact Information */}
+                    {(post.authorEmail || post.authorPhone) && (
+                      <div className="mb-4 space-y-2">
+                        {post.authorEmail && (
+                          <div className="flex items-center space-x-2 text-sm text-gray-600">
+                            <span>Email:</span>
+                            <a 
+                              href={`mailto:${post.authorEmail}`} 
+                              className="text-blue-600 hover:underline"
+                            >
+                              {post.authorEmail}
+                            </a>
+                          </div>
+                        )}
+                        {post.authorPhone && (
+                          <div className="flex items-center space-x-2 text-sm text-gray-600">
+                            <span>Phone:</span>
+                            <a 
+                              href={`tel:${post.authorPhone}`} 
+                              className="text-blue-600 hover:underline"
+                            >
+                              {post.authorPhone}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
                     <div className="flex space-x-3">
                       <Button variant="outline" size="sm">
                         <User className="w-4 h-4 mr-2" />

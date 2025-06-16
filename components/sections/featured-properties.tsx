@@ -35,9 +35,9 @@ interface Property {
 }
 
 const propertyStats = [
-  { icon: TrendingUp, title: 'Properties Listed', value: '2,500+', color: 'text-primary' },
-  { icon: Award, title: 'Successful Sales', value: '850+', color: 'text-secondary' },
-  { icon: Star, title: 'Client Rating', value: '4.8/5', color: 'text-accent' }
+  { icon: TrendingUp, title: 'Properties Listed', value: '', color: 'text-primary' },
+  { icon: Award, title: 'Successful Sales', value: '', color: 'text-secondary' },
+  { icon: Star, title: 'Client Satisfied', value: '', color: 'text-accent' }
 ];
 
 export default function FeaturedProperties() {
@@ -139,11 +139,10 @@ export default function FeaturedProperties() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
                 <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <CardContent className="p-6 text-center">
-                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 mb-4`}>
+                  <CardContent className="p-6 text-center">                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 mb-4`}>
                       <stat.icon className={`w-6 h-6 ${stat.color}`} />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-2">{stat.value}</h3>
+                    {stat.value && <h3 className="text-2xl font-bold text-gray-800 mb-2">{stat.value}</h3>}
                     <p className="text-gray-600">{stat.title}</p>
                   </CardContent>
                 </Card>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import { 
   Search, 
   Filter, 
@@ -244,32 +245,6 @@ export default function ProjectsPage() {
             </div>
           </div>
 
-          {/* Categories Section */}
-          {categories.length > 0 && (
-            <div className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Project Categories</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {categories.map((category) => (
-                  <motion.div
-                    key={category.id}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Card 
-                      className="h-full hover:shadow-lg transition-shadow cursor-pointer"
-                      onClick={() => setSelectedCategory(category.id)}
-                    >
-                      <CardContent className="p-4 text-center">
-                        <h3 className="font-semibold text-gray-900 mb-1">{category.name}</h3>
-                        <p className="text-sm text-gray-600">{category.description}</p>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Projects Grid */}
           <div className="mb-12">
             <div className="flex justify-between items-center mb-6">
@@ -359,14 +334,15 @@ export default function ProjectsPage() {
                         )}
 
                         <div className="flex items-center justify-between">
-                          <Button
-                            variant="outline"
-                            className="flex items-center gap-2"
-                            onClick={() => console.log('View project:', project.id)}
-                          >
-                            <Eye className="h-4 w-4" />
-                            View Details
-                          </Button>
+                          <Link href={`/projects/${project.id}`}>
+                            <Button
+                              variant="outline"
+                              className="flex items-center gap-2"
+                            >
+                              <Eye className="h-4 w-4" />
+                              View Details
+                            </Button>
+                          </Link>
                           {(project as any).beforeImages && (project as any).beforeImages.length > 0 && (
                             <Badge variant="secondary">
                               Before/After Available

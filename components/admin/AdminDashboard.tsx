@@ -26,6 +26,7 @@ import MarketplaceTab from './MarketplaceTab';
 import ProjectsTab from './ProjectsTab';
 import BlogTab from './BlogTab';
 import SettingsTab from './SettingsTab';
+import TestimonialsTab from './TestimonialsTab';
 import HeroTab from './HeroTab';
 import AITrainingTab from './AITrainingTab';
 import DetailsTab from './DetailsTab';
@@ -261,8 +262,7 @@ const AdminDashboard: React.FC = () => {
     };
 
     fetchAdminData();
-  }, [user, router, authLoading]);
-  const sidebarItems = [
+  }, [user, router, authLoading]);  const sidebarItems = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'hero', label: 'Hero Sections', icon: Image },
     { id: 'details', label: 'Detail Pages', icon: Layers },
@@ -272,6 +272,7 @@ const AdminDashboard: React.FC = () => {
     { id: 'marketplace', label: 'Marketplace', icon: Package },
     { id: 'projects', label: 'Projects', icon: Package },
     { id: 'blog', label: 'Blog & Content', icon: FileText },
+    { id: 'testimonials', label: 'Testimonials', icon: Users },
     { id: 'ai-training', label: 'AI Training', icon: Brain },
     { id: 'settings', label: 'Site Settings', icon: Settings }
   ];
@@ -351,7 +352,9 @@ const AdminDashboard: React.FC = () => {
             {activeTab === 'food' && <FoodTab key={refreshTrigger} onAdd={() => handleAdd('food_items')} onEdit={(data: any) => handleEdit('food_items', data)} onView={(data: any) => handleView('food_items', data)} onDelete={createDeleteHandler('food_items')} />}
             {activeTab === 'marketplace' && <MarketplaceTab key={refreshTrigger} onAdd={() => handleAdd('store_products')} onEdit={(data: any) => handleEdit('store_products', data)} onView={(data: any) => handleView('store_products', data)} onDelete={createDeleteHandler('store_products')} />}
             {activeTab === 'projects' && <ProjectsTab key={refreshTrigger} onAdd={() => handleAdd('projects')} onEdit={(data: any) => handleEdit('projects', data)} onView={(data: any) => handleView('projects', data)} onDelete={createDeleteHandler('projects')} />}
-            {activeTab === 'blog' && <BlogTab key={refreshTrigger} onAdd={() => handleAdd('blog_posts')} onEdit={(data: any) => handleEdit('blog_posts', data)} onView={(data: any) => handleView('blog_posts', data)} onDelete={createDeleteHandler('blog_posts')} />}            {activeTab === 'ai-training' && <AITrainingTab key={refreshTrigger} onAdd={() => handleAdd('ai_training_data')} onEdit={(data: any) => handleEdit('ai_training_data', data)} onView={(data: any) => handleView('ai_training_data', data)} onDelete={createDeleteHandler('ai_training_data')} />}
+            {activeTab === 'blog' && <BlogTab key={refreshTrigger} onAdd={() => handleAdd('blog_posts')} onEdit={(data: any) => handleEdit('blog_posts', data)} onView={(data: any) => handleView('blog_posts', data)} onDelete={createDeleteHandler('blog_posts')} />}
+            {activeTab === 'testimonials' && <TestimonialsTab key={refreshTrigger} onAdd={() => handleAdd('testimonials')} onEdit={(data: any) => handleEdit('testimonials', data)} onView={(data: any) => handleView('testimonials', data)} onDelete={createDeleteHandler('testimonials')} />}
+            {activeTab === 'ai-training' && <AITrainingTab key={refreshTrigger} onAdd={() => handleAdd('ai_training_data')} onEdit={(data: any) => handleEdit('ai_training_data', data)} onView={(data: any) => handleView('ai_training_data', data)} onDelete={createDeleteHandler('ai_training_data')} />}
             {activeTab === 'settings' && <SettingsTab key={refreshTrigger} onAdd={() => handleAdd('site_settings')} onEdit={(data: any) => handleEdit('site_settings', data)} onView={(data: any) => handleView('site_settings', data)} onDelete={createDeleteHandler('site_settings')} />}
           </div>
         </div>

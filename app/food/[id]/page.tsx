@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft,
-  ShoppingCart,
   Plus,
   Minus,
   Star,
@@ -26,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CURRENCY } from '@/lib/constants';
 
 interface FoodItem {
@@ -41,6 +41,11 @@ interface FoodItem {
   origin?: string;
   isActive: boolean;
   createdAt: string;
+  sellerName?: string;
+  sellerPhone?: string;
+  sellerEmail?: string;
+  sellerAddress?: string;
+  sellerDescription?: string;
 }
 
 interface FoodDetailPageProps {
@@ -104,7 +109,6 @@ export default function FoodDetailPage({ params }: FoodDetailPageProps) {
       maximumFractionDigits: 0,
     }).format(price);
   };
-
   const incrementQuantity = () => {
     setQuantity(prev => Math.min(prev + 1, foodItem?.stock || 999));
   };
@@ -113,10 +117,13 @@ export default function FoodDetailPage({ params }: FoodDetailPageProps) {
     setQuantity(prev => Math.max(prev - 1, foodItem?.minimumOrder || 1));
   };
 
+  // Cart functionality temporarily disabled - contact sellers directly
+  /*
   const handleAddToCart = () => {
     // Add to cart logic here
     alert(`Added ${quantity} ${foodItem?.unit} of ${foodItem?.name} to cart!`);
   };
+  */
 
   if (loading) {
     return (
@@ -308,24 +315,19 @@ export default function FoodDetailPage({ params }: FoodDetailPageProps) {
                 <span>Total:</span>
                 <span className="text-primary">{formatPrice(foodItem.price * quantity)}</span>
               </div>
-            </div>
-
-            <Separator />
-
-            {/* Add to Cart */}
+            </div>            <Separator />            {/* Contact Seller - Cart functionality disabled */}
             <div className="space-y-3">
               <Button 
-                onClick={handleAddToCart}
-                className="w-full"
+                onClick={() => alert('Contact form for ' + foodItem.name + ' will open here')}
+                className="w-full bg-green-600 hover:bg-green-700"
                 size="lg"
-                disabled={quantity > foodItem.stock}
               >
-                <ShoppingCart className="w-5 h-5 mr-2" />
-                Add to Cart
+                <Package className="w-5 h-5 mr-2" />
+                Contact Seller
               </Button>
-              <Button variant="outline" className="w-full" size="lg">
-                Buy Now
-              </Button>
+              <div className="text-center text-sm text-gray-500">
+                Contact seller directly for pricing and availability
+              </div>
             </div>
 
             {/* Features */}
@@ -347,41 +349,160 @@ export default function FoodDetailPage({ params }: FoodDetailPageProps) {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Product Details */}
+        </div>        {/* Product Details Tabs */}
         <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Product Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="prose max-w-none">
-              <p className="text-gray-700 leading-relaxed mb-6">{foodItem.description}</p>
+          <CardContent className="p-6">
+            <Tabs defaultValue="description" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="description">Description</TabsTrigger>
+                <TabsTrigger value="specifications">Specifications</TabsTrigger>
+                <TabsTrigger value="seller">Seller Info</TabsTrigger>
+                <TabsTrigger value="reviews">Reviews</TabsTrigger>
+              </TabsList>
               
-              {foodItem.nutritionalInfo && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Nutritional Information</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-gray-50 p-3 rounded-lg text-center">
-                      <div className="text-2xl font-bold text-primary">120</div>
-                      <div className="text-sm text-gray-600">Calories</div>
+              <TabsContent value="description" className="mt-6">
+                <div className="prose max-w-none">
+                  <p className="text-gray-700 leading-relaxed">{foodItem.description}</p>
+                  
+                  {foodItem.origin && (
+                    <div className="mt-6">
+                      <h3 className="text-lg font-semibold mb-3 text-gray-900">Origin & Source</h3>
+                      <div className="flex items-center space-x-2 text-gray-700">
+                        <MapPin className="w-4 h-4 text-green-500" />
+                        <span>{foodItem.origin}</span>
+                      </div>
                     </div>
-                    <div className="bg-gray-50 p-3 rounded-lg text-center">
-                      <div className="text-2xl font-bold text-primary">5g</div>
-                      <div className="text-sm text-gray-600">Protein</div>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded-lg text-center">
-                      <div className="text-2xl font-bold text-primary">25g</div>
-                      <div className="text-sm text-gray-600">Carbs</div>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded-lg text-center">
-                      <div className="text-2xl font-bold text-primary">2g</div>
-                      <div className="text-sm text-gray-600">Fat</div>
+                  )}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="specifications" className="mt-6">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Unit</span>
+                        <span className="font-medium">{foodItem.unit}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Minimum Order</span>
+                        <span className="font-medium">{foodItem.minimumOrder} {foodItem.unit}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Stock Available</span>
+                        <span className="font-medium">{foodItem.stock} {foodItem.unit}</span>
+                      </div>
+                      {foodItem.origin && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Origin</span>
+                          <span className="font-medium">{foodItem.origin}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
+                  
+                  {foodItem.nutritionalInfo && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3">Nutritional Information</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="bg-gray-50 p-3 rounded-lg text-center">
+                          <div className="text-2xl font-bold text-primary">120</div>
+                          <div className="text-sm text-gray-600">Calories</div>
+                        </div>
+                        <div className="bg-gray-50 p-3 rounded-lg text-center">
+                          <div className="text-2xl font-bold text-primary">5g</div>
+                          <div className="text-sm text-gray-600">Protein</div>
+                        </div>
+                        <div className="bg-gray-50 p-3 rounded-lg text-center">
+                          <div className="text-2xl font-bold text-primary">25g</div>
+                          <div className="text-sm text-gray-600">Carbs</div>
+                        </div>
+                        <div className="bg-gray-50 p-3 rounded-lg text-center">
+                          <div className="text-2xl font-bold text-primary">2g</div>
+                          <div className="text-sm text-gray-600">Fat</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </TabsContent>
+              
+              <TabsContent value="seller" className="mt-6">
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-gray-900">Seller Information</h3>
+                  
+                  {foodItem.sellerName || foodItem.sellerPhone || foodItem.sellerEmail ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        {foodItem.sellerName && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Seller Name</label>
+                            <p className="text-gray-900">{foodItem.sellerName}</p>
+                          </div>
+                        )}
+                        
+                        {foodItem.sellerPhone && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Phone</label>
+                            <p className="text-gray-900">
+                              <a href={`tel:${foodItem.sellerPhone}`} className="text-green-600 hover:underline">
+                                {foodItem.sellerPhone}
+                              </a>
+                            </p>
+                          </div>
+                        )}
+                        
+                        {foodItem.sellerEmail && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Email</label>
+                            <p className="text-gray-900">
+                              <a href={`mailto:${foodItem.sellerEmail}`} className="text-green-600 hover:underline">
+                                {foodItem.sellerEmail}
+                              </a>
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-4">
+                        {foodItem.sellerAddress && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Address</label>
+                            <p className="text-gray-900">{foodItem.sellerAddress}</p>
+                          </div>
+                        )}
+                        
+                        {foodItem.sellerDescription && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">About Seller</label>
+                            <p className="text-gray-700 leading-relaxed">{foodItem.sellerDescription}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-600">Seller information not available</p>
+                    </div>
+                  )}
+                  
+                  <div className="pt-4 border-t">
+                    <p className="text-xs text-gray-500">
+                      Contact the seller directly for bulk orders, fresh availability, or any questions about this product.
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="reviews" className="mt-6">
+                <div className="text-center py-8">
+                  <p className="text-gray-600">Reviews coming soon...</p>
+                  <Button variant="outline" className="mt-4">
+                    Be the first to review
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 

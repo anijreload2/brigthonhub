@@ -34,9 +34,9 @@ interface FoodItem {
 }
 
 const foodStats = [
-  { icon: Package, title: 'Fresh Products', value: '1,200+', color: 'text-green-600' },
-  { icon: Truck, title: 'Daily Deliveries', value: '300+', color: 'text-blue-600' },
-  { icon: Award, title: 'Customer Rating', value: '4.9/5', color: 'text-yellow-600' }
+  { icon: Package, title: 'Fresh Products', value: '', color: 'text-green-600' },
+  { icon: Truck, title: 'Daily Deliveries', value: '', color: 'text-blue-600' },
+  { icon: Award, title: 'Customer Satisfied', value: '', color: 'text-yellow-600' }
 ];
 
 export default function FeaturedFoodMarketplace() {
@@ -141,11 +141,10 @@ export default function FeaturedFoodMarketplace() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
                 <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <CardContent className="p-6 text-center">
-                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 mb-4`}>
+                  <CardContent className="p-6 text-center">                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 mb-4`}>
                       <stat.icon className={`w-6 h-6 ${stat.color}`} />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-2">{stat.value}</h3>
+                    {stat.value && <h3 className="text-2xl font-bold text-gray-800 mb-2">{stat.value}</h3>}
                     <p className="text-gray-600">{stat.title}</p>
                   </CardContent>
                 </Card>

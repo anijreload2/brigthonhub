@@ -11,38 +11,45 @@ import {
   MapPin,
   User,
   Star,
-  Quote,
   CheckCircle,
-  Clock,
-  DollarSign,
   Share2,
   Heart,
   ChevronLeft,
   ChevronRight,
   Building,
-  Award,
-  Users
+  Award
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
-import { CURRENCY } from '@/lib/constants';
 
 interface Project {
   id: string;
   title: string;
   description: string;
+  specifications?: string;
   beforeImages: string[];
   afterImages: string[];
   status: string;
-  budget?: number;
-  startDate?: string;
-  endDate?: string;
   location?: string;
-  clientName?: string;
-  testimonial?: string;
+  teamMembers?: {
+    name: string;
+    role: string;
+    phone?: string;
+    email?: string;
+  }[];
+  contactName?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  contactAddress?: string;
+  reviews?: {
+    id: string;
+    rating: number;
+    comment: string;
+    author: string;
+    date: string;
+  }[];
   isActive: boolean;
   createdAt: string;
 }
@@ -51,12 +58,12 @@ interface ProjectDetailPageProps {
   params: { id: string };
 }
 
-export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
-  const [project, setProject] = useState<Project | null>(null);
+export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {  const [project, setProject] = useState<Project | null>(null);
   const [relatedProjects, setRelatedProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'before' | 'after'>('before');
+  const [activeTab, setActiveTab] = useState<'description' | 'specifications' | 'team' | 'reviews'>('description');
+  const [activeImageTab, setActiveImageTab] = useState<'before' | 'after'>('before');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -82,10 +89,9 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
     fetchProject();
   }, [params.id]);
-
   const getCurrentImages = () => {
     if (!project) return [];
-    return activeTab === 'before' ? project.beforeImages : project.afterImages;
+    return activeImageTab === 'before' ? project.beforeImages : project.afterImages;
   };
 
   const nextImage = () => {
@@ -96,7 +102,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       );
     }
   };
-
   const prevImage = () => {
     const images = getCurrentImages();
     if (images.length > 0) {
@@ -104,15 +109,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
         prev === 0 ? images.length - 1 : prev - 1
       );
     }
-  };
-
-  const formatBudget = (budget: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(budget);
   };
 
   const getStatusColor = (status: string) => {
@@ -132,11 +128,10 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       default: return 0;
     }
   };
-
-  // Reset image index when switching tabs
+  // Reset image index when switching image tabs
   useEffect(() => {
     setCurrentImageIndex(0);
-  }, [activeTab]);
+  }, [activeImageTab]);
 
   if (loading) {
     return (
@@ -187,8 +182,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Project Header */}
+      <div className="container mx-auto px-4 py-8">        {/* Project Header */}
         <div className="bg-white rounded-lg p-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
             <div>
@@ -203,33 +197,14 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 <Badge className={`${getStatusColor(project.status)} text-white`}>
                   {project.status}
                 </Badge>
-                {project.clientName && (
-                  <div className="flex items-center space-x-2 text-gray-600">
-                    <User className="w-4 h-4" />
-                    <span>Client: {project.clientName}</span>
-                  </div>
-                )}
               </div>
             </div>
             <div className="mt-4 md:mt-0 text-right">
-              {project.budget && (
-                <div className="text-2xl font-bold text-primary mb-2">
-                  {formatBudget(project.budget)}
-                </div>
-              )}
               <div className="space-y-1 text-sm text-gray-600">
-                {project.startDate && (
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4" />
-                    <span>Started: {new Date(project.startDate).toLocaleDateString()}</span>
-                  </div>
-                )}
-                {project.endDate && (
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4" />
-                    <span>Completed: {new Date(project.endDate).toLocaleDateString()}</span>
-                  </div>
-                )}
+                <div className="flex items-center space-x-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>Created: {new Date(project.createdAt).toLocaleDateString()}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -253,16 +228,16 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                   <CardTitle>Project Gallery</CardTitle>
                   <div className="flex space-x-2">
                     <Button
-                      variant={activeTab === 'before' ? 'default' : 'outline'}
+                      variant={activeImageTab === 'before' ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setActiveTab('before')}
+                      onClick={() => setActiveImageTab('before')}
                     >
                       Before ({project.beforeImages.length})
                     </Button>
                     <Button
-                      variant={activeTab === 'after' ? 'default' : 'outline'}
+                      variant={activeImageTab === 'after' ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => setActiveTab('after')}
+                      onClick={() => setActiveImageTab('after')}
                     >
                       After ({project.afterImages.length})
                     </Button>
@@ -275,7 +250,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                     <>
                       <Image
                         src={currentImages[currentImageIndex]}
-                        alt={`${project.title} - ${activeTab}`}
+                        alt={`${project.title} - ${activeImageTab}`}
                         fill
                         className="object-cover"
                       />
@@ -311,7 +286,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                       )}
                       <div className="absolute top-4 right-4">
                         <Badge variant="secondary" className="bg-black/50 text-white">
-                          {activeTab === 'before' ? 'Before' : 'After'}
+                          {activeImageTab === 'before' ? 'Before' : 'After'}
                         </Badge>
                       </div>
                     </>
@@ -333,11 +308,11 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                           className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
                             index === currentImageIndex ? 'border-primary' : 'border-gray-200'
                           }`}
-                          aria-label={`View ${activeTab} image ${index + 1}`}
+                          aria-label={`View ${activeImageTab} image ${index + 1}`}
                         >
                           <Image
                             src={image}
-                            alt={`${project.title} ${activeTab} ${index + 1}`}
+                            alt={`${project.title} ${activeImageTab} ${index + 1}`}
                             fill
                             className="object-cover"
                           />
@@ -349,15 +324,132 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               </CardContent>
             </Card>
 
-            {/* Project Description */}
+            {/* Four-Tab Content Section */}
             <Card className="mt-6">
               <CardHeader>
-                <CardTitle>Project Description</CardTitle>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant={activeTab === 'description' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setActiveTab('description')}
+                    className="flex-1 min-w-[120px]"
+                  >
+                    Description
+                  </Button>
+                  <Button
+                    variant={activeTab === 'specifications' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setActiveTab('specifications')}
+                    className="flex-1 min-w-[120px]"
+                  >
+                    Specifications
+                  </Button>
+                  <Button
+                    variant={activeTab === 'team' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setActiveTab('team')}
+                    className="flex-1 min-w-[120px]"
+                  >
+                    Team Info
+                  </Button>
+                  <Button
+                    variant={activeTab === 'reviews' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setActiveTab('reviews')}
+                    className="flex-1 min-w-[120px]"
+                  >
+                    Reviews
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="prose max-w-none">
-                  <p className="text-gray-700 leading-relaxed">{project.description}</p>
-                </div>
+                {activeTab === 'description' && (
+                  <div className="prose max-w-none">
+                    <p className="text-gray-700 leading-relaxed">{project.description}</p>
+                  </div>
+                )}
+
+                {activeTab === 'specifications' && (
+                  <div className="prose max-w-none">
+                    {project.specifications ? (
+                      <p className="text-gray-700 leading-relaxed">{project.specifications}</p>
+                    ) : (
+                      <p className="text-gray-500 italic">No specifications available for this project.</p>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === 'team' && (
+                  <div className="space-y-4">
+                    {project.teamMembers && project.teamMembers.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {project.teamMembers.map((member, index) => (
+                          <div key={index} className="border rounded-lg p-4">
+                            <div className="flex items-center space-x-3 mb-3">
+                              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                                <User className="w-5 h-5 text-primary" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold">{member.name}</h4>
+                                <p className="text-sm text-gray-600">{member.role}</p>
+                              </div>
+                            </div>
+                            <div className="space-y-2 text-sm">
+                              {member.phone && (
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">Phone:</span>
+                                  <a href={`tel:${member.phone}`} className="text-blue-600 hover:underline">
+                                    {member.phone}
+                                  </a>
+                                </div>
+                              )}
+                              {member.email && (
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">Email:</span>
+                                  <a href={`mailto:${member.email}`} className="text-blue-600 hover:underline">
+                                    {member.email}
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 italic">No team information available for this project.</p>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === 'reviews' && (
+                  <div className="space-y-4">
+                    {project.reviews && project.reviews.length > 0 ? (
+                      project.reviews.map((review) => (
+                        <div key={review.id} className="border rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-semibold">{review.author}</span>
+                              <div className="flex items-center">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star 
+                                    key={i} 
+                                    className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            <span className="text-sm text-gray-500">
+                              {new Date(review.date).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-gray-700">{review.comment}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 italic">No reviews available for this project.</p>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -380,86 +472,125 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                     {project.status}
                   </Badge>
                 </div>
-                {project.budget && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Budget</span>
-                    <span className="font-medium">{formatBudget(project.budget)}</span>
-                  </div>
-                )}
-                {project.startDate && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Start Date</span>
-                    <span className="font-medium">
-                      {new Date(project.startDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
-                {project.endDate && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">End Date</span>
-                    <span className="font-medium">
-                      {new Date(project.endDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Created</span>
+                  <span className="font-medium">
+                    {new Date(project.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
               </CardContent>
             </Card>
 
-            {/* Client Testimonial */}
-            {project.testimonial && (
+            {/* Contact Information */}
+            {(project.contactName || project.contactPhone || project.contactEmail) && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Client Testimonial</CardTitle>
+                  <CardTitle>Contact Information</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <Quote className="w-8 h-8 text-primary" />
-                    <blockquote className="text-gray-700 italic leading-relaxed">
-                      "{project.testimonial}"
-                    </blockquote>
-                    {project.clientName && (
-                      <div className="flex items-center space-x-2">
-                        <User className="w-4 h-4 text-gray-400" />
-                        <span className="font-medium text-gray-900">{project.clientName}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      ))}
+                <CardContent className="space-y-4">
+                  {project.contactName && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Contact Person</span>
+                      <span className="font-medium">{project.contactName}</span>
                     </div>
-                  </div>
+                  )}
+                  {project.contactPhone && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Phone</span>
+                      <a 
+                        href={`tel:${project.contactPhone}`} 
+                        className="font-medium text-blue-600 hover:underline"
+                      >
+                        {project.contactPhone}
+                      </a>
+                    </div>
+                  )}
+                  {project.contactEmail && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Email</span>
+                      <a 
+                        href={`mailto:${project.contactEmail}`} 
+                        className="font-medium text-blue-600 hover:underline"
+                      >
+                        {project.contactEmail}
+                      </a>
+                    </div>
+                  )}
+                  {project.contactAddress && (
+                    <div>
+                      <span className="text-gray-600 block mb-1">Address</span>
+                      <span className="font-medium text-sm">{project.contactAddress}</span>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
 
-            {/* Get Quote CTA */}
+            {/* Contact Form */}
             <Card>
               <CardHeader>
-                <CardTitle>Interested in Similar Work?</CardTitle>
+                <CardTitle>Contact Project Team</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 mb-4">
-                  Get a custom quote for your project based on this completed work.
-                </p>
-                <Button className="w-full mb-3">
-                  Get Free Quote
-                </Button>
-                <Button variant="outline" className="w-full">
-                  Contact Our Team
-                </Button>
+                <form className="space-y-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      Your Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Enter your name"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      Your Email
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Enter your email"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                      Your Phone
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Enter your phone number"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                      Message
+                    </label>
+                    <textarea
+                      id="message"
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Tell us about your project requirements..."
+                    />
+                  </div>
+                  <Button type="submit" className="w-full">
+                    Send Message
+                  </Button>
+                </form>
                 <div className="mt-4 pt-4 border-t text-center">
                   <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
                     <Award className="w-4 h-4" />
-                    <span>Satisfaction Guaranteed</span>
+                    <span>Professional Service Guaranteed</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-        </div>
-
-        {/* Related Projects */}
+        </div>        {/* Related Projects */}
         {relatedProjects.length > 0 && (
           <div className="mt-12">
             <h2 className="text-2xl font-bold mb-6">Related Projects</h2>
@@ -483,19 +614,14 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                     <div className="p-4">
                       <h3 className="font-semibold mb-2 line-clamp-2">{relatedProject.title}</h3>
                       {relatedProject.location && (
-                        <div className="flex items-center space-x-1 text-sm text-gray-600 mb-2">
+                        <div className="flex items-center space-x-1 text-sm text-gray-600 mb-3">
                           <MapPin className="w-3 h-3" />
                           <span className="line-clamp-1">{relatedProject.location}</span>
                         </div>
                       )}
-                      <div className="flex justify-between items-center">
-                        {relatedProject.budget && (
-                          <span className="font-bold text-primary text-sm">
-                            {formatBudget(relatedProject.budget)}
-                          </span>
-                        )}
+                      <div className="flex justify-center">
                         <Link href={`/projects/${relatedProject.id}`}>
-                          <Button size="sm" variant="outline">View</Button>
+                          <Button size="sm" variant="outline" className="w-full">View Project</Button>
                         </Link>
                       </div>
                     </div>

@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -25,6 +25,17 @@ import HeroWithHeader from '@/components/sections/hero-with-header';
 import FeaturedProperties from '@/components/sections/featured-properties';
 import FeaturedFoodMarketplace from '@/components/sections/featured-food-marketplace';
 import FeaturedProjects from '@/components/sections/featured-projects';
+
+interface Testimonial {
+  id?: string;
+  name: string;
+  role: string;
+  company?: string;
+  content: string;
+  rating: number;
+  avatar_url?: string;
+  location?: string;
+}
 
 const services = [
   {
@@ -62,37 +73,72 @@ const services = [
 ];
 
 const stats = [
-  { label: 'Happy Clients', value: '2,500+', icon: Users },
-  { label: 'Projects Completed', value: '1,200+', icon: Award },
-  { label: 'Years Experience', value: '15+', icon: TrendingUp },
-  { label: 'Cities Served', value: '25+', icon: MapPin }
-];
-
-const testimonials = [
-  {
-    name: 'Adebayo Johnson',
-    role: 'Property Developer',
-    content: 'BrightonHub transformed our property development process. Their platform is intuitive and their service is exceptional.',
-    rating: 5,
-    location: 'Lagos'
-  },
-  {
-    name: 'Fatima Abdullahi',
-    role: 'Restaurant Owner',
-    content: 'The food services platform has revolutionized how we source our ingredients. Fresh, reliable, and cost-effective.',
-    rating: 5,
-    location: 'Abuja'
-  },
-  {
-    name: 'Chinedu Okafor',
-    role: 'Construction Manager',
-    content: 'From office furniture to building materials, BrightonHub is our one-stop solution for all project needs.',
-    rating: 5,
-    location: 'Port Harcourt'
-  }
+  { label: 'Happy Clients', value: '', icon: Users },
+  { label: 'Projects Completed', value: '', icon: Award },
+  { label: 'Years Experience', value: '', icon: TrendingUp },
+  { label: 'Cities Served', value: '', icon: MapPin }
 ];
 
 export default function HomePage() {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [testimonialsLoading, setTestimonialsLoading] = useState(true);
+
+  // Fetch testimonials from API
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const response = await fetch('/api/testimonials');
+        if (response.ok) {
+          const data = await response.json();
+          // Filter for featured testimonials or take first 3
+          const displayTestimonials = data.testimonials
+            .filter((t: any) => t.is_featured)
+            .slice(0, 3);
+          
+          // If less than 3 featured, fill with non-featured
+          if (displayTestimonials.length < 3) {
+            const remaining = data.testimonials
+              .filter((t: any) => !t.is_featured)
+              .slice(0, 3 - displayTestimonials.length);
+            displayTestimonials.push(...remaining);
+          }
+          
+          setTestimonials(displayTestimonials);
+        }
+      } catch (error) {
+        console.error('Error fetching testimonials:', error);
+        // Fallback to static testimonials
+        setTestimonials([
+          {
+            name: 'Adebayo Johnson',
+            role: 'Property Developer',
+            content: 'BrightonHub transformed our property development process. Their platform is intuitive and their service is exceptional.',
+            rating: 5,
+            company: 'Lagos Properties'
+          },
+          {
+            name: 'Fatima Abdullahi',
+            role: 'Restaurant Owner',
+            content: 'The food services platform has revolutionized how we source our ingredients. Fresh, reliable, and cost-effective.',
+            rating: 5,
+            company: 'Abuja Delights'
+          },
+          {
+            name: 'Chinedu Okafor',
+            role: 'Construction Manager',
+            content: 'From office furniture to building materials, BrightonHub is our one-stop solution for all project needs.',
+            rating: 5,
+            company: 'BuildRight Ltd'
+          }
+        ]);
+      } finally {
+        setTestimonialsLoading(false);
+      }
+    };
+
+    fetchTestimonials();
+  }, []);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section with Integrated Header */}
@@ -116,9 +162,11 @@ export default function HomePage() {
                     <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Icon className="w-8 h-8 text-primary" />
                     </div>
-                    <div className="text-3xl font-bold text-primary mb-2 count-up">
-                      {stat.value}
-                    </div>
+                    {stat.value && (
+                      <div className="text-3xl font-bold text-primary mb-2 count-up">
+                        {stat.value}
+                      </div>
+                    )}
                     <div className="text-gray-600 font-medium">
                       {stat.label}
                     </div>
@@ -228,8 +276,14 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
+          {testimonialsLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading testimonials...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {testimonials.map((testimonial, index) => (
               <motion.div
                 key={testimonial.name}
                 initial={{ opacity: 0, y: 20 }}
@@ -239,26 +293,38 @@ export default function HomePage() {
               >
                 <Card className="h-full border-0 shadow-lg">
                   <CardContent className="p-6">
-                    <div className="flex items-center space-x-1 mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
+                    {testimonial.rating > 0 && (
+                      <div className="flex items-center space-x-1 mb-4">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                        ))}
+                      </div>
+                    )}
                     <p className="text-gray-700 mb-6 leading-relaxed">
                       "{testimonial.content}"
                     </p>
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold">
-                          {testimonial.name.charAt(0)}
-                        </span>
-                      </div>
+                      {testimonial.avatar_url ? (
+                        <img 
+                          src={testimonial.avatar_url} 
+                          alt={testimonial.name}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                          <span className="text-white font-semibold">
+                            {testimonial.name.charAt(0)}
+                          </span>
+                        </div>
+                      )}
                       <div>
                         <div className="font-semibold text-gray-900">
                           {testimonial.name}
                         </div>
                         <div className="text-sm text-gray-600">
-                          {testimonial.role} • {testimonial.location}
+                          {testimonial.role}
+                          {(testimonial.company || testimonial.location) && ' • '}
+                          {testimonial.company || testimonial.location}
                         </div>
                       </div>
                     </div>
@@ -266,7 +332,8 @@ export default function HomePage() {
                 </Card>
               </motion.div>
             ))}
-          </div>
+            </div>
+          )}
         </div>
       </section>
 

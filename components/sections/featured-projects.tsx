@@ -36,9 +36,8 @@ interface Project {
 }
 
 const projectStats = [
-  { icon: CheckCircle, title: 'Completed Projects', value: '150+', color: 'text-blue-600' },
-  { icon: TrendingUp, title: 'Client Satisfaction', value: '98%', color: 'text-green-600' },
-  { icon: Award, title: 'Awards Won', value: '12+', color: 'text-purple-600' }
+  { icon: CheckCircle, title: 'Completed Projects', value: '', color: 'text-blue-600' },
+  { icon: TrendingUp, title: 'Client Satisfaction', value: '', color: 'text-green-600' }
 ];
 
 export default function FeaturedProjects() {
@@ -160,11 +159,9 @@ export default function FeaturedProjects() {
               renovation, and property development across Lagos and beyond.
             </p>
           </motion.div>
-        </div>
-
-        {/* Statistics */}
+        </div>        {/* Statistics */}
         <div className="mb-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
             {projectStats.map((stat, index) => (
               <motion.div
                 key={stat.title}
@@ -173,11 +170,10 @@ export default function FeaturedProjects() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
                 <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <CardContent className="p-6 text-center">
-                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 mb-4`}>
+                  <CardContent className="p-6 text-center">                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 mb-4`}>
                       <stat.icon className={`w-6 h-6 ${stat.color}`} />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-2">{stat.value}</h3>
+                    {stat.value && <h3 className="text-2xl font-bold text-gray-800 mb-2">{stat.value}</h3>}
                     <p className="text-gray-600">{stat.title}</p>
                   </CardContent>
                 </Card>
