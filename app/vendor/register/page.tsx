@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -147,11 +146,9 @@ export default function VendorRegisterPage() {
     }
   };
 
-  if (isSuccess) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+  if (isSuccess) {    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div
           style={{
             backgroundColor: 'white',
             borderRadius: '0.5rem',
@@ -169,10 +166,9 @@ export default function VendorRegisterPage() {
           <p className="text-gray-600 mb-4">
             Your vendor application has been submitted successfully. Our admin team will review it and get back to you within 2-3 business days.
           </p>
-          <p className="text-sm text-gray-500">
-            You will be redirected to your profile page shortly...
+          <p className="text-sm text-gray-500">            You will be redirected to your profile page shortly...
           </p>
-        </motion.div>
+        </div>
       </div>
     );
   }
