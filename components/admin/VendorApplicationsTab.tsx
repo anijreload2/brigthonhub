@@ -20,14 +20,17 @@ interface VendorApplication {
   contact_email: string;
   contact_phone: string;
   business_address: string;
-  website?: string;
-  experience?: string;
-  certifications?: string;
-  contact_preferences: Record<string, boolean>;
+  website_url?: string;
+  verification_data?: {
+    experience?: string;
+    certifications?: string;
+    contact_preferences?: Record<string, boolean>;
+  };
   status: 'pending' | 'approved' | 'rejected';
   submitted_at: string;
   reviewed_at?: string;
-  admin_notes?: string;  // User data from join
+  admin_notes?: string;
+  // User data from join
   users?: {
     name?: string;
     email: string;
@@ -347,7 +350,7 @@ export default function VendorApplicationsTab() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Website</label>
-                  <p className="mt-1 text-sm text-gray-900">{selectedApplication.website || 'N/A'}</p>
+                  <p className="mt-1 text-sm text-gray-900">{selectedApplication.website_url || 'N/A'}</p>
                 </div>
               </div>
               
@@ -378,18 +381,16 @@ export default function VendorApplicationsTab() {
                   })}
                 </div>
               </div>
-              
-              {selectedApplication.experience && (
+                {selectedApplication.verification_data?.experience && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Experience</label>
-                  <p className="mt-1 text-sm text-gray-900">{selectedApplication.experience}</p>
+                  <p className="mt-1 text-sm text-gray-900">{selectedApplication.verification_data.experience}</p>
                 </div>
               )}
-              
-              {selectedApplication.certifications && (
+                {selectedApplication.verification_data?.certifications && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Certifications</label>
-                  <p className="mt-1 text-sm text-gray-900">{selectedApplication.certifications}</p>
+                  <p className="mt-1 text-sm text-gray-900">{selectedApplication.verification_data.certifications}</p>
                 </div>
               )}
               

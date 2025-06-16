@@ -107,8 +107,7 @@ export default function VendorRegisterPage() {
     }
 
     setIsSubmitting(true);
-    try {
-      // Submit vendor application
+    try {      // Submit vendor application
       const { error } = await supabase
         .from('vendor_applications')
         .insert({
@@ -119,12 +118,13 @@ export default function VendorRegisterPage() {
           contact_email: formData.contactEmail,
           contact_phone: formData.contactPhone,
           business_address: formData.businessAddress,
-          website: formData.website,
-          experience: formData.experience,
-          certifications: formData.certifications,
-          contact_preferences: formData.preferredContactMethods,
-          status: 'pending',
-          submitted_at: new Date().toISOString()
+          website_url: formData.website,
+          verification_data: {
+            experience: formData.experience,
+            certifications: formData.certifications,
+            contact_preferences: formData.preferredContactMethods
+          },
+          status: 'pending'
         });
 
       if (error) throw error;      setIsSuccess(true);
