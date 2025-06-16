@@ -3,9 +3,12 @@
   publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "18"
-  NEXT_PUBLIC_SUPABASE_URL = "https://jahtkqvekhdjwoflatpg.supabase.co"
+  NODE_VERSION = "18"  NEXT_PUBLIC_SUPABASE_URL = "https://jahtkqvekhdjwoflatpg.supabase.co"
   NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphaHRrcXZla2hkandvZmxhdHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwMDQ3NzgsImV4cCI6MjA2NTU4MDc3OH0.bxXr3ED7qSa7cg0jwv1v2yY5oWJAJQIU06638Ksc6Mg"
+  SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphaHRrcXZla2hkandvZmxhdHBnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDAwNDc3OCwiZXhwIjoyMDY1NTgwNzc4fQ.o3ZuS-_FPZxXobYJGYO19uUPcVJL2aPcDeYbQT8KY_I"
+  
+  # OpenRouter Configuration (Fallback)
+  OPENROUTER_API_KEY = "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"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
