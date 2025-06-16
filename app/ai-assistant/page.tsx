@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Send, 
@@ -34,33 +35,6 @@ interface Message {
   timestamp: Date;
 }
 
-const quickActions = [
-  {
-    icon: Home,
-    title: 'Property Search',
-    description: 'Find properties in Lagos',
-    prompt: 'Help me find a 3-bedroom apartment in Lekki, Lagos under ₦50 million'
-  },
-  {
-    icon: Utensils,
-    title: 'Food Supply',
-    description: 'Bulk food ordering',
-    prompt: 'I need to order fresh tomatoes and peppers for my restaurant in bulk'
-  },
-  {
-    icon: ShoppingCart,
-    title: 'Office Setup',
-    description: 'Office furniture needs',
-    prompt: 'Help me set up a modern office for 20 employees with furniture and equipment'
-  },
-  {
-    icon: Briefcase,
-    title: 'Project Planning',
-    description: 'Construction advice',
-    prompt: 'I want to renovate my 4-bedroom house, what should I consider?'
-  }
-];
-
 const sampleResponses = {
   'property': 'I can help you find the perfect property! Based on your budget of ₦50 million for a 3-bedroom apartment in Lekki, I found several great options:\n\n1. **Modern Apartment in Lekki Phase 1** - ₦45M\n   - 3 bedrooms, 3 bathrooms\n   - Swimming pool, gym, 24/7 security\n   - Close to shopping centers\n\n2. **Luxury Flat in Lekki Gardens** - ₦48M\n   - 3 bedrooms, 4 bathrooms\n   - Fitted kitchen, balcony\n   - Gated estate with excellent facilities\n\nWould you like me to show you more details about any of these properties or help you schedule a viewing?',
   
@@ -77,8 +51,61 @@ export default function AIAssistantPage() {
   const [isListening, setIsListening] = useState(false);
   const [language, setLanguage] = useState('en');
   const [isTyping, setIsTyping] = useState(false);
+  const [quickActions, setQuickActions] = useState<any[]>([]);
+  const [isLoadingActions, setIsLoadingActions] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
+  const router = useRouter();
+
+  // Protect the AI assistant - only for registered users
+  useEffect(() => {
+    if (!user) {
+      router.push('/auth/login');
+      return;
+    }
+  }, [user, router]);
+
+  // Fetch quick actions from training data
+  useEffect(() => {
+    const fetchQuickActions = async () => {
+      if (!user) return;
+      
+      try {
+        setIsLoadingActions(true);
+        const response = await fetch('/api/ai-assistant/quick-actions');
+        if (response.ok) {
+          const data = await response.json();
+          setQuickActions(data.quickActions || []);
+        } else {
+          console.error('Failed to fetch quick actions');
+          // Fall back to default actions if API fails
+          setQuickActions([
+            {
+              id: 'default-1',
+              icon: 'Home',
+              title: 'Property Search',
+              description: 'Find properties in Lagos',
+              prompt: 'Help me find a 3-bedroom apartment in Lekki, Lagos under ₦50 million'
+            },
+            {
+              id: 'default-2',
+              icon: 'Utensils',
+              title: 'Food Supply',
+              description: 'Bulk food ordering',
+              prompt: 'I need to order fresh tomatoes and peppers for my restaurant in bulk'
+            }
+          ]);
+        }
+      } catch (error) {
+        console.error('Error fetching quick actions:', error);
+        setQuickActions([]);
+      } finally {
+        setIsLoadingActions(false);
+      }
+    };
+
+    fetchQuickActions();
+  }, [user]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -116,20 +143,58 @@ export default function AIAssistantPage() {
     setInputMessage('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Get conversation history for context
+      const conversationHistory = messages.slice(-6).map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+
+      // Call the new AI chat API
+      const chatResponse = await fetch('/api/ai-assistant/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          message: messageContent,
+          conversation: conversationHistory
+        }),
+      });
+
       let response = "I understand you're looking for assistance. Let me help you with that!";
       
-      // Simple keyword matching for demo
-      const lowerContent = messageContent.toLowerCase();
-      if (lowerContent.includes('property') || lowerContent.includes('apartment') || lowerContent.includes('house') || lowerContent.includes('lekki')) {
-        response = sampleResponses.property;
-      } else if (lowerContent.includes('food') || lowerContent.includes('tomato') || lowerContent.includes('pepper') || lowerContent.includes('restaurant')) {
-        response = sampleResponses.food;
-      } else if (lowerContent.includes('office') || lowerContent.includes('furniture') || lowerContent.includes('employee') || lowerContent.includes('desk')) {
-        response = sampleResponses.office;
-      } else if (lowerContent.includes('renovation') || lowerContent.includes('project') || lowerContent.includes('construction') || lowerContent.includes('bedroom')) {
-        response = sampleResponses.project;
+      if (chatResponse.ok) {
+        const chatData = await chatResponse.json();
+        response = chatData.response;
+        
+        // Add model indicator if available
+        if (chatData.model) {
+          console.log(`🤖 Response generated using: ${chatData.model}`);
+        }
+        
+        // Add knowledge base indicator
+        if (chatData.hasTrainingContext) {
+          response += `\n\n💡 *This response incorporates information from our knowledge base.*`;
+        }
+      } else {
+        const errorData = await chatResponse.json();
+        if (errorData.error.includes('OpenRouter API key not configured')) {
+          response = "🔧 **AI Configuration Required**\n\nThe AI assistant needs to be configured by an administrator. Please contact support or check the admin panel to set up the OpenRouter API key and model selection.";
+        } else {
+          console.error('AI chat API error:', errorData.error);
+          // Fallback to keyword matching for demo
+          const lowerContent = messageContent.toLowerCase();
+          if (lowerContent.includes('property') || lowerContent.includes('apartment') || lowerContent.includes('house') || lowerContent.includes('lekki')) {
+            response = sampleResponses.property;
+          } else if (lowerContent.includes('food') || lowerContent.includes('tomato') || lowerContent.includes('pepper') || lowerContent.includes('restaurant')) {
+            response = sampleResponses.food;
+          } else if (lowerContent.includes('office') || lowerContent.includes('furniture') || lowerContent.includes('employee') || lowerContent.includes('desk')) {
+            response = sampleResponses.office;
+          } else if (lowerContent.includes('renovation') || lowerContent.includes('project') || lowerContent.includes('construction') || lowerContent.includes('bedroom')) {
+            response = sampleResponses.project;
+          }
+        }
       }
 
       const assistantMessage: Message = {
@@ -141,7 +206,19 @@ export default function AIAssistantPage() {
 
       setMessages(prev => [...prev, assistantMessage]);
       setIsTyping(false);
-    }, 1500);
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: "I apologize, but I'm having trouble connecting to the AI service right now. Please try again in a moment, or contact support if the issue persists.",
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+      setIsTyping(false);
+    }
   };
 
   const handleQuickAction = (prompt: string) => {
@@ -173,6 +250,18 @@ export default function AIAssistantPage() {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  // Show loading while checking authentication
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -211,31 +300,47 @@ export default function AIAssistantPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {quickActions.map((action, index) => {
-                  const Icon = action.icon;
-                  return (
-                    <motion.div
-                      key={action.title}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                    >
-                      <Button
-                        variant="outline"
-                        className="w-full h-auto p-4 flex flex-col items-start space-y-2 hover:bg-primary hover:text-white"
-                        onClick={() => handleQuickAction(action.prompt)}
+                {isLoadingActions ? (
+                  <div className="text-center py-4">
+                    <div className="w-6 h-6 border-2 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <p className="text-sm text-gray-500">Loading suggestions...</p>
+                  </div>
+                ) : (
+                  quickActions.map((action, index) => {
+                    // Map icon names to components
+                    const iconMap: Record<string, any> = {
+                      'Home': Home,
+                      'Utensils': Utensils,
+                      'ShoppingCart': ShoppingCart,
+                      'Briefcase': Briefcase,
+                      'MessageSquare': MessageSquare
+                    };
+                    const Icon = iconMap[action.icon] || MessageSquare;
+                    
+                    return (
+                      <motion.div
+                        key={action.id || `action-${index}`}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5, delay: index * 0.1 }}
                       >
-                        <div className="flex items-center space-x-2">
-                          <Icon className="w-4 h-4" />
-                          <span className="font-medium">{action.title}</span>
-                        </div>
-                        <span className="text-xs text-left opacity-70">
-                          {action.description}
-                        </span>
-                      </Button>
-                    </motion.div>
-                  );
-                })}
+                        <Button
+                          variant="outline"
+                          className="w-full h-auto p-4 flex flex-col items-start space-y-2 hover:bg-primary hover:text-white"
+                          onClick={() => handleQuickAction(action.prompt)}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <Icon className="w-4 h-4" />
+                            <span className="font-medium">{action.title}</span>
+                          </div>
+                          <span className="text-xs text-left opacity-70">
+                            {action.description}
+                          </span>
+                        </Button>
+                      </motion.div>
+                    );
+                  })
+                )}
               </CardContent>
             </Card>
 

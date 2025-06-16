@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Brain, Search, Plus, Eye, Edit, Trash2, MessageSquare, CheckCircle, XCircle } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
 
 interface AITrainingTabProps {
   onAdd: () => void;
@@ -17,20 +16,16 @@ const AITrainingTab: React.FC<AITrainingTabProps> = ({ onAdd, onEdit, onView, on
   const [filterLanguage, setFilterLanguage] = useState('all');
   const [trainingData, setTrainingData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
   const fetchTrainingData = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('ai_training_data')
-        .select('*')
-        .order('createdAt', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching AI training data:', error);
+      const response = await fetch('/api/ai-training-data');
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Fetched AI training data:', result.trainingData);
+        setTrainingData(result.trainingData || []);
       } else {
-        console.log('Fetched AI training data:', data);
-        setTrainingData(data || []);
+        console.error('Error fetching AI training data: HTTP', response.status);
       }
     } catch (error) {
       console.error('Error fetching AI training data:', error);
@@ -53,15 +48,19 @@ const AITrainingTab: React.FC<AITrainingTabProps> = ({ onAdd, onEdit, onView, on
   // Get unique categories and languages for filters
   const categories = Array.from(new Set(trainingData.map(item => item.category)));
   const languages = Array.from(new Set(trainingData.map(item => item.language)));
-
   const toggleActive = async (id: string, isActive: boolean) => {
     try {
-      const { error } = await supabase
-        .from('ai_training_data')
-        .update({ isActive: !isActive, updatedAt: new Date().toISOString() })
-        .eq('id', id);
+      const response = await fetch('/api/ai-training-data', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          id, 
+          isActive: !isActive, 
+          updatedAt: new Date().toISOString() 
+        })
+      });
 
-      if (error) throw error;
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       
       // Update local state
       setTrainingData(prev => prev.map(item => 
@@ -74,7 +73,6 @@ const AITrainingTab: React.FC<AITrainingTabProps> = ({ onAdd, onEdit, onView, on
       alert(`Error: ${error.message}`);
     }
   };
-
   return (
     <div className="bg-white rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
@@ -83,6 +81,26 @@ const AITrainingTab: React.FC<AITrainingTabProps> = ({ onAdd, onEdit, onView, on
           <Plus className="w-4 h-4" />
           Add Training Data
         </button>
+      </div>
+
+      {/* Info Section */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="flex items-start space-x-3">
+          <MessageSquare className="w-5 h-5 text-blue-600 mt-0.5" />
+          <div>
+            <h3 className="font-semibold text-blue-900 mb-2">AI Assistant Quick Actions</h3>
+            <p className="text-blue-800 text-sm mb-2">
+              Questions from this training data automatically become quick action buttons on the AI Assistant page. 
+              Active questions will appear as clickable suggestions for users.
+            </p>
+            <ul className="text-blue-700 text-xs space-y-1">
+              <li>• Questions are grouped by category and displayed as quick action buttons</li>
+              <li>• Only active training data items appear as quick actions</li>
+              <li>• Up to 6 questions are shown as quick actions to users</li>
+              <li>• Changes here update the AI Assistant interface immediately</li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
