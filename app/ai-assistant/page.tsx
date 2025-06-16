@@ -112,7 +112,10 @@ export default function AIAssistantPage() {
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Only scroll to bottom if there are more than 1 message (i.e., user has started chatting)
+    if (messages.length > 1) {
+      scrollToBottom();
+    }
   }, [messages]);
 
   useEffect(() => {

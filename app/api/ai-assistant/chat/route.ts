@@ -49,34 +49,32 @@ export async function POST(request: NextRequest) {
     }    // Get training data context if available
     let trainingContext = '';
     try {
-      // Use localhost for internal API calls during development
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? request.url.replace('/api/ai-assistant/chat', '') 
-        : 'http://localhost:3000';
-      const searchUrl = `${baseUrl}/api/ai-assistant/search`;
-      
-      console.log('Searching training data with URL:', searchUrl);
-      const searchResponse = await fetch(searchUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: message }),
-      });
+      // Direct database query instead of internal API call for better Netlify compatibility
+      const { data: trainingData, error: trainingError } = await adminClient
+        .from('ai_training_data')
+        .select('question, answer, category, keywords')
+        .eq('is_active', true)
+        .limit(3);
 
-      if (searchResponse.ok) {
-        const searchData = await searchResponse.json();
-        console.log('Search response:', { found: searchData.found, contextCount: searchData.context?.length || 0 });
-        if (searchData.found && searchData.context.length > 0) {
-          trainingContext = searchData.context
-            .slice(0, 3) // Use top 3 most relevant
-            .map((ctx: any) => `Q: ${ctx.question}\nA: ${ctx.answer}`)
+      if (!trainingError && trainingData && trainingData.length > 0) {
+        // Simple keyword matching for relevance
+        const relevantData = trainingData.filter(item => {
+          const searchText = message.toLowerCase();
+          const itemText = `${item.question} ${item.answer} ${item.keywords || ''}`.toLowerCase();
+          return itemText.includes(searchText) || 
+                 searchText.includes(item.question.toLowerCase().substring(0, 10));
+        });
+
+        if (relevantData.length > 0) {
+          trainingContext = relevantData
+            .slice(0, 3)
+            .map(ctx => `Q: ${ctx.question}\nA: ${ctx.answer}`)
             .join('\n\n');
           console.log('Training context found:', trainingContext.substring(0, 100) + '...');
         }
-      } else {
-        console.log('Search response failed:', searchResponse.status);
       }
     } catch (error) {
-      console.log('Training data search failed, continuing without context:', error);
+      console.log('Training data query failed, continuing without context:', error);
     }
 
     // Build system message with context

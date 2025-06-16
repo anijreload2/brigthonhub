@@ -104,13 +104,16 @@ export default function VendorRegisterPage() {
     if (selectedCategories.length === 0) {
       alert('Please select at least one vendor category');
       return;
-    }
-
-    setIsSubmitting(true);
-    try {      // Submit vendor application
+    }    setIsSubmitting(true);
+    try {
+      // Generate a unique ID for the application
+      const applicationId = crypto.randomUUID();
+      
+      // Submit vendor application
       const { error } = await supabase
         .from('vendor_applications')
         .insert({
+          id: applicationId,
           user_id: user.id,
           categories: selectedCategories,
           business_name: formData.businessName,
