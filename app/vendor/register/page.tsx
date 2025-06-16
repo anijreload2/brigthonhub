@@ -11,6 +11,9 @@ import { UserRole } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check, Store, Home, Utensils, Briefcase } from 'lucide-react';
 
+// Force dynamic rendering to avoid SSR issues
+export const dynamic = 'force-dynamic';
+
 const VENDOR_CATEGORIES = [
   {
     id: 'property',
