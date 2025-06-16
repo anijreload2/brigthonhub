@@ -18,25 +18,55 @@ interface OpenRouterResponse {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    console.log('AI Chat API - Request received');
+    
+    let body;
+    try {
+      body = await request.json();
+      console.log('AI Chat API - Body parsed:', { 
+        hasMessage: !!body.message, 
+        messageLength: body.message?.length || 0,
+        conversationLength: body.conversation?.length || 0 
+      });
+    } catch (parseError) {
+      console.error('AI Chat API - JSON parse error:', parseError);
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+    }
+    
     const { message, conversation = [] } = body;
 
     if (!message) {
+      console.log('AI Chat API - No message provided');
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    // Initialize with fallback values
+    if (typeof message !== 'string') {
+      console.log('AI Chat API - Message is not a string:', typeof message);
+      return NextResponse.json({ error: 'Message must be a string' }, { status: 400 });
+    }    // Initialize with fallback values
     let openrouterApiKey = process.env.OPENROUTER_API_KEY;
     let model = 'mistralai/mistral-7b-instruct:free';
     let systemPrompt = 'You are a helpful AI assistant for BrightonHub, a real estate and business services platform in Lagos, Nigeria. Help users with property searches, food supply, marketplace needs, and project planning.';
 
+    console.log('AI Chat API - Environment check:', {
+      hasEnvKey: !!process.env.OPENROUTER_API_KEY,
+      envKeyLength: process.env.OPENROUTER_API_KEY?.length || 0
+    });
+
     // Try to get OpenRouter settings from site_settings using admin client
     try {
       const adminClient = getAdminClient();
+      console.log('AI Chat API - Getting admin client...');
+      
       const { data: settings, error: settingsError } = await adminClient
         .from('site_settings')
         .select('key, value')
         .in('key', ['openrouter_api_key', 'openrouter_model', 'ai_system_prompt']);
+
+      console.log('AI Chat API - Settings query result:', {
+        hasError: !!settingsError,
+        settingsCount: settings?.length || 0
+      });
 
       if (!settingsError && settings && settings.length > 0) {
         const settingsMap = settings.reduce((acc: Record<string, string>, setting: { key: string; value: string }) => {
@@ -47,6 +77,7 @@ export async function POST(request: NextRequest) {
         // Use database settings if available, otherwise keep fallbacks
         if (settingsMap.openrouter_api_key) {
           openrouterApiKey = settingsMap.openrouter_api_key;
+          console.log('AI Chat API - Using DB API key');
         }
         if (settingsMap.openrouter_model) {
           model = settingsMap.openrouter_model;
@@ -55,17 +86,18 @@ export async function POST(request: NextRequest) {
           systemPrompt = settingsMap.ai_system_prompt;
         }
       } else {
-        console.log('Using fallback settings due to database error:', settingsError);
+        console.log('AI Chat API - Using fallback settings due to database error:', settingsError);
       }
     } catch (error) {
-      console.log('Failed to fetch admin settings, using fallbacks:', error);
-    }
-
-    if (!openrouterApiKey) {
+      console.log('AI Chat API - Failed to fetch admin settings, using fallbacks:', error);
+    }    if (!openrouterApiKey) {
+      console.log('AI Chat API - No API key available');
       return NextResponse.json({ 
         error: 'OpenRouter API key not configured. Please set it in the admin panel or environment variables.' 
       }, { status: 400 });
     }
+
+    console.log('AI Chat API - API key available, length:', openrouterApiKey.length);
 
     // Try to get training data context if available
     let trainingContext = '';
@@ -109,9 +141,10 @@ export async function POST(request: NextRequest) {
       { role: 'system', content: systemMessage },
       ...conversation.slice(-10), // Keep last 10 messages for context
       { role: 'user', content: message }
-    ];
-
-    // Call OpenRouter API
+    ];    // Call OpenRouter API
+    console.log('AI Chat API - Calling OpenRouter with model:', model);
+    console.log('AI Chat API - Messages count:', messages.length);
+    
     const openrouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -130,16 +163,23 @@ export async function POST(request: NextRequest) {
       }),
     });
 
+    console.log('AI Chat API - OpenRouter response status:', openrouterResponse.status);
+
     if (!openrouterResponse.ok) {
       const errorText = await openrouterResponse.text();
-      console.error('OpenRouter API error:', errorText);
+      console.error('AI Chat API - OpenRouter API error:', {
+        status: openrouterResponse.status,
+        statusText: openrouterResponse.statusText,
+        errorText: errorText
+      });
       return NextResponse.json({ 
-        error: 'AI service temporarily unavailable' 
+        error: 'AI service temporarily unavailable',
+        details: process.env.NODE_ENV === 'development' ? errorText : undefined
       }, { status: 500 });
-    }
-
-    const data: OpenRouterResponse = await openrouterResponse.json();
+    }    const data: OpenRouterResponse = await openrouterResponse.json();
     const aiResponse = data.choices[0]?.message?.content || 'I apologize, but I was unable to generate a response.';
+
+    console.log('AI Chat API - Success, response length:', aiResponse.length);
 
     return NextResponse.json({ 
       response: aiResponse,

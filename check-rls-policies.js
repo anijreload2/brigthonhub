@@ -8,48 +8,74 @@ const supabase = createClient(
 
 (async () => {
   try {
-    console.log('🔍 Checking RLS policies for vendor_applications table...\n');
+    console.log('🔍 Checking vendor_applications table access and RLS policies...\n');
     
-    const { data, error } = await supabase.rpc('exec_sql', {
-      query: `
-        SELECT
-          schemaname,
-          tablename,
-          policyname,
-          permissive,
-          roles,
-          cmd,
-          qual,
-          with_check
-        FROM pg_policies 
-        WHERE tablename = 'vendor_applications'
-        ORDER BY policyname;
-      `
-    });
+    // Test 1: Query vendor_applications table directly
+    console.log('📋 Test 1: Querying vendor_applications table...');
+    const { data: applications, error: queryError } = await supabase
+      .from('vendor_applications')
+      .select('id, business_name, status, created_at')
+      .limit(5);
 
-    if (error) {
-      console.error('❌ Error checking RLS policies:', error);
+    if (queryError) {
+      console.error('❌ Error querying vendor_applications:', queryError);
     } else {
-      console.log('📋 RLS Policies for vendor_applications:');
-      console.log(JSON.stringify(data, null, 2));
+      console.log('✅ Successfully queried vendor_applications');
+      console.log(`📊 Found ${applications.length} applications`);
+      if (applications.length > 0) {
+        console.log('📝 Sample data:', applications[0]);
+      }
     }
 
-    // Also check if RLS is enabled
-    const { data: rlsData, error: rlsError } = await supabase.rpc('exec_sql', {
-      query: `
-        SELECT 
-          tablename,
-          rowsecurity
-        FROM pg_tables 
-        WHERE tablename = 'vendor_applications';
-      `
-    });
+    // Test 2: Try to insert a test record (should work with service role)
+    console.log('\n📋 Test 2: Testing INSERT permission...');
+    const testApplication = {
+      business_name: 'RLS Test Business',
+      business_type: 'restaurant',
+      contact_name: 'Test Contact',
+      email: 'test@example.com',
+      phone: '123-456-7890',
+      description: 'Test application for RLS',
+      status: 'pending'
+    };
 
-    if (rlsError) {
-      console.error('❌ Error checking RLS status:', rlsError);
+    const { data: insertData, error: insertError } = await supabase
+      .from('vendor_applications')
+      .insert(testApplication)
+      .select();
+
+    if (insertError) {
+      console.error('❌ Error inserting test record:', insertError);
     } else {
-      console.log('\n🔒 RLS Status:');
-      console.log(JSON.stringify(rlsData, null, 2));
+      console.log('✅ Successfully inserted test record');
+      console.log('📝 Inserted record:', insertData[0]);
+
+      // Clean up - delete the test record
+      if (insertData[0]?.id) {
+        const { error: deleteError } = await supabase
+          .from('vendor_applications')
+          .delete()
+          .eq('id', insertData[0].id);
+
+        if (deleteError) {
+          console.error('⚠️ Warning: Could not delete test record:', deleteError);
+        } else {
+          console.log('🧹 Test record cleaned up successfully');
+        }
+      }
+    }
+
+    // Test 3: Check table structure
+    console.log('\n📋 Test 3: Checking table structure...');
+    const { data: schemaData, error: schemaError } = await supabase
+      .from('vendor_applications')
+      .select('*')
+      .limit(0); // Get structure without data
+
+    if (schemaError) {
+      console.error('❌ Error checking table structure:', schemaError);
+    } else {
+      console.log('✅ Table structure accessible');
     }
 
   } catch (err) {
