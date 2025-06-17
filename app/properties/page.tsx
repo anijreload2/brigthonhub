@@ -45,17 +45,67 @@ const PropertiesPage = () => {
   const fetchProperties = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // Fetch admin-managed properties
+      const { data: adminProperties, error: adminError } = await supabase
         .from('properties')
         .select('*')
         .eq('isActive', true)
         .order('createdAt', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching properties:', error);
-      } else {
-        setProperties(data || []);
+      if (adminError) {
+        console.error('Error fetching admin properties:', adminError);
       }
+
+      // Fetch vendor property listings
+      const { data: vendorListings, error: vendorError } = await supabase
+        .from('vendor_listings')
+        .select(`
+          *,
+          vendor:users!vendor_listings_vendor_id_fkey (
+            id,
+            name,
+            email
+          )
+        `)
+        .eq('category', 'property')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (vendorError) {
+        console.error('Error fetching vendor listings:', vendorError);
+      }
+
+      // Transform vendor listings to match Property interface
+      const transformedVendorListings = (vendorListings || []).map(listing => ({
+        id: `vendor_${listing.id}`,
+        title: listing.title,
+        description: listing.description,
+        price: listing.price || 0,
+        location: listing.location || '',
+        address: listing.location || '',
+        images: listing.images || [],
+        features: listing.specifications ? Object.entries(listing.specifications).map(([key, value]) => `${key}: ${value}`) : [],
+        propertyType: (listing.specifications?.property_type || 'RESIDENTIAL') as PropertyType,
+        listingType: 'SALE' as ListingType,
+        bedrooms: listing.specifications?.bedrooms ? parseInt(listing.specifications.bedrooms) : undefined,
+        bathrooms: listing.specifications?.bathrooms ? parseInt(listing.specifications.bathrooms) : undefined,
+        area: listing.specifications?.size_sqft ? parseInt(listing.specifications.size_sqft) : undefined,
+        isActive: true,
+        agentId: listing.vendor_id,
+        createdAt: new Date(listing.created_at),
+        updatedAt: new Date(listing.updated_at),
+        isVendorListing: true, // Flag to identify vendor listings
+        vendor: listing.vendor
+      }));
+
+      // Combine both sources
+      const allProperties = [
+        ...(adminProperties || []),
+        ...transformedVendorListings
+      ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      setProperties(allProperties);
     } catch (error) {
       console.error('Error fetching properties:', error);
     } finally {

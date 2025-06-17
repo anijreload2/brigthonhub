@@ -158,7 +158,17 @@ export async function PUT(request: NextRequest) {
 
     const adminClient = getAdminClient();
     
-    const updateData: any = {
+    // First, get the application to find the user_id
+    const { data: currentApplication, error: fetchError } = await adminClient
+      .from('vendor_applications')
+      .select('user_id')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching application:', fetchError);
+      return NextResponse.json({ error: 'Application not found' }, { status: 404 });
+    }    const updateData: any = {
       status,
       reviewed_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -167,6 +177,7 @@ export async function PUT(request: NextRequest) {
     if (admin_notes) updateData.admin_notes = admin_notes;
     if (reviewed_by) updateData.reviewed_by = reviewed_by;
 
+    // Update the vendor application
     const { data: application, error } = await adminClient
       .from('vendor_applications')
       .update(updateData)
@@ -177,6 +188,21 @@ export async function PUT(request: NextRequest) {
     if (error) {
       console.error('Error updating vendor application:', error);
       return NextResponse.json({ error: 'Failed to update application' }, { status: 500 });
+    }    // If approving the application, update the user's role to VENDOR
+    if (status === 'approved') {
+      const { error: userUpdateError } = await adminClient
+        .from('users')
+        .update({ 
+          role: 'VENDOR',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', currentApplication.user_id);
+
+      if (userUpdateError) {
+        console.error('Error updating user role:', userUpdateError);
+        // Don't fail the entire operation, but log the error
+        console.warn('Application approved but user role update failed');
+      }
     }
 
     return NextResponse.json({ 

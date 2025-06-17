@@ -344,6 +344,13 @@ export interface Property {
   agentId?: string;
   createdAt: Date;
   updatedAt: Date;
+  // Additional fields for vendor listings
+  isVendorListing?: boolean;
+  vendor?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 export enum PropertyType {

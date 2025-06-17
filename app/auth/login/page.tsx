@@ -13,26 +13,22 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('');
+export default function LoginPage() {  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
-  const { toast } = useToast();
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const { toast } = useToast();  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      await login(email, password); // The redirect will be handled automatically by AuthProvider
       toast({
         title: 'Welcome back!',
         description: 'You have been successfully logged in.',
       });
-      router.push('/');
     } catch (error) {
       toast({
         title: 'Login failed',

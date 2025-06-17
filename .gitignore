@@ -19,6 +19,75 @@ dist/
 .env.test.local
 .env.production.local
 
+# Test and debug files (prevent temporary files from being committed)
+test-*.js
+test-*.ts
+*-test.js
+*-test.ts
+check-*.js
+check-*.ts
+verify-*.js
+verify-*.ts
+debug-*.js
+debug-*.ts
+fix-*.js
+create-*.js
+setup-*.js
+exec-sql.js
+cleanup-test-scripts.js
+
+# SQL development scripts (temporary/testing scripts)
+*.sql
+!Database/*.sql
+setup-*.sql
+fix-*.sql
+check-*.sql
+create-*.sql
+emergency-*.sql
+final-*.sql
+simple-*.sql
+secure-*.sql
+ultra-safe-*.sql
+minimal-*.sql
+harmonize-*.sql
+complete-*.sql
+
+# Development and testing scripts
+test-*.js
+test-*.ts
+check-*.js
+debug-*.js
+find-*.js
+discover-*.js
+apply-*.js
+detailed-*.js
+
+# Markdown documentation files (development notes)
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE.md
+
+# Development documentation files
+ADMIN_*.md
+VENDOR_*.md
+COMPREHENSIVE_*.md
+FINAL_*.md
+URGENT_*.md
+STORAGE_*.md
+
+# Specific development files
+*_PROGRESS*.md
+*_FIX*.md
+*_ANALYSIS*.md
+*_COMPLETION*.md
+*_STATUS*.md
+*_PERFECTION*.md
+*_SUCCESS*.md
+*_FIXES*.md
+*_REPORT*.md
+*_INSTRUCTIONS*.md
+
 # IDE/Editor files
 .vscode/
 .idea/

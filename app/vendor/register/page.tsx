@@ -155,20 +155,9 @@ export default function VendorRegisterPage() {
       setIsSubmitting(false);
     }
   };
-
-  if (isSuccess) {    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div
-          style={{
-            backgroundColor: 'white',
-            borderRadius: '0.5rem',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            padding: '2rem',
-            maxWidth: '28rem',
-            width: '100%',
-            textAlign: 'center'
-          }}
-        >
+  if (isSuccess) {
+    return (      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Check className="w-8 h-8 text-green-600" />
           </div>
