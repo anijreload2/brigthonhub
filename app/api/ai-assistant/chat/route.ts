@@ -43,34 +43,24 @@ export async function POST(request: NextRequest) {
     if (typeof message !== 'string') {
       console.log('AI Chat API - Message is not a string:', typeof message);
       return NextResponse.json({ error: 'Message must be a string' }, { status: 400 });
-    }    // Initialize with fallback values - add extra logging
-    let openrouterApiKey = process.env.OPENROUTER_API_KEY;
+    }    // Use environment variable for API key (Netlify environment)
+    const openrouterApiKey = process.env.OPENROUTER_API_KEY;
     let model = 'mistralai/mistral-7b-instruct:free';
     let systemPrompt = 'You are a helpful AI assistant for BrightonHub, a real estate and business services platform in Lagos, Nigeria. Help users with property searches, food supply, marketplace needs, and project planning.';
 
-    console.log('AI Chat API - Step 1: Environment check:', {
-      hasEnvKey: !!process.env.OPENROUTER_API_KEY,
-      envKeyLength: process.env.OPENROUTER_API_KEY?.length || 0,
-      envKeyPreview: process.env.OPENROUTER_API_KEY?.substring(0, 20) + '...'
+    console.log('AI Chat API - Environment API key check:', {
+      hasEnvKey: !!openrouterApiKey,
+      envKeyLength: openrouterApiKey?.length || 0,
+      envKeyPreview: openrouterApiKey?.substring(0, 20) + '...'
     });
 
-    // Try to get OpenRouter settings from site_settings using admin client
+    // Optionally get model and system prompt from database (but not API key)
     try {
-      console.log('AI Chat API - Step 2: Getting admin client...');
       const adminClient = getAdminClient();
-      console.log('AI Chat API - Step 3: Admin client created, querying settings...');
-      
       const { data: settings, error: settingsError } = await adminClient
         .from('site_settings')
         .select('key, value')
-        .in('key', ['openrouter_api_key', 'openrouter_model', 'ai_system_prompt']);
-
-      console.log('AI Chat API - Step 4: Settings query completed:', {
-        hasError: !!settingsError,
-        errorMessage: settingsError?.message,
-        settingsCount: settings?.length || 0,
-        settingsKeys: settings?.map(s => s.key) || []
-      });
+        .in('key', ['openrouter_model', 'ai_system_prompt']);
 
       if (!settingsError && settings && settings.length > 0) {
         const settingsMap = settings.reduce((acc: Record<string, string>, setting: { key: string; value: string }) => {
@@ -78,39 +68,16 @@ export async function POST(request: NextRequest) {
           return acc;
         }, {} as Record<string, string>);
 
-        console.log('AI Chat API - Step 5: Settings map created:', {
-          hasApiKey: !!settingsMap.openrouter_api_key,
-          apiKeyLength: settingsMap.openrouter_api_key?.length || 0,
-          hasModel: !!settingsMap.openrouter_model,
-          hasPrompt: !!settingsMap.ai_system_prompt
-        });
-
-        // Use database settings if available, otherwise keep fallbacks
-        if (settingsMap.openrouter_api_key) {
-          openrouterApiKey = settingsMap.openrouter_api_key;
-          console.log('AI Chat API - Step 6: Using DB API key');
-        }
         if (settingsMap.openrouter_model) {
           model = settingsMap.openrouter_model;
         }
         if (settingsMap.ai_system_prompt) {
           systemPrompt = settingsMap.ai_system_prompt;
         }
-      } else {
-        console.log('AI Chat API - Step 6: Using fallback settings due to database error:', settingsError);
       }
     } catch (error) {
-      console.log('AI Chat API - Step 6: Exception caught while fetching admin settings:', {
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
-        errorStack: error instanceof Error ? error.stack : 'No stack'
-      });
-    }
-
-    console.log('AI Chat API - Step 7: Final API key check:', {
-      hasFinalKey: !!openrouterApiKey,
-      finalKeyLength: openrouterApiKey?.length || 0,
-      source: openrouterApiKey === process.env.OPENROUTER_API_KEY ? 'environment' : 'database'
-    });if (!openrouterApiKey) {
+      console.log('AI Chat API - Could not fetch model/prompt from database, using defaults:', error);
+    }if (!openrouterApiKey) {
       console.log('AI Chat API - No API key available');
       return NextResponse.json({ 
         error: 'OpenRouter API key not configured. Please set it in the admin panel or environment variables.' 
@@ -165,8 +132,10 @@ export async function POST(request: NextRequest) {
     console.log('AI Chat API - Calling OpenRouter with model:', model);
     console.log('AI Chat API - Messages count:', messages.length);
     console.log('AI Chat API - API key length:', openrouterApiKey.length);
-    console.log('AI Chat API - API key starts with:', openrouterApiKey.substring(0, 10));
+    console.log('AI Chat API - API key starts with:', openrouterApiKey.substring(0, 15));
+    console.log('AI Chat API - API key ends with:', openrouterApiKey.substring(openrouterApiKey.length - 10));
     console.log('AI Chat API - API key trimmed length:', openrouterApiKey.trim().length);
+    console.log('AI Chat API - Full API key for debug:', openrouterApiKey);
     
     // Ensure API key is properly trimmed
     const cleanApiKey = openrouterApiKey.trim();
