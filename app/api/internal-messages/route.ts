@@ -88,9 +88,7 @@ export async function POST(request: NextRequest) {
       } else {
         finalConversationId = convData;
       }
-    }
-
-    // Create the internal message
+    }    // Create the internal message
     const messageData = {
       sender_id: authUser.id,
       recipient_id: recipientId,
@@ -103,9 +101,9 @@ export async function POST(request: NextRequest) {
       conversation_id: finalConversationId,
       parent_message_id: parentMessageId || null,
       is_internal: true,
-      is_read: false,
-      item_type: 'internal',
-      item_id: null,
+      status: 'unread', // Use existing status field instead of is_read
+      content_type: 'internal',
+      content_id: null,
       created_at: new Date().toISOString()
     };
 

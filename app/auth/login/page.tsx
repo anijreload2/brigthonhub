@@ -133,7 +133,7 @@ export default function LoginPage() {  const [email, setEmail] = useState('');
               >
                 {isLoading ? 'Signing in...' : 'Sign In'}
               </Button>
-            </form>            <div className="mt-6 text-center">
+            </form>            <div className="mt-6 text-center space-y-2">
               <p className="text-gray-600">
                 Don't have an account?{' '}
                 <Link
@@ -141,6 +141,15 @@ export default function LoginPage() {  const [email, setEmail] = useState('');
                   className="text-primary hover:text-primary/80 font-medium"
                 >
                   Sign up
+                </Link>
+              </p>
+              <p className="text-gray-600">
+                Need admin access?{' '}
+                <Link
+                  href="/auth/admin-signup"
+                  className="text-red-600 hover:text-red-700 font-medium"
+                >
+                  Create Admin Account
                 </Link>
               </p>
             </div>

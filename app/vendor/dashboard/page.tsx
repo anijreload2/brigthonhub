@@ -710,13 +710,25 @@ export default function VendorDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900">Messages</h2>
-                      <p className="text-gray-600 mt-1">Customer inquiries about your listings</p>
+                      <p className="text-gray-600 mt-1">Customer inquiries and admin communications</p>
                     </div>
-                    {stats?.pending_messages && stats.pending_messages > 0 && (
-                      <span className="bg-red-100 text-red-800 text-sm font-medium px-2 py-1 rounded-full">
-                        {stats.pending_messages} unread
-                      </span>
-                    )}
+                    <div className="flex items-center gap-3">
+                      {stats?.pending_messages && stats.pending_messages > 0 && (
+                        <span className="bg-red-100 text-red-800 text-sm font-medium px-2 py-1 rounded-full">
+                          {stats.pending_messages} unread
+                        </span>
+                      )}
+                      <Button
+                        onClick={() => {
+                          // Navigate to a dedicated messaging page or open modal
+                          router.push('/vendor/messages');
+                        }}
+                        className="bg-primary hover:bg-primary/90"
+                      >
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        Message Admin
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
@@ -726,7 +738,7 @@ export default function VendorDashboard() {
                       <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No Messages Yet</h3>
                       <p className="text-gray-600">
-                        When customers send you messages about your listings, they'll appear here.
+                        Customer inquiries and admin communications will appear here.
                       </p>
                     </div>
                   ) : (
@@ -747,6 +759,11 @@ export default function VendorDashboard() {
                                     New
                                   </span>
                                 )}
+                                {message.message_type === 'internal' && (
+                                  <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">
+                                    Admin Message
+                                  </span>
+                                )}
                               </div>
                               <div className="flex items-center space-x-2 text-sm text-gray-600">
                                 <span>From: {message.sender_name}</span>
@@ -758,7 +775,8 @@ export default function VendorDashboard() {
                                     <span>{message.sender_phone}</span>
                                   </>
                                 )}
-                              </div>                              <div className="text-sm text-gray-500 mt-1">
+                              </div>
+                              <div className="text-sm text-gray-500 mt-1">
                                 {new Date(message.created_at).toLocaleDateString()} at {new Date(message.created_at).toLocaleTimeString()}
                               </div>
                             </div>
@@ -768,7 +786,7 @@ export default function VendorDashboard() {
                             <p className="text-gray-700 leading-relaxed">{message.message}</p>
                           </div>
                           
-                          {message.content_type && message.content_type !== 'general' && (
+                          {message.content_type && message.content_type !== 'general' && message.content_type !== 'internal' && (
                             <div className="flex items-center text-sm text-gray-500 mb-3">
                               <span className="capitalize">{message.content_type}</span>
                               {message.content_id && (
@@ -781,23 +799,35 @@ export default function VendorDashboard() {
                           )}
                           
                           <div className="flex space-x-3">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => window.location.href = `mailto:${message.sender_email}?subject=Re: ${message.subject}`}
-                            >
-                              <Mail className="w-4 h-4 mr-1" />
-                              Reply by Email
-                            </Button>
-                            {message.sender_phone && (
+                            {message.message_type === 'internal' ? (
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => window.location.href = `tel:${message.sender_phone}`}
+                                onClick={() => router.push('/vendor/messages')}
                               >
-                                <Phone className="w-4 h-4 mr-1" />
-                                Call
+                                <MessageSquare className="w-4 h-4 mr-1" />
+                                Reply to Admin
                               </Button>
+                            ) : (
+                              <>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => window.location.href = `mailto:${message.sender_email}?subject=Re: ${message.subject}`}
+                                >
+                                  <Mail className="w-4 h-4 mr-1" />
+                                  Reply by Email
+                                </Button>
+                                {message.sender_phone && (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => window.location.href = `tel:${message.sender_phone}`}
+                                  >
+                                    <Phone className="w-4 h-4 mr-1" />
+                                    Call
+                                  </Button>                                )}
+                              </>
                             )}
                             {message.status === 'unread' && (
                               <Button 

@@ -162,6 +162,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string, redirectAfterLogin: boolean = true) => {
     setShouldRedirectAfterLogin(redirectAfterLogin);
     
+    // Use Supabase Auth for proper authentication
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
