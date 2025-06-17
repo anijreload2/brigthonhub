@@ -100,23 +100,31 @@ export default function VendorRegisterPage() {
       }
     }));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedCategories.length === 0) {
       alert('Please select at least one vendor category');
       return;
-    }    setIsSubmitting(true);
+    }
+
+    setIsSubmitting(true);
     try {
+      // Get the current authenticated user
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      
+      if (!authUser) {
+        throw new Error('Not authenticated');
+      }
+
       // Generate a unique ID for the application
       const applicationId = crypto.randomUUID();
       
-      // Submit vendor application
+      // Submit vendor application using auth user ID for RLS compatibility
       const { error } = await supabase
         .from('vendor_applications')
         .insert({
           id: applicationId,
-          user_id: user.id,
+          user_id: authUser.id, // Use auth user ID instead of our custom user ID
           categories: selectedCategories,
           business_name: formData.businessName,
           business_description: formData.businessDescription,
