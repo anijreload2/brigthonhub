@@ -194,10 +194,10 @@ export async function POST(request: NextRequest) {
         stack: fetchError.stack,
         name: fetchError.name,
         cause: fetchError.cause
-      });
-      return NextResponse.json({ 
+      });      return NextResponse.json({ 
         error: 'Network error connecting to AI service',
-        details: `Fetch error: ${fetchError.message}`      }, { status: 500 });
+        details: `Fetch error: ${fetchError.message}`
+      }, { status: 500 });
     }
   } catch (error: any) {
     console.error('Error in AI chat API:', {

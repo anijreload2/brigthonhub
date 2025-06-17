@@ -179,6 +179,8 @@ export default function AIAssistantPage() {
         // Add knowledge base indicator
         if (chatData.hasTrainingContext) {
           response += `\n\n💡 *This response incorporates information from our knowledge base.*`;
+        } else {
+          response += `\n\n🤖 *This response is generated using AI model: ${chatData.model || 'OpenRouter'}*`;
         }
       } else {
         const errorData = await chatResponse.json();

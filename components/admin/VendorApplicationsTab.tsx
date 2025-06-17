@@ -62,42 +62,43 @@ export default function VendorApplicationsTab() {
 
   useEffect(() => {
     fetchApplications();
-  }, []);
-  const fetchApplications = async () => {
+  }, []);  const fetchApplications = async () => {
     try {
-      const { data, error } = await supabase
-        .from('vendor_applications')
-        .select(`
-          *,
-          users:user_id (
-            name, 
-            email
-          )
-        `)
-        .order('submitted_at', { ascending: false });
-
-      if (error) throw error;
-      setApplications(data || []);
+      const response = await fetch(`/api/vendor-applications?status=${statusFilter}`);
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch applications');
+      }
+      
+      setApplications(result.applications || []);
     } catch (error) {
       console.error('Error fetching vendor applications:', error);
     } finally {
       setLoading(false);
     }
   };
-
   const reviewApplication = async (applicationId: string, newStatus: 'approved' | 'rejected') => {
     setIsReviewing(true);
     try {
-      const { error: updateError } = await supabase
-        .from('vendor_applications')
-        .update({
+      const response = await fetch('/api/vendor-applications', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: applicationId,
           status: newStatus,
-          reviewed_at: new Date().toISOString(),
-          admin_notes: reviewNotes || null
+          admin_notes: reviewNotes || null,
+          reviewed_by: 'admin-001' // TODO: Get actual admin user ID
         })
-        .eq('id', applicationId);
+      });
 
-      if (updateError) throw updateError;
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update application');
+      }
 
       // If approved, update user role to VENDOR
       if (newStatus === 'approved') {

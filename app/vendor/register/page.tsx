@@ -107,24 +107,22 @@ export default function VendorRegisterPage() {
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      // Get the current authenticated user
-      const { data: { user: authUser } } = await supabase.auth.getUser();
+    setIsSubmitting(true);    try {
+      // Get the current authenticated user token
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (!authUser) {
+      if (!session) {
         throw new Error('Not authenticated');
       }
 
-      // Generate a unique ID for the application
-      const applicationId = crypto.randomUUID();
-      
-      // Submit vendor application using auth user ID for RLS compatibility
-      const { error } = await supabase
-        .from('vendor_applications')
-        .insert({
-          id: applicationId,
-          user_id: authUser.id, // Use auth user ID instead of our custom user ID
+      // Submit via API route
+      const response = await fetch('/api/vendor-applications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
           categories: selectedCategories,
           business_name: formData.businessName,
           business_description: formData.businessDescription,
@@ -136,11 +134,15 @@ export default function VendorRegisterPage() {
             experience: formData.experience,
             certifications: formData.certifications,
             contact_preferences: formData.preferredContactMethods
-          },
-          status: 'pending'
-        });
+          }
+        })
+      });
 
-      if (error) throw error;      setIsSuccess(true);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to submit application');
+      }setIsSuccess(true);
       setTimeout(() => {
         if (typeof window !== 'undefined') {
           router.push('/profile');
