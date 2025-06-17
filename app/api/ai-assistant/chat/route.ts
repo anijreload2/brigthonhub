@@ -166,14 +166,19 @@ export async function POST(request: NextRequest) {
     console.log('AI Chat API - Messages count:', messages.length);
     console.log('AI Chat API - API key length:', openrouterApiKey.length);
     console.log('AI Chat API - API key starts with:', openrouterApiKey.substring(0, 10));
+    console.log('AI Chat API - API key trimmed length:', openrouterApiKey.trim().length);
     
-    try {
-      const openrouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    // Ensure API key is properly trimmed
+    const cleanApiKey = openrouterApiKey.trim();
+    
+    try {      const openrouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${openrouterApiKey}`,
+          'Authorization': `Bearer ${cleanApiKey}`,
           'Content-Type': 'application/json',
           'X-Title': 'BrightonHub AI Assistant',
+          'HTTP-Referer': 'https://polite-panda-057236.netlify.app',
+          'User-Agent': 'BrightonHub/1.0',
         },
         body: JSON.stringify({
           model: model,
