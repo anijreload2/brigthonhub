@@ -164,48 +164,67 @@ export async function POST(request: NextRequest) {
     ];    // Call OpenRouter API
     console.log('AI Chat API - Calling OpenRouter with model:', model);
     console.log('AI Chat API - Messages count:', messages.length);
+    console.log('AI Chat API - API key length:', openrouterApiKey.length);
+    console.log('AI Chat API - API key starts with:', openrouterApiKey.substring(0, 10));
     
-    const openrouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openrouterApiKey}`,
-        'Content-Type': 'application/json',
-        'X-Title': 'BrightonHub AI Assistant',
-      },
-      body: JSON.stringify({
+    try {
+      const openrouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openrouterApiKey}`,
+          'Content-Type': 'application/json',
+          'X-Title': 'BrightonHub AI Assistant',
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: 1000,
+          top_p: 1,
+          frequency_penalty: 0,
+          presence_penalty: 0,
+        }),
+      });
+
+      console.log('AI Chat API - OpenRouter response status:', openrouterResponse.status);
+      console.log('AI Chat API - OpenRouter response headers:', Object.fromEntries(openrouterResponse.headers.entries()));
+
+      if (!openrouterResponse.ok) {
+        const errorText = await openrouterResponse.text();
+        console.error('AI Chat API - OpenRouter API error:', {
+          status: openrouterResponse.status,
+          statusText: openrouterResponse.statusText,
+          errorText: errorText,
+          url: 'https://openrouter.ai/api/v1/chat/completions',
+          model: model,
+          messagesLength: messages.length
+        });
+        return NextResponse.json({ 
+          error: 'AI service temporarily unavailable',
+          details: `OpenRouter API error: ${openrouterResponse.status} - ${errorText}`,
+          status: openrouterResponse.status
+        }, { status: 500 });
+      }      const data: OpenRouterResponse = await openrouterResponse.json();
+      const aiResponse = data.choices[0]?.message?.content || 'I apologize, but I was unable to generate a response.';
+
+      console.log('AI Chat API - Success, response length:', aiResponse.length);
+
+      return NextResponse.json({ 
+        response: aiResponse,
         model: model,
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 1000,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0,
-      }),
-    });
-
-    console.log('AI Chat API - OpenRouter response status:', openrouterResponse.status);
-
-    if (!openrouterResponse.ok) {
-      const errorText = await openrouterResponse.text();
-      console.error('AI Chat API - OpenRouter API error:', {
-        status: openrouterResponse.status,
-        statusText: openrouterResponse.statusText,
-        errorText: errorText
+        hasTrainingContext: !!trainingContext
+      });
+    } catch (fetchError: any) {
+      console.error('AI Chat API - Fetch error to OpenRouter:', {
+        message: fetchError.message,
+        stack: fetchError.stack,
+        name: fetchError.name,
+        cause: fetchError.cause
       });
       return NextResponse.json({ 
-        error: 'AI service temporarily unavailable',
-        details: process.env.NODE_ENV === 'development' ? errorText : undefined
-      }, { status: 500 });
-    }    const data: OpenRouterResponse = await openrouterResponse.json();
-    const aiResponse = data.choices[0]?.message?.content || 'I apologize, but I was unable to generate a response.';
-
-    console.log('AI Chat API - Success, response length:', aiResponse.length);
-
-    return NextResponse.json({ 
-      response: aiResponse,
-      model: model,
-      hasTrainingContext: !!trainingContext
-    });
+        error: 'Network error connecting to AI service',
+        details: `Fetch error: ${fetchError.message}`      }, { status: 500 });
+    }
   } catch (error: any) {
     console.error('Error in AI chat API:', {
       message: error.message,
