@@ -98,7 +98,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setShouldRedirectAfterLogin(false);
           const redirectUrl = getRoleBasedRedirectUrl(newUser.role);
           console.log('Post-login redirect:', newUser.role, '->', redirectUrl);
-          router.push(redirectUrl);
+          
+          // Use setTimeout to ensure state is updated before redirect
+          setTimeout(() => {
+            router.push(redirectUrl);
+          }, 100);
         }
       }
     } catch (error) {

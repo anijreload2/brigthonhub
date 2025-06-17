@@ -139,7 +139,7 @@ export function Navigation() {
                       <span>Messages</span>
                     </Link>
                   </DropdownMenuItem>
-                  {(user.role === UserRole.VENDOR || user.role === UserRole.ADMIN) && (
+                  {user.role === UserRole.VENDOR && (
                     <DropdownMenuItem asChild>
                       <Link href="/vendor/dashboard" className="flex items-center">
                         <Store className="mr-2 h-4 w-4" />
@@ -147,7 +147,7 @@ export function Navigation() {
                       </Link>
                     </DropdownMenuItem>
                   )}
-                  {(user.role === UserRole.ADMIN || user.role === UserRole.AGENT || user.role === UserRole.VENDOR) && (
+                  {(user.role === UserRole.ADMIN || user.role === UserRole.AGENT) && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin" className="flex items-center">
                         <Settings className="mr-2 h-4 w-4" />

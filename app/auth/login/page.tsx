@@ -24,12 +24,16 @@ export default function LoginPage() {  const [email, setEmail] = useState('');
     setIsLoading(true);
 
     try {
-      await login(email, password); // The redirect will be handled automatically by AuthProvider
+      await login(email, password, true); // Enable redirect after login
+      
       toast({
         title: 'Welcome back!',
         description: 'You have been successfully logged in.',
       });
+      
+      // Note: Redirect will be handled automatically by AuthProvider
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         title: 'Login failed',
         description: error instanceof Error ? error.message : 'Please check your credentials and try again.',
@@ -129,9 +133,7 @@ export default function LoginPage() {  const [email, setEmail] = useState('');
               >
                 {isLoading ? 'Signing in...' : 'Sign In'}
               </Button>
-            </form>
-
-            <div className="mt-6 text-center">
+            </form>            <div className="mt-6 text-center">
               <p className="text-gray-600">
                 Don't have an account?{' '}
                 <Link
@@ -141,18 +143,6 @@ export default function LoginPage() {  const [email, setEmail] = useState('');
                   Sign up
                 </Link>
               </p>
-            </div>
-
-            {/* Demo Credentials */}
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800 font-medium mb-2">Demo Credentials:</p>
-              <div className="text-xs text-blue-700 space-y-1">
-                <p>Admin: admin@brightonhub.ng</p>
-                <p>Agent: agent@brightonhub.ng</p>
-                <p>Vendor: vendor@brightonhub.ng</p>
-                <p>User: user@brightonhub.ng</p>
-                <p className="font-medium">Password: any password</p>
-              </div>
             </div>
           </CardContent>
         </Card>

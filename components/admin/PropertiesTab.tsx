@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Home, Search, Plus, Eye, Edit, Trash2 } from 'lucide-react';
+import { Home, Search, Plus, Eye, Edit, Trash2, EyeOff, ToggleLeft, ToggleRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 
 interface PropertiesTabProps {
   onAdd: () => void;
@@ -15,18 +16,67 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ onAdd, onEdit, onView, on
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-
+  const { toast } = useToast();
   const fetchProperties = async () => {
     try {
-      setLoading(true);      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .order('createdAt', { ascending: false });      if (error) {
-        console.error('Error fetching properties:', error);
-      } else {
-        console.log('Fetched properties:', data); // Debug log
-        setProperties(data || []);
+      setLoading(true);
+      
+      // Fetch ALL properties including those from vendor listings
+      const [propertiesResult, vendorListingsResult] = await Promise.all([
+        supabase
+          .from('properties')
+          .select('*')
+          .order('createdAt', { ascending: false }),
+        supabase
+          .from('vendor_listings')
+          .select('*')
+          .eq('category', 'property')
+          .order('created_at', { ascending: false })
+      ]);
+
+      const allProperties: any[] = [];
+
+      // Add admin properties
+      if (propertiesResult.data) {
+        propertiesResult.data.forEach(property => {
+          allProperties.push({
+            ...property,
+            source: 'admin',
+            listing_type: 'admin'
+          });
+        });
       }
+
+      // Add vendor properties
+      if (vendorListingsResult.data) {
+        vendorListingsResult.data.forEach(listing => {
+          allProperties.push({
+            id: listing.id,
+            title: listing.title,
+            description: listing.description,
+            price: listing.price,
+            location: listing.location,
+            images: listing.images,
+            isActive: listing.is_active,
+            agentId: listing.vendor_id,
+            createdAt: listing.created_at,
+            updatedAt: listing.updated_at,
+            source: 'vendor',
+            listing_type: 'vendor',
+            vendor_data: listing
+          });
+        });
+      }
+
+      if (propertiesResult.error) {
+        console.error('Error fetching admin properties:', propertiesResult.error);
+      }
+      if (vendorListingsResult.error) {
+        console.error('Error fetching vendor properties:', vendorListingsResult.error);
+      }
+
+      console.log('Fetched all properties:', allProperties.length);
+      setProperties(allProperties);
     } catch (error) {
       console.error('Error fetching properties:', error);
     } finally {
@@ -42,6 +92,45 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ onAdd, onEdit, onView, on
     property.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     property.location?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const toggleVisibility = async (property: any) => {
+    try {
+      const newActiveState = !property.isActive;
+      
+      if (property.source === 'admin') {
+        // Update admin property
+        const { error } = await supabase
+          .from('properties')
+          .update({ isActive: newActiveState })
+          .eq('id', property.id);
+          
+        if (error) throw error;
+      } else if (property.source === 'vendor') {
+        // Update vendor listing
+        const { error } = await supabase
+          .from('vendor_listings')
+          .update({ is_active: newActiveState })
+          .eq('id', property.id);
+          
+        if (error) throw error;
+      }
+
+      toast({
+        title: 'Success',
+        description: `Property ${newActiveState ? 'shown' : 'hidden'} successfully`,
+      });
+
+      // Refresh the list
+      fetchProperties();
+    } catch (error) {
+      console.error('Error toggling visibility:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update property visibility',
+        variant: 'destructive',
+      });
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl p-6">
@@ -73,12 +162,11 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ onAdd, onEdit, onView, on
       ) : (
         <>          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredProperties.length > 0 ? filteredProperties.map((property) => (
-              <div key={property.id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                {/* Property Image */}
+              <div key={property.id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">                {/* Property Image */}
                 <div className="h-48 bg-gray-200 overflow-hidden">
-                  {property.imageUrl ? (
+                  {(property.images && property.images.length > 0) ? (
                     <img 
-                      src={property.imageUrl} 
+                      src={Array.isArray(property.images) ? property.images[0] : property.images} 
                       alt={property.title}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -91,20 +179,51 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ onAdd, onEdit, onView, on
                     </div>
                   )}
                 </div>
-                
-                {/* Property Info */}
+                  {/* Property Info */}
                 <div className="p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
-                      <h4 className="font-semibold text-text-primary mb-1 line-clamp-2">{property.title}</h4>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-semibold text-text-primary line-clamp-1">{property.title}</h4>
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          property.source === 'admin' 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-green-100 text-green-800'
+                        }`}>
+                          {property.source === 'admin' ? 'Admin' : 'Vendor'}
+                        </span>
+                      </div>
                       <p className="text-sm text-text-light mb-2">{property.location}</p>
                       <p className="text-lg font-bold text-primary">₦{property.price?.toLocaleString()}</p>
                     </div>
-                    <div className="flex items-center gap-1 ml-2">
+                  </div>
+                  
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        property.isActive 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {property.isActive ? 'Visible' : 'Hidden'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button 
+                        onClick={() => toggleVisibility(property)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                        title={property.isActive ? 'Hide' : 'Show'}
+                      >
+                        {property.isActive ? (
+                          <EyeOff className="w-4 h-4 text-orange-500" />
+                        ) : (
+                          <Eye className="w-4 h-4 text-green-500" />
+                        )}
+                      </button>
                       <button 
                         onClick={() => onView(property)}
                         className="p-1 hover:bg-gray-100 rounded"
-                        title="View"
+                        title="View Details"
                       >
                         <Eye className="w-4 h-4 text-text-light" />
                       </button>
@@ -126,8 +245,8 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ onAdd, onEdit, onView, on
                   </div>
                   
                   <div className="flex items-center justify-between text-xs text-text-light">
-                    <span>{property.type} • {property.status}</span>
-                    <span>{property.bedrooms}BR • {property.bathrooms}BA</span>
+                    <span>{property.propertyType || 'Property'}</span>
+                    <span>{property.bedrooms || 0}BR • {property.bathrooms || 0}BA</span>
                   </div>
                   
                   {property.description && (
