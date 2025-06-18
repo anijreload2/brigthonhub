@@ -13,9 +13,6 @@ import {
   Store, 
   Utensils, 
   ArrowRight, 
-  Menu, 
-  X, 
-  User, 
   ShoppingCart, 
   FolderOpen, 
   BookOpen, 
@@ -24,24 +21,12 @@ import {
   UserPlus, 
   Bell, 
   ChevronDown,
-  Bot,
-  Settings,
-  LogOut
+  Bot
 } from 'lucide-react';
+import { Navigation } from '@/components/navigation/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/components/auth/auth-provider';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { UserRole } from '@/lib/types';
 
 interface HeroSlide {
   id: string;
@@ -87,11 +72,6 @@ const HeroWithHeader: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchCategory, setSearchCategory] = useState('all');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isServicesOpen, setIsServicesOpen] = useState(false);
-
-  // Get auth state
-  const { user, logout } = useAuth();
 
   const slides = defaultSlides;
 
@@ -139,220 +119,10 @@ const HeroWithHeader: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
           </div>
         ))}
+      </div>      {/* Navigation */}
+      <div className="absolute top-0 left-0 right-0 z-50">
+        <Navigation />
       </div>
-
-      {/* Glass morphism header */}
-      <header className="absolute top-0 left-0 right-0 z-50">
-        <nav className="relative">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-20">
-              {/* Logo */}
-              <div className="flex-shrink-0">
-                <Link href="/" className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-[#005288] to-[#8CC63F] rounded-lg flex items-center justify-center">
-                    <Home className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-white text-xl font-bold">BrightonHub</span>
-                </Link>
-              </div>
-
-              {/* Desktop Navigation */}
-              <div className="hidden lg:flex items-center space-x-8">
-                <Link href="/" className="text-white hover:text-[#8CC63F] transition-colors duration-200">
-                  Home
-                </Link>
-                <div className="relative group">
-                  <button className="text-white hover:text-[#8CC63F] transition-colors duration-200 flex items-center space-x-1">
-                    <span>Services</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
-                  <div className="absolute top-full left-0 mt-2 w-64 glass rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    <div className="p-4 space-y-2">
-                      <Link href="/properties" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                        <Building className="w-5 h-5 text-[#8CC63F]" />
-                        <span className="text-white">Real Estate</span>
-                      </Link>
-                      <Link href="/food" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                        <Utensils className="w-5 h-5 text-[#8CC63F]" />
-                        <span className="text-white">Food Services</span>
-                      </Link>
-                      <Link href="/store" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                        <Store className="w-5 h-5 text-[#8CC63F]" />
-                        <span className="text-white">Marketplace</span>
-                      </Link>
-                      <Link href="/projects" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                        <FolderOpen className="w-5 h-5 text-[#8CC63F]" />
-                        <span className="text-white">Projects</span>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-                <Link href="/blog" className="text-white hover:text-[#8CC63F] transition-colors duration-200">
-                  Blog
-                </Link>
-                <Link href="/contact" className="text-white hover:text-[#8CC63F] transition-colors duration-200">
-                  Contact
-                </Link>
-              </div>              {/* Desktop CTA */}
-              <div className="hidden lg:flex items-center space-x-4">
-                {user ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="border-white text-white hover:bg-white hover:text-[#005288]">
-                        <Avatar className="h-6 w-6 mr-2">
-                          <AvatarImage src={user.profile?.avatar} alt={user.name || ''} />
-                          <AvatarFallback className="bg-primary text-white text-xs">
-                            {user.name?.charAt(0)?.toUpperCase() || user.email.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        {user.name || 'User'}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="end">
-                      <DropdownMenuLabel className="font-normal">
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium leading-none">{user.name || 'User'}</p>
-                          <p className="text-xs leading-none text-muted-foreground">
-                            {user.email}
-                          </p>
-                          <p className="text-xs leading-none text-muted-foreground">
-                            {user.role}
-                          </p>
-                        </div>
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/profile" className="flex items-center">
-                          <User className="mr-2 h-4 w-4" />
-                          <span>Profile</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      {(user.role === UserRole.ADMIN || user.role === UserRole.AGENT || user.role === UserRole.VENDOR) && (
-                        <DropdownMenuItem asChild>
-                          <Link href="/admin" className="flex items-center">
-                            <Settings className="mr-2 h-4 w-4" />
-                            <span>Dashboard</span>
-                          </Link>
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => logout()} className="text-red-600">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Log out</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <>
-                    <Button variant="outline" className="border-white text-white hover:bg-white hover:text-[#005288]">
-                      <Link href="/auth/login">Sign In</Link>
-                    </Button>
-                    <Button className="bg-[#8CC63F] hover:bg-[#7ab82f] text-white">
-                      <Link href="/auth/register">Get Started</Link>
-                    </Button>
-                  </>
-                )}
-              </div>
-
-              {/* Mobile menu button */}
-              <div className="lg:hidden">
-                <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="text-white p-2 rounded-lg glass"
-                >
-                  {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile Navigation */}
-          {isMenuOpen && (
-            <div className="lg:hidden absolute top-full left-0 right-0 glass mt-2 mx-4 rounded-lg shadow-lg animate-slide-up">
-              <div className="p-4 space-y-2">
-                <Link href="/" className="block text-white hover:text-[#8CC63F] p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                  Home
-                </Link>
-                <div>
-                  <button
-                    onClick={() => setIsServicesOpen(!isServicesOpen)}
-                    className="w-full flex items-center justify-between text-white hover:text-[#8CC63F] p-2 rounded-lg hover:bg-white/20 transition-colors duration-200"
-                  >
-                    <span>Services</span>
-                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isServicesOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                  {isServicesOpen && (
-                    <div className="ml-4 mt-2 space-y-2">
-                      <Link href="/properties" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                        <Building className="w-4 h-4 text-[#8CC63F]" />
-                        <span className="text-white">Real Estate</span>
-                      </Link>
-                      <Link href="/food" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                        <Utensils className="w-4 h-4 text-[#8CC63F]" />
-                        <span className="text-white">Food Services</span>
-                      </Link>
-                      <Link href="/store" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                        <Store className="w-4 h-4 text-[#8CC63F]" />
-                        <span className="text-white">Marketplace</span>
-                      </Link>
-                      <Link href="/projects" className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                        <FolderOpen className="w-4 h-4 text-[#8CC63F]" />
-                        <span className="text-white">Projects</span>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-                <Link href="/blog" className="block text-white hover:text-[#8CC63F] p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                  Blog
-                </Link>
-                <Link href="/contact" className="block text-white hover:text-[#8CC63F] p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                  Contact
-                </Link>                <div className="border-t border-white/20 pt-4 mt-4 space-y-2">
-                  {user ? (
-                    <>
-                      <div className="flex items-center space-x-3 p-2 rounded-lg bg-white/10">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={user.profile?.avatar} alt={user.name || ''} />
-                          <AvatarFallback className="bg-primary text-white text-sm">
-                            {user.name?.charAt(0)?.toUpperCase() || user.email.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-white font-medium text-sm">{user.name || 'User'}</p>
-                          <p className="text-white/70 text-xs">{user.role}</p>
-                        </div>
-                      </div>
-                      <Link href="/profile" className="block text-white hover:text-[#8CC63F] p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                        Profile
-                      </Link>
-                      {(user.role === UserRole.ADMIN || user.role === UserRole.AGENT || user.role === UserRole.VENDOR) && (
-                        <Link href="/admin" className="block text-white hover:text-[#8CC63F] p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                          Dashboard
-                        </Link>
-                      )}
-                      <button 
-                        onClick={() => logout()} 
-                        className="w-full text-left text-red-300 hover:text-red-200 p-2 rounded-lg hover:bg-white/20 transition-colors duration-200"
-                      >
-                        Log out
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <Link href="/auth/login" className="block text-white hover:text-[#8CC63F] p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                        Sign In
-                      </Link>
-                      <Link href="/auth/register" className="block text-white hover:text-[#8CC63F] p-2 rounded-lg hover:bg-white/20 transition-colors duration-200">
-                        Get Started
-                      </Link>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </nav>
-      </header>
 
       {/* Hero Content */}
       <div className="relative z-40 flex items-center min-h-screen pt-20">
