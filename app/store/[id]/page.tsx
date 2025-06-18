@@ -30,7 +30,6 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CURRENCY } from '@/lib/constants';
-import ContactForm from '@/components/ui/contact-form';
 
 interface StoreProduct {
   id: string;
@@ -56,11 +55,6 @@ interface StoreProduct {
   sellerEmail?: string;
   sellerAddress?: string;
   sellerDescription?: string;
-  vendor?: {
-    id: string;
-    name: string;
-    email: string;
-  };
 }
 
 interface ProductDetailPageProps {
@@ -559,22 +553,12 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                     <div className="text-center py-8">
                       <p className="text-gray-600">Seller information not available</p>
                     </div>
-                  )}                  
+                  )}
+                  
                   <div className="pt-4 border-t">
-                    <div className="space-y-4">
-                      <h4 className="text-lg font-semibold text-gray-900">Contact Seller</h4>
-                      <p className="text-sm text-gray-600">
-                        Send a message to inquire about this product, bulk orders, custom requirements, or any questions.
-                      </p>
-                      <ContactForm
-                        contentType="store_product"
-                        contentId={product.id}
-                        recipientId={product.vendor?.id || 'unknown'}
-                        recipientName={product.vendor?.name || product.sellerName || 'Seller'}
-                        title="Contact Seller"
-                        description="Send a message about this product."
-                      />
-                    </div>
+                    <p className="text-xs text-gray-500">
+                      Contact the seller directly for bulk orders, custom requirements, or any questions about this product.
+                    </p>
                   </div>
                 </div>
               </TabsContent>

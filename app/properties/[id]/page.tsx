@@ -25,7 +25,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import ContactForm from '@/components/ui/contact-form';
 // import { PropertyCard } from '@/components/properties/property-card';
 
 interface Property {
@@ -75,6 +74,12 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
   const [activeTab, setActiveTab] = useState<'description' | 'specifications' | 'agent' | 'reviews'>('description');
   const [showContactForm, setShowContactForm] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -119,6 +124,14 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
         prev === 0 ? property.images.length - 1 : prev - 1
       );
     }
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement contact form submission
+    alert('Contact form submitted! We will get back to you soon.');
+    setShowContactForm(false);
+    setContactForm({ name: '', email: '', phone: '', message: '' });
   };
 
   const handleBookmark = async () => {
@@ -512,17 +525,76 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
             </Card>
 
             {/* Contact Form */}
-            {showContactForm && property && (
-              <ContactForm
-                contentType="property"
-                contentId={property.id}
-                recipientId={(property as any).vendor?.id || undefined}
-                recipientName={(property as any).vendor?.name || property.agent?.name || 'Property Owner'}
-                title={`Contact ${(property as any).vendor?.name || property.agent?.name || 'Property Owner'}`}
-                description={`Inquire about "${property.title}"`}
-                onSuccess={() => setShowContactForm(false)}
-                onCancel={() => setShowContactForm(false)}
-              />
+            {showContactForm && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {property.agent ? `Contact ${property.agent.name}` : 'Contact Agent'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleContactSubmit} className="space-y-4">
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                        Your Name
+                      </label>
+                      <Input
+                        id="name"
+                        placeholder="Enter your name"
+                        value={contactForm.name}
+                        onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                        Your Email
+                      </label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={contactForm.email}
+                        onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                        Your Phone
+                      </label>
+                      <Input
+                        id="phone"
+                        placeholder="Enter your phone number"
+                        value={contactForm.phone}
+                        onChange={(e) => setContactForm({...contactForm, phone: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                        Message
+                      </label>
+                      <Textarea
+                        id="message"
+                        placeholder="I'm interested in this property..."
+                        value={contactForm.message}
+                        onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
+                        rows={4}
+                      />
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button type="submit" className="flex-1">Send Message</Button>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setShowContactForm(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
             )}
           </div>
         </div>

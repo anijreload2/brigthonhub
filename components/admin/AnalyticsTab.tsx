@@ -36,35 +36,50 @@ export default function AnalyticsTab() {
   useEffect(() => {
     fetchAnalyticsData();
   }, [timeframe]);
-
   const fetchAnalyticsData = async () => {
     setLoading(true);
     try {
-      // Calculate date range
+      // Calculate date range with proper validation
       const endDate = new Date();
+      endDate.setHours(23, 59, 59, 999); // End of day
+      
       const startDate = new Date();
       const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 90;
       startDate.setDate(endDate.getDate() - days);
+      startDate.setHours(0, 0, 0, 0); // Start of day
 
-      // Fetch total messages
-      const { count: totalMessages } = await supabase
+      console.log('Date range:', { startDate: startDate.toISOString(), endDate: endDate.toISOString() });
+
+      // Fetch total messages with error handling
+      const { count: totalMessages, error: totalMessagesError } = await supabase
         .from('contact_messages')
         .select('*', { count: 'exact', head: true });
 
+      if (totalMessagesError) {
+        console.error('Error fetching total messages:', totalMessagesError);
+      }
+
       // Fetch vendor applications data
-      const { data: applications } = await supabase
+      const { data: applications, error: applicationsError } = await supabase
         .from('vendor_applications')
         .select('status, categories, created_at');
 
+      if (applicationsError) {
+        console.error('Error fetching applications:', applicationsError);
+      }
+
       const totalVendorApplications = applications?.length || 0;
       const pendingApplications = applications?.filter(app => app.status === 'pending').length || 0;
-      const approvedVendors = applications?.filter(app => app.status === 'approved').length || 0;
-
-      // Messages by type
-      const { data: messageTypes } = await supabase
+      const approvedVendors = applications?.filter(app => app.status === 'approved').length || 0;      // Messages by type with error handling
+      const { data: messageTypes, error: messageTypesError } = await supabase
         .from('contact_messages')
         .select('item_type')
-        .gte('created_at', startDate.toISOString());
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString());
+
+      if (messageTypesError) {
+        console.error('Error fetching message types:', messageTypesError);
+      }
 
       const typeCount = (messageTypes || []).reduce((acc: Record<string, number>, msg) => {
         acc[msg.item_type] = (acc[msg.item_type] || 0) + 1;
@@ -75,14 +90,17 @@ export default function AnalyticsTab() {
         type: type.charAt(0).toUpperCase() + type.slice(1),
         count: count as number,
         color: COLORS[index % COLORS.length]
-      }));
-
-      // Messages over time (daily for the selected period)
-      const { data: messagesOverTime } = await supabase
+      }));      // Messages over time (daily for the selected period) with error handling
+      const { data: messagesOverTime, error: messagesOverTimeError } = await supabase
         .from('contact_messages')
         .select('created_at')
         .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString())
         .order('created_at');
+
+      if (messagesOverTimeError) {
+        console.error('Error fetching messages over time:', messagesOverTimeError);
+      }
 
       const dailyMessages = (messagesOverTime || []).reduce((acc: Record<string, number>, msg) => {
         const date = new Date(msg.created_at).toISOString().split('T')[0];

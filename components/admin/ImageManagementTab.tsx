@@ -25,14 +25,11 @@ interface ImageData {
   original_filename: string;
   file_size: number;
   mime_type: string;
-  file_url: string;
   uploaded_by: string;
   upload_purpose: string;
   content_type?: string;
   content_id?: string;
-  alt_text?: string;
-  is_primary: boolean;
-  status: string;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
   // Joined user data
@@ -89,12 +86,11 @@ export default function ImageManagementTab() {
   };
 
   const fetchStats = async () => {
-    try {
-      // Get overall stats
+    try {      // Get overall stats
       const { data: allImages, error } = await supabase
         .from('image_uploads')
         .select('file_size, upload_purpose, content_type, created_at')
-        .eq('status', 'active');
+        .eq('is_active', true);
 
       if (error) throw error;
 
@@ -336,27 +332,14 @@ export default function ImageManagementTab() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredImages.map((image) => (
-                <Card key={image.id} className="overflow-hidden">
-                  <div className="aspect-square relative">
-                    <img
-                      src={image.file_url}
-                      alt={image.alt_text || image.original_filename}
-                      className="w-full h-full object-cover"
-                    />
-                    {image.is_primary && (
-                      <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-medium">
-                        Primary
-                      </div>
-                    )}
+              {filteredImages.map((image) => (                <Card key={image.id} className="overflow-hidden">
+                  <div className="aspect-square relative bg-gray-100 flex items-center justify-center">
+                    <div className="text-center">
+                      <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-xs text-gray-500">Preview unavailable</p>
+                      <p className="text-xs text-gray-400">{image.mime_type}</p>
+                    </div>
                     <div className="absolute top-2 right-2 flex space-x-1">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => window.open(image.file_url, '_blank')}
-                      >
-                        <Eye className="w-3 h-3" />
-                      </Button>
                       <Button
                         size="sm"
                         variant="destructive"

@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { UserPlus, Mail, Lock, User, Eye, EyeOff, Store } from 'lucide-react';
+import { UserPlus, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/components/auth/auth-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -182,20 +182,7 @@ export default function RegisterPage() {
               </Button>
             </form>
 
-            <div className="mt-6 text-center space-y-3">
-              <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border border-purple-200">
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  Looking to sell products or services?
-                </p>
-                <Link
-                  href="/auth/vendor-signup"
-                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-medium text-sm"
-                >
-                  <Store className="w-4 h-4 mr-2" />
-                  Join as a Vendor
-                </Link>
-              </div>
-              
+            <div className="mt-6 text-center">
               <p className="text-gray-600">
                 Already have an account?{' '}
                 <Link

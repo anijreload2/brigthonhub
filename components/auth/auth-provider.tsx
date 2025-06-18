@@ -3,15 +3,13 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { User, UserRole } from '@/lib/types';
-import { getRoleBasedRedirectUrl } from '@/lib/auth-utils';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string, redirectAfterLogin?: boolean) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
@@ -22,8 +20,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [shouldRedirectAfterLogin, setShouldRedirectAfterLogin] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     // Get initial session
@@ -79,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
       } else {
         console.log('Setting user data:', userData);
-        const newUser = {
+        setUser({
           id: userData.id,
           email: userData.email,
           name: userData.name,
@@ -89,21 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           createdAt: userData.createdAt,
           updatedAt: userData.updatedAt,
           profile: userData.profile
-        };
-        
-        setUser(newUser);
-        
-        // Handle role-based redirect after login
-        if (shouldRedirectAfterLogin && newUser.role) {
-          setShouldRedirectAfterLogin(false);
-          const redirectUrl = getRoleBasedRedirectUrl(newUser.role);
-          console.log('Post-login redirect:', newUser.role, '->', redirectUrl);
-          
-          // Use setTimeout to ensure state is updated before redirect
-          setTimeout(() => {
-            router.push(redirectUrl);
-          }, 100);
-        }
+        });
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -159,22 +141,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const login = async (email: string, password: string, redirectAfterLogin: boolean = true) => {
-    setShouldRedirectAfterLogin(redirectAfterLogin);
-    
-    // Use Supabase Auth for proper authentication
+  const login = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      setShouldRedirectAfterLogin(false);
       throw new Error(error.message);
     }
 
     // User profile will be fetched automatically by the auth state change listener
-    // The redirect will happen in fetchUserProfile if shouldRedirectAfterLogin is true
   };
 
   const register = async (email: string, password: string, name: string) => {

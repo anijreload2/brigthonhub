@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, getAdminClient } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { getAuthUser } from '@/lib/auth';
 import { notifyVendorOfNewMessage } from '@/lib/email-notifications';
 
@@ -58,7 +58,9 @@ export async function POST(request: NextRequest) {
       // For non-authenticated users, we need to create a guest record or handle differently
       // For now, we'll allow messages without a user account
       senderId = null;
-    }    // Prepare the contact message data
+    }
+
+    // Prepare the contact message data
     const contactMessageData = {
       sender_id: senderId,
       recipient_id: recipientId || null,
@@ -68,8 +70,11 @@ export async function POST(request: NextRequest) {
       subject: subject.trim(),
       message: message.trim(),
       status: 'unread',
-      content_type: itemType,
-      content_id: contentId || null
+      item_type: itemType,
+      item_id: contentId || null,
+      metadata: metadata || {},
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
 
     // Insert the contact message
@@ -181,7 +186,9 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const itemType = searchParams.get('itemType');
     const limit = parseInt(searchParams.get('limit') || '50');
-    const offset = parseInt(searchParams.get('offset') || '0');    // Build query
+    const offset = parseInt(searchParams.get('offset') || '0');
+
+    // Build query
     let query = supabase
       .from('contact_messages')
       .select(`
@@ -199,7 +206,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (itemType && itemType !== 'all') {
-      query = query.eq('content_type', itemType);
+      query = query.eq('item_type', itemType);
     }
 
     const { data, error } = await query;
@@ -215,74 +222,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       messages: data || [],
       hasMore: (data?.length || 0) === limit
-    });
-
-  } catch (error) {
-    console.error('API error:', error);    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PATCH(request: NextRequest) {
-  try {
-    // Get authenticated user
-    const authUser = getAuthUser(request);
-    
-    if (!authUser) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    const body = await request.json();
-    const { status, messageId } = body;
-
-    // Validate required fields
-    if (!messageId) {
-      return NextResponse.json(
-        { error: 'Message ID is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!status || !['read', 'unread', 'archived'].includes(status)) {
-      return NextResponse.json(
-        { error: 'Valid status is required (read, unread, archived)' },
-        { status: 400 }
-      );
-    }
-
-    // Update the message status, but only if the user is the recipient
-    const { data, error } = await supabase
-      .from('contact_messages')
-      .update({ status })
-      .eq('id', messageId)
-      .eq('recipient_id', authUser.id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Database error:', error);
-      return NextResponse.json(
-        { error: 'Failed to update message status' },
-        { status: 500 }
-      );
-    }
-
-    if (!data) {
-      return NextResponse.json(
-        { error: 'Message not found or unauthorized' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: data,
-      status: data.status
     });
 
   } catch (error) {

@@ -23,7 +23,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import ContactForm from '@/components/ui/contact-form';
 
 interface Project {
   id: string;
@@ -53,11 +52,6 @@ interface Project {
   }[];
   isActive: boolean;
   createdAt: string;
-  vendor?: {
-    id: string;
-    name: string;
-    email: string;
-  };
 }
 
 interface ProjectDetailPageProps {
@@ -530,19 +524,63 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) { 
                   )}
                 </CardContent>
               </Card>
-            )}            {/* Contact Form */}
+            )}
+
+            {/* Contact Form */}
             <Card>
               <CardHeader>
                 <CardTitle>Contact Project Team</CardTitle>
               </CardHeader>
-              <CardContent>                <ContactForm
-                  contentType="project"
-                  contentId={project.id}
-                  recipientId={project.vendor?.id || 'unknown'}
-                  recipientName={project.vendor?.name || project.contactName || 'Project Team'}
-                  title="Contact Project Team"
-                  description="Send a message to inquire about this project or request similar services."
-                />
+              <CardContent>
+                <form className="space-y-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      Your Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Enter your name"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      Your Email
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Enter your email"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                      Your Phone
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Enter your phone number"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                      Message
+                    </label>
+                    <textarea
+                      id="message"
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Tell us about your project requirements..."
+                    />
+                  </div>
+                  <Button type="submit" className="w-full">
+                    Send Message
+                  </Button>
+                </form>
                 <div className="mt-4 pt-4 border-t text-center">
                   <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
                     <Award className="w-4 h-4" />
