@@ -20,11 +20,12 @@ interface FoodItem {
   description: string;
   price: number;
   unit: string;
-  minimumOrder: number;
+  minimum_order: number;
   stock: number;
   images: string[];
-  nutritionalInfo?: any;
-  origin?: string;  isActive: boolean;
+  nutritional_info?: any;
+  origin?: string;
+  is_active: boolean;
   created_at: string;
 }
 
@@ -190,7 +191,7 @@ export default function FeaturedFoodMarketplace() {
                     </div>
                     <div className="text-right">
                       <div className="text-sm text-gray-500">Min. Order</div>
-                      <div className="font-semibold">{item.minimumOrder}</div>
+                      <div className="font-semibold">{item.minimum_order}</div>
                     </div>
                   </div>
 

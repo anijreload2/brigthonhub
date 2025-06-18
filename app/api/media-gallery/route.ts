@@ -6,7 +6,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('media_gallery')
       .select('*')
-      .eq('isActive', true)
+      .eq('is_active', true)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const mediaData = {
       ...body,
       uploadedById: body.uploadedById || 'system-user', // Default to system user
-      isActive: body.isActive !== undefined ? body.isActive : true
+      is_active: body.is_active !== undefined ? body.is_active : true
     };
 
     const { data, error } = await supabase

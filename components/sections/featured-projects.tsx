@@ -21,15 +21,16 @@ interface Project {
   id: string;
   title: string;
   description: string;
-  beforeImages: string[];
-  afterImages: string[];
+  before_images: string[];
+  after_images: string[];
   status: string;
   budget?: number;
-  startDate?: string;
-  endDate?: string;
+  start_date?: string;
+  end_date?: string;
   location?: string;
-  clientName?: string;
-  testimonial?: string;  isActive: boolean;
+  client_name?: string;
+  testimonial?: string;
+  is_active: boolean;
   created_at: string;
 }
 
@@ -172,10 +173,9 @@ export default function FeaturedProjects() {
             >
               <Card className="group bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden">
                 <div className="relative overflow-hidden">
-                  <div className="aspect-[4/3] bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-                    {project.afterImages && project.afterImages.length > 0 ? (
+                  <div className="aspect-[4/3] bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">                    {project.after_images && project.after_images.length > 0 ? (
                       <img
-                        src={project.afterImages[0]}
+                        src={project.after_images[0]}
                         alt={project.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         onError={(e) => {
@@ -213,19 +213,17 @@ export default function FeaturedProjects() {
                     <p className="text-gray-600 text-sm line-clamp-2 mb-3">
                       {project.description}
                     </p>
-                  </div>
-
-                  <div className="space-y-3 mb-4">
-                    {project.clientName && (
+                  </div>                  <div className="space-y-3 mb-4">
+                    {project.client_name && (
                       <div className="flex items-center text-sm text-gray-500">
                         <User className="w-4 h-4 mr-2" />
-                        {project.clientName}
+                        {project.client_name}
                       </div>
                     )}
-                    {project.startDate && (
+                    {project.start_date && (
                       <div className="flex items-center text-sm text-gray-500">
                         <Calendar className="w-4 h-4 mr-2" />
-                        {new Date(project.startDate).toLocaleDateString()}
+                        {new Date(project.start_date).toLocaleDateString()}
                       </div>
                     )}
                     {project.budget && (

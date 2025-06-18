@@ -25,13 +25,13 @@ interface UploadedImage {
   originalFilename: string;
   fileSize: number;
   mimeType: string;
-  fileUrl: string;
+  file_url: string;
   uploadPurpose: string;
   contentType?: string;
   contentId?: string;
   altText?: string;
   isPrimary: boolean;
-  createdAt: string;
+  created_at: string;
 }
 
 interface ImageUploadProps {
@@ -370,7 +370,7 @@ export default function ImageUpload({
                   >
                     <div className="relative group bg-gray-50 rounded-lg overflow-hidden aspect-square">
                     <img
-                      src={image.fileUrl}
+                      src={image.file_url}
                       alt={image.altText || image.originalFilename}
                       className="w-full h-full object-cover"
                     />
@@ -388,7 +388,7 @@ export default function ImageUpload({
                         <Button
                           size="sm"
                           variant="secondary"
-                          onClick={() => window.open(image.fileUrl, '_blank')}
+                          onClick={() => window.open(image.file_url, '_blank')}
                         >
                           <Eye className="w-4 h-4" />
                         </Button>

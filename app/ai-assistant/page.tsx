@@ -46,6 +46,7 @@ const sampleResponses = {
 };
 
 export default function AIAssistantPage() {
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isListening, setIsListening] = useState(false);
@@ -258,6 +259,7 @@ export default function AIAssistantPage() {
 
   // Show loading while checking authentication
   if (!user) {
+
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

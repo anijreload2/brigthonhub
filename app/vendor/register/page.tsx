@@ -64,6 +64,7 @@ export default function VendorRegisterPage() {
       platform_messages: true
     }
   });
+    const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -78,12 +79,11 @@ export default function VendorRegisterPage() {
     router.push('/vendor/dashboard');
     return null;
   }
-
-  const toggleCategory = (categoryId: string) => {
+  const toggleCategory = (category_id: string) => {
     setSelectedCategories(prev => 
-      prev.includes(categoryId) 
-        ? prev.filter(id => id !== categoryId)
-        : [...prev, categoryId]
+      prev.includes(category_id) 
+        ? prev.filter(id => id !== category_id)
+        : [...prev, category_id]
     );
   };
 
@@ -101,6 +101,7 @@ export default function VendorRegisterPage() {
     }));
   };
   const handleSubmit = async (e: React.FormEvent) => {
+        setLoading(true);
     e.preventDefault();
     if (selectedCategories.length === 0) {
       alert('Please select at least one vendor category');
@@ -153,9 +154,10 @@ export default function VendorRegisterPage() {
       alert('Failed to submit application. Please try again.');
     } finally {
       setIsSubmitting(false);
+            setLoading(false);
     }
-  };
-  if (isSuccess) {
+  };  if (isSuccess) {
+
     return (      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -370,12 +372,8 @@ export default function VendorRegisterPage() {
           </div>
 
           {/* Submit Button */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <Button
-              type="submit"
-              disabled={isSubmitting || selectedCategories.length === 0}
-              className="w-full"
-            >
+          <div className="bg-white rounded-lg shadow-sm p-6">            <Button
+              type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Submitting Application...' : 'Submit Vendor Application'}
             </Button>
             <p className="text-sm text-gray-500 mt-3 text-center">

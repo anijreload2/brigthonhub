@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -30,6 +30,18 @@ interface PropertyCardProps {
 export function PropertyCard({ property, viewMode = 'grid' }: PropertyCardProps) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Reset image index if it's out of bounds
+  useEffect(() => {
+    if (property.images && property.images.length > 0 && currentImageIndex >= property.images.length) {
+      setCurrentImageIndex(0);
+    }
+  }, [property.images, currentImageIndex]);
+
+  // Ensure currentImageIndex is valid for the available images
+  const safeImageIndex = property.images && property.images.length > 0 
+    ? Math.min(currentImageIndex, property.images.length - 1) 
+    : 0;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -64,16 +76,16 @@ export function PropertyCard({ property, viewMode = 'grid' }: PropertyCardProps)
         <div className="flex flex-col md:flex-row">
           <div className="relative md:w-80 h-64 md:h-auto">
             <Image
-              src={property.images[currentImageIndex]}
+              src={property.images && property.images.length > 0 ? property.images[safeImageIndex] : '/placeholder-property.jpg'}
               alt={property.title}
               fill
               className="object-cover"
             />
             <div className="absolute top-3 left-3">
               <Badge className={`${
-                property.listingType === 'SALE' ? 'bg-green-500' : 'bg-blue-500'
+                property.listing_type === 'SALE' ? 'bg-green-500' : 'bg-blue-500'
               } text-white`}>
-                For {property.listingType === 'SALE' ? 'Sale' : 'Rent'}
+                For {property.listing_type === 'SALE' ? 'Sale' : 'Rent'}
               </Badge>
             </div>
             <div className="absolute top-3 right-3 flex space-x-2">
@@ -113,7 +125,7 @@ export function PropertyCard({ property, viewMode = 'grid' }: PropertyCardProps)
                 <div className="text-2xl font-bold text-primary">
                   {formatPrice(property.price)}
                 </div>
-                {property.listingType === 'RENT' && (
+                {property.listing_type === 'RENT' && (
                   <div className="text-sm text-gray-600">per year</div>
                 )}
               </div>
@@ -179,16 +191,16 @@ export function PropertyCard({ property, viewMode = 'grid' }: PropertyCardProps)
     <Card className="card-hover border-0 shadow-md overflow-hidden">
       <div className="relative h-64">
         <Image
-          src={property.images[currentImageIndex]}
+          src={property.images && property.images.length > 0 ? property.images[safeImageIndex] : '/placeholder-property.jpg'}
           alt={property.title}
           fill
           className="object-cover"
         />
         <div className="absolute top-3 left-3">
           <Badge className={`${
-            property.listingType === 'SALE' ? 'bg-green-500' : 'bg-blue-500'
+            property.listing_type === 'SALE' ? 'bg-green-500' : 'bg-blue-500'
           } text-white`}>
-            For {property.listingType === 'SALE' ? 'Sale' : 'Rent'}
+            For {property.listing_type === 'SALE' ? 'Sale' : 'Rent'}
           </Badge>
         </div>
         <div className="absolute top-3 right-3 flex space-x-2">
@@ -210,9 +222,9 @@ export function PropertyCard({ property, viewMode = 'grid' }: PropertyCardProps)
           </Button>
         </div>
         
-        {property.images.length > 1 && (
+        {property.images && property.images.length > 1 && (
           <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-1">
-            {property.images.map((_, index) => (
+            {property.images && property.images.map((_, index) => (
               <button
                 key={index}
                 onClick={(e) => {
@@ -221,8 +233,9 @@ export function PropertyCard({ property, viewMode = 'grid' }: PropertyCardProps)
                   setCurrentImageIndex(index);
                 }}
                 className={`w-2 h-2 rounded-full ${
-                  index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                  index === safeImageIndex ? 'bg-white' : 'bg-white/50'
                 }`}
+                aria-label={`View image ${index + 1}`}
               />
             ))}
           </div>
@@ -234,7 +247,7 @@ export function PropertyCard({ property, viewMode = 'grid' }: PropertyCardProps)
           <div className="text-xl font-bold text-primary">
             {formatPrice(property.price)}
           </div>
-          {property.listingType === 'RENT' && (
+          {property.listing_type === 'RENT' && (
             <div className="text-sm text-gray-600">per year</div>
           )}
         </div>
@@ -272,12 +285,12 @@ export function PropertyCard({ property, viewMode = 'grid' }: PropertyCardProps)
         </div>
 
         <div className="flex flex-wrap gap-1 mb-4">
-          {property.features.slice(0, 2).map((feature) => (
+          {property.features && property.features.slice(0, 2).map((feature) => (
             <Badge key={feature} variant="secondary" className="text-xs">
               {feature}
             </Badge>
           ))}
-          {property.features.length > 2 && (
+          {property.features && property.features.length > 2 && (
             <Badge variant="secondary" className="text-xs">
               +{property.features.length - 2}
             </Badge>

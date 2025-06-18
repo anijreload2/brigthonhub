@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useReducer } from 'react';
 import { useAuth } from '@/components/auth/auth-provider';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,22 @@ import {
   Shield, Users, TrendingUp, Bell, Settings,
   CheckSquare, Flag
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import ComposeMessageModal from '@/components/messages/ComposeMessageModal';
+import { authenticatedFetch } from '@/lib/auth-utils';
+
+// Safe date formatting utility
+const formatSafeDate = (dateString: string, formatStr: string = 'MMM d, h:mm a'): string => {
+  try {
+    if (!dateString) return 'Invalid date';
+    const date = new Date(dateString);
+    if (!isValid(date)) return 'Invalid date';
+    return format(date, formatStr);
+  } catch (error) {
+    console.error('Date formatting error:', error, 'Date string:', dateString);
+    return 'Invalid date';
+  }
+};
 
 interface ContactMessage {
   id: string;
@@ -90,6 +104,8 @@ function AdminMessagesPageContent() {
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  
+  // State declarations
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [threads, setThreads] = useState<MessageThread[]>([]);
   const [selectedThread, setSelectedThread] = useState<MessageThread | null>(null);
@@ -113,16 +129,23 @@ function AdminMessagesPageContent() {
 
   // Auto-select thread from URL parameter
   const threadId = searchParams?.get('thread');
-
   useEffect(() => {
-    if (!user) {
+    if (user === null) {
+      // User is not authenticated
       router.push('/auth/login?redirect=/admin/messages');
       return;
     }
-    if (user.role !== 'admin') {
+    
+    if (user === undefined) {
+      // Still loading user auth state
+      return;
+    }
+    
+    if (user.role !== 'ADMIN') {
       router.push('/messages');
       return;
     }
+    
     fetchMessages();
   }, [user, router]);
 
@@ -135,45 +158,47 @@ function AdminMessagesPageContent() {
       }
     }
   }, [threadId, threads]);
-
   const fetchMessages = async () => {
     if (!user) return;
 
     try {
       setLoading(true);
       
+      console.log('🔍 Fetching messages for admin ID:', user.id);
+      
       // Use the new unified contact-messages API with admin access (sees all messages)
-      const response = await fetch('/api/contact-messages?role=admin', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+      const response = await authenticatedFetch('/api/contact-messages?role=admin', {
+        method: 'GET'
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch messages');
+        const errorText = await response.text();
+        console.error('❌ API Error Response:', response.status, errorText);
+        throw new Error(`Failed to fetch messages: ${response.status}`);
       }
 
       const data = await response.json();
-      const messages = data.messages || [];
-      setMessages(messages);
-
-      // Calculate admin-specific stats
+      const fetchedMessages = data.messages || [];
+      
+      console.log('✅ Successfully fetched messages count:', fetchedMessages.length);
+      console.log('📋 Messages data:', fetchedMessages);
+      
+      setMessages(fetchedMessages);      // Calculate admin-specific stats
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
       
       const statsData = {
-        total: messages.length,
-        unread: messages.filter((m: ContactMessage) => m.status === 'unread').length,
-        urgent: messages.filter((m: ContactMessage) => m.priority === 'urgent').length,
-        contactForms: messages.filter((m: ContactMessage) => m.message_type === 'inquiry' && m.item_type === 'general').length,
-        thisWeek: messages.filter((m: ContactMessage) => new Date(m.created_at) >= oneWeekAgo).length
+        total: fetchedMessages.length,
+        unread: fetchedMessages.filter((m: ContactMessage) => m.status === 'unread').length,
+        urgent: fetchedMessages.filter((m: ContactMessage) => m.priority === 'urgent').length,
+        contactForms: fetchedMessages.filter((m: ContactMessage) => m.message_type === 'inquiry' && m.item_type === 'general').length,
+        thisWeek: fetchedMessages.filter((m: ContactMessage) => new Date(m.created_at) >= oneWeekAgo).length
       };
       setStats(statsData);
 
       // Group messages into threads
       const threadsMap = new Map<string, MessageThread>();
-      messages.forEach((message: ContactMessage) => {
+      fetchedMessages.forEach((message: ContactMessage) => {
         // Use the thread_id from the database, or create one if missing
         const threadKey = message.thread_id || `${[message.sender_id, message.recipient_id].sort().join('-')}-${message.item_type}-${message.item_id}`;
         
@@ -212,16 +237,15 @@ function AdminMessagesPageContent() {
       setLoading(false);
     }
   };
-
   const sendMessage = async () => {
     if (!user || !selectedThread || !newMessage.trim()) return;
 
     setSending(true);
     try {
-      const recipientId = selectedThread.participants.find(p => p !== user.id);
+      const recipientId = selectedThread.participants.find((p: string) => p !== user.id);
       const lastMessage = selectedThread.last_message;
       
-      const response = await fetch('/api/contact-messages', {
+      const response = await authenticatedFetch('/api/contact-messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -250,10 +274,9 @@ function AdminMessagesPageContent() {
       setSending(false);
     }
   };
-
   const markAsRead = async (messageId: string) => {
     try {
-      const response = await fetch('/api/contact-messages', {
+      const response = await authenticatedFetch('/api/contact-messages', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
@@ -278,7 +301,7 @@ function AdminMessagesPageContent() {
     if (selectedMessages.length === 0) return;
 
     try {
-      const response = await fetch('/api/contact-messages', {
+      const response = await authenticatedFetch('/api/contact-messages', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
@@ -345,8 +368,18 @@ function AdminMessagesPageContent() {
     const matchesPriority = priorityFilter === 'all' || 
       thread.last_message.priority === priorityFilter;
     
-    return matchesSearch && matchesStatus && matchesType && matchesPriority;
-  });
+    return matchesSearch && matchesStatus && matchesType && matchesPriority;  });
+  // Handle auth loading state
+  if (user === undefined) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -552,8 +585,7 @@ function AdminMessagesPageContent() {
                         key={thread.id}
                         className="p-6 hover:bg-gray-50 transition-colors"
                       >
-                        <div className="flex items-start space-x-3">
-                          <input
+                        <div className="flex items-start space-x-3">                          <input
                             type="checkbox"
                             checked={selectedMessages.includes(thread.last_message.id)}
                             onChange={(e) => {
@@ -564,6 +596,7 @@ function AdminMessagesPageContent() {
                               }
                             }}
                             className="mt-1"
+                            aria-label={`Select message from ${getOtherParticipant(thread)?.name || 'Unknown'}`}
                           />
                           <div
                             className="flex-1 cursor-pointer"
@@ -640,7 +673,7 @@ function AdminMessagesPageContent() {
                                 )}
                               </div>
                               <span className="text-xs text-gray-500">
-                                {format(new Date(thread.last_message.created_at), 'MMM d, h:mm a')}
+                                {formatSafeDate(thread.last_message.created_at)}
                               </span>
                             </div>
                           </div>
@@ -704,7 +737,7 @@ function AdminMessagesPageContent() {
                           <p className={`text-xs mt-1 ${
                             isFromUser ? 'text-red-100' : 'text-gray-500'
                           }`}>
-                            {format(new Date(message.created_at), 'MMM d, h:mm a')}
+                            {formatSafeDate(message.created_at)}
                           </p>
                         </div>
                       </div>
@@ -743,8 +776,7 @@ function AdminMessagesPageContent() {
       </div>
 
       {/* Compose Message Modal */}
-      <ComposeMessageModal
-        isOpen={showComposeModal}
+      <ComposeMessageModal        isOpen={showComposeModal}
         onClose={() => setShowComposeModal(false)}
         onMessageSent={fetchMessages}
       />

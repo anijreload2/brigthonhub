@@ -7,8 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    first_name: '',
+    last_name: '',
     email: '',
     phone: '',
     subject: '',
@@ -16,7 +16,6 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -24,11 +23,10 @@ export default function ContactPage() {
       [name]: value
     }));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.subject || !formData.message) {
+    if (!formData.first_name || !formData.last_name || !formData.email || !formData.subject || !formData.message) {
       toast({
         title: 'Missing Information',
         description: 'Please fill in all required fields.',
@@ -37,7 +35,7 @@ export default function ContactPage() {
       return;
     }
 
-    setIsSubmitting(true);    try {
+    setIsSubmitting(true);try {
       // Send message to admin using unified contact messaging API
       const response = await fetch('/api/contact-messages', {
         method: 'POST',
@@ -45,7 +43,7 @@ export default function ContactPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: `${formData.firstName} ${formData.lastName}`,
+          name: `${formData.first_name} ${formData.last_name}`,
           email: formData.email,
           phone: formData.phone,
           subject: `Contact Form: ${formData.subject}`,
@@ -63,8 +61,8 @@ export default function ContactPage() {
         
         // Reset form
         setFormData({
-          firstName: '',
-          lastName: '',
+          first_name: '',
+          last_name: '',
           email: '',
           phone: '',
           subject: '',
@@ -79,11 +77,10 @@ export default function ContactPage() {
         title: 'Error',
         description: 'Failed to send message. Please try again or contact us directly.',
         variant: 'destructive'
-      });
-    } finally {
+      });    } finally {
       setIsSubmitting(false);
-    }
-  };
+    }  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8">
@@ -105,14 +102,14 @@ export default function ContactPage() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Send us a Message</h2>            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     First Name *
                   </label>
                   <input
                     type="text"
-                    id="firstName"
-                    name="firstName"
-                    value={formData.firstName}
+                    id="first_name"
+                    name="first_name"
+                    value={formData.first_name}
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -120,14 +117,14 @@ export default function ContactPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Last Name *
                   </label>
                   <input
                     type="text"
-                    id="lastName"
-                    name="lastName"
-                    value={formData.lastName}
+                    id="last_name"
+                    name="last_name"
+                    value={formData.last_name}
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -203,12 +200,10 @@ export default function ContactPage() {
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Tell us how we can help you..."
                 ></textarea>
-              </div>
-
-              <button
-                type="submit"
+              </div>              <button
+                type="submit" 
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center"
               >
                 <Send className="w-4 h-4 mr-2" />
                 {isSubmitting ? 'Sending...' : 'Send Message'}

@@ -29,20 +29,20 @@ interface Project {
   title: string;
   description: string;
   specifications?: string;
-  beforeImages: string[];
-  afterImages: string[];
+  before_images: string[];
+  after_images: string[];
   status: string;
   location?: string;
-  teamMembers?: {
+  team_members?: {
     name: string;
     role: string;
     phone?: string;
     email?: string;
   }[];
-  contactName?: string;
-  contactPhone?: string;
-  contactEmail?: string;
-  contactAddress?: string;
+  contact_name?: string;
+  contact_phone?: string;
+  contact_email?: string;
+  contact_address?: string;
   reviews?: {
     id: string;
     rating: number;
@@ -50,15 +50,15 @@ interface Project {
     author: string;
     date: string;
   }[];
-  isActive: boolean;
-  createdAt: string;
+  is_active: boolean;
+  created_at: string;
 }
 
 interface ProjectDetailPageProps {
   params: { id: string };
 }
 
-export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {  const [project, setProject] = useState<Project | null>(null);
+export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {const [project, setProject] = useState<Project | null>(null);
   const [relatedProjects, setRelatedProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,10 +88,10 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) { 
     };
 
     fetchProject();
-  }, [params.id]);
-  const getCurrentImages = () => {
+  }, [params.id]);  const getCurrentImages = () => {
     if (!project) return [];
-    return activeImageTab === 'before' ? project.beforeImages : project.afterImages;
+    const images = activeImageTab === 'before' ? project.before_images : project.after_images;
+    return images || [];
   };
 
   const nextImage = () => {
@@ -127,12 +127,18 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) { 
       case 'planning': return 20;
       default: return 0;
     }
-  };
-  // Reset image index when switching image tabs
+  };  // Reset image index when switching image tabs
   useEffect(() => {
     setCurrentImageIndex(0);
   }, [activeImageTab]);
 
+  // Ensure image index is within bounds when images change
+  useEffect(() => {
+    const images = getCurrentImages();
+    if (images.length > 0 && currentImageIndex >= images.length) {
+      setCurrentImageIndex(0);
+    }
+  }, [project, activeImageTab, currentImageIndex]);
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -203,7 +209,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) { 
               <div className="space-y-1 text-sm text-gray-600">
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4" />
-                  <span>Created: {new Date(project.createdAt).toLocaleDateString()}</span>
+                  <span>Created: {new Date(project.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
             </div>
@@ -232,14 +238,14 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) { 
                       size="sm"
                       onClick={() => setActiveImageTab('before')}
                     >
-                      Before ({project.beforeImages.length})
+                      Before ({project.before_images?.length || 0})
                     </Button>
                     <Button
                       variant={activeImageTab === 'after' ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setActiveImageTab('after')}
                     >
-                      After ({project.afterImages.length})
+                      After ({project.after_images?.length || 0})
                     </Button>
                   </div>
                 </div>
@@ -271,7 +277,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) { 
                             <ChevronRight className="w-5 h-5" />
                           </button>
                           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                            {currentImages.map((_, index) => (
+                            {currentImages.map((_: any, index: number) => (
                               <button
                                 key={index}
                                 onClick={() => setCurrentImageIndex(index)}
@@ -301,7 +307,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) { 
                 {currentImages.length > 1 && (
                   <div className="p-4 border-t">
                     <div className="flex space-x-2 overflow-x-auto">
-                      {currentImages.map((image, index) => (
+                      {currentImages.map((image: string, index: number) => (
                         <button
                           key={index}
                           onClick={() => setCurrentImageIndex(index)}
@@ -380,10 +386,9 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) { 
                 )}
 
                 {activeTab === 'team' && (
-                  <div className="space-y-4">
-                    {project.teamMembers && project.teamMembers.length > 0 ? (
+                  <div className="space-y-4">                    {project.team_members && project.team_members.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {project.teamMembers.map((member, index) => (
+                        {project.team_members.map((member: any, index: number) => (
                           <div key={index} className="border rounded-lg p-4">
                             <div className="flex items-center space-x-3 mb-3">
                               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -475,51 +480,50 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) { 
                 <div className="flex justify-between">
                   <span className="text-gray-600">Created</span>
                   <span className="font-medium">
-                    {new Date(project.createdAt).toLocaleDateString()}
+                    {new Date(project.created_at).toLocaleDateString()}
                   </span>
                 </div>
               </CardContent>
             </Card>
 
             {/* Contact Information */}
-            {(project.contactName || project.contactPhone || project.contactEmail) && (
+            {(project.contact_name || project.contact_phone || project.contact_email) && (
               <Card>
                 <CardHeader>
                   <CardTitle>Contact Information</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  {project.contactName && (
+                <CardContent className="space-y-4">                  {project.contact_name && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Contact Person</span>
-                      <span className="font-medium">{project.contactName}</span>
+                      <span className="font-medium">{project.contact_name}</span>
                     </div>
                   )}
-                  {project.contactPhone && (
+                  {project.contact_phone && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Phone</span>
                       <a 
-                        href={`tel:${project.contactPhone}`} 
+                        href={`tel:${project.contact_phone}`} 
                         className="font-medium text-blue-600 hover:underline"
                       >
-                        {project.contactPhone}
+                        {project.contact_phone}
                       </a>
                     </div>
                   )}
-                  {project.contactEmail && (
+                  {project.contact_email && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Email</span>
                       <a 
-                        href={`mailto:${project.contactEmail}`} 
+                        href={`mailto:${project.contact_email}`} 
                         className="font-medium text-blue-600 hover:underline"
                       >
-                        {project.contactEmail}
+                        {project.contact_email}
                       </a>
                     </div>
                   )}
-                  {project.contactAddress && (
+                  {project.contact_address && (
                     <div>
                       <span className="text-gray-600 block mb-1">Address</span>
-                      <span className="font-medium text-sm">{project.contactAddress}</span>
+                      <span className="font-medium text-sm">{project.contact_address}</span>
                     </div>
                   )}
                 </CardContent>
@@ -600,7 +604,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) { 
                   <CardContent className="p-0">
                     <div className="relative h-48">
                       <Image
-                        src={relatedProject.afterImages[0] || relatedProject.beforeImages[0] || '/placeholder.jpg'}
+                        src={relatedProject.after_images?.[0] || relatedProject.before_images?.[0] || '/placeholder.jpg'}
                         alt={relatedProject.title}
                         fill
                         className="object-cover rounded-t-lg"

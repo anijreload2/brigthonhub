@@ -20,7 +20,7 @@ export async function GET(
       .from('properties')
       .select('*')
       .eq('id', id)
-      .eq('isActive', true)
+      .eq('is_active', true)
       .single();
 
     if (error) {
@@ -42,8 +42,8 @@ export async function GET(
     const { data: relatedProperties } = await supabase
       .from('properties')
       .select('*')
-      .eq('isActive', true)
-      .eq('propertyType', property.propertyType)
+      .eq('is_active', true)
+      .eq('property_type', property.property_type)
       .neq('id', id)
       .limit(4);
 

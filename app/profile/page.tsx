@@ -34,6 +34,7 @@ import { useToast } from '@/hooks/use-toast';
 import { UserRole } from '@/lib/types';
 
 export default function ProfilePage() {
+
   const { user, updateUser } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
@@ -46,13 +47,13 @@ export default function ProfilePage() {
     name: user?.name || '',
     email: user?.email || '',
     phone: user?.phone || '',
-    firstName: user?.profile?.firstName || '',
-    lastName: user?.profile?.lastName || '',
+    first_name: user?.profile?.first_name || '',
+    last_name: user?.profile?.last_name || '',
     bio: user?.profile?.bio || '',
     location: user?.profile?.location || '',
-    businessName: user?.profile?.businessName || '',
-    businessAddress: user?.profile?.businessAddress || '',
-    businessPhone: user?.profile?.businessPhone || ''
+    business_name: user?.profile?.business_name || '',
+    business_address: user?.profile?.business_address || '',
+    business_phone: user?.profile?.business_phone || ''
   });
 
   useEffect(() => {
@@ -91,16 +92,20 @@ export default function ProfilePage() {
         phone: formData.phone,
         profile: {
           id: user?.profile?.id || '',
-          userId: user?.profile?.userId || user?.id || '',
-          ...user?.profile,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+          user_id: user?.profile?.user_id || user?.id || '',
+          first_name: formData.first_name,
+          last_name: formData.last_name,
           bio: formData.bio,
           location: formData.location,
-          businessName: formData.businessName,
-          businessAddress: formData.businessAddress,
-          businessPhone: formData.businessPhone
-        }
+          business_name: formData.business_name,
+          business_address: formData.business_address,
+          business_phone: formData.business_phone,
+          avatar: user?.profile?.avatar || '',
+          preferences: user?.profile?.preferences || {},
+          notifications: user?.profile?.notifications || {},
+          created_at: user?.profile?.created_at || new Date(),
+          updated_at: new Date()
+        } as any
       });
 
       setIsEditing(false);
@@ -122,13 +127,13 @@ export default function ProfilePage() {
       name: user?.name || '',
       email: user?.email || '',
       phone: user?.phone || '',
-      firstName: user?.profile?.firstName || '',
-      lastName: user?.profile?.lastName || '',
+      first_name: user?.profile?.first_name || '',
+      last_name: user?.profile?.last_name || '',
       bio: user?.profile?.bio || '',
       location: user?.profile?.location || '',
-      businessName: user?.profile?.businessName || '',
-      businessAddress: user?.profile?.businessAddress || '',
-      businessPhone: user?.profile?.businessPhone || ''
+      business_name: user?.profile?.business_name || '',
+      business_address: user?.profile?.business_address || '',
+      business_phone: user?.profile?.business_phone || ''
     });
     setIsEditing(false);
   };
@@ -256,21 +261,21 @@ export default function ProfilePage() {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="firstName">First Name</Label>
+                        <Label htmlFor="first_name">First Name</Label>
                         <Input
-                          id="firstName"
-                          value={formData.firstName}
-                          onChange={(e) => handleInputChange('firstName', e.target.value)}
+                          id="first_name"
+                          value={formData.first_name}
+                          onChange={(e) => handleInputChange('first_name', e.target.value)}
                           disabled={!isEditing}
                           className="mt-1"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="lastName">Last Name</Label>
+                        <Label htmlFor="last_name">Last Name</Label>
                         <Input
-                          id="lastName"
-                          value={formData.lastName}
-                          onChange={(e) => handleInputChange('lastName', e.target.value)}
+                          id="last_name"
+                          value={formData.last_name}
+                          onChange={(e) => handleInputChange('last_name', e.target.value)}
                           disabled={!isEditing}
                           className="mt-1"
                         />
@@ -348,7 +353,7 @@ export default function ProfilePage() {
                         <Label htmlFor="businessName">Business Name</Label>
                         <Input
                           id="businessName"
-                          value={formData.businessName}
+                          value={formData.business_name}
                           onChange={(e) => handleInputChange('businessName', e.target.value)}
                           disabled={!isEditing}
                           className="mt-1"
@@ -359,7 +364,7 @@ export default function ProfilePage() {
                         <Label htmlFor="businessAddress">Business Address</Label>
                         <Input
                           id="businessAddress"
-                          value={formData.businessAddress}
+                          value={formData.business_address}
                           onChange={(e) => handleInputChange('businessAddress', e.target.value)}
                           disabled={!isEditing}
                           className="mt-1"
@@ -370,7 +375,7 @@ export default function ProfilePage() {
                         <Label htmlFor="businessPhone">Business Phone</Label>
                         <Input
                           id="businessPhone"
-                          value={formData.businessPhone}
+                          value={formData.business_phone}
                           onChange={(e) => handleInputChange('businessPhone', e.target.value)}
                           disabled={!isEditing}
                           className="mt-1"

@@ -122,9 +122,9 @@ export async function POST(request: NextRequest) {
           name,
           phone: body.phone || null,
           role: 'USER', // Will be updated to VENDOR after approval
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         });
       
       if (!newUserError) {
@@ -148,9 +148,9 @@ export async function POST(request: NextRequest) {
           name,
           phone: body.phone || null,
           role: 'USER', // Will be updated to VENDOR after approval
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         });
 
       if (legacyUserError) {

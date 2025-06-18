@@ -49,9 +49,9 @@ export async function POST(request: NextRequest) {
         email,
         name,
         role,
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       })
       .select()
       .single();
@@ -65,11 +65,11 @@ export async function POST(request: NextRequest) {
       .from('user_profiles')
       .insert({
         id: profileId,
-        userId: userId,
-        firstName: name?.split(' ')[0] || '',
-        lastName: name?.split(' ').slice(1).join(' ') || '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        user_id: userId,
+        first_name: name?.split(' ')[0] || '',
+        last_name: name?.split(' ').slice(1).join(' ') || '',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       })
       .select()
       .single();

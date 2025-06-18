@@ -20,7 +20,7 @@ export async function GET(
       .from('projects')
       .select('*')
       .eq('id', id)
-      .eq('isActive', true)
+      .eq('is_active', true)
       .single();
 
     if (error) {
@@ -42,7 +42,7 @@ export async function GET(
     const { data: relatedProjects } = await supabase
       .from('projects')
       .select('*')
-      .eq('isActive', true)
+      .eq('is_active', true)
       .neq('id', id)
       .limit(4);
 

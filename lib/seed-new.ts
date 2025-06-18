@@ -34,7 +34,7 @@ export async function seedDatabase() {
           name: 'BrightonHub Admin',
           phone: '+234-800-BRIGHTON',
           role: 'ADMIN',
-          isActive: true,
+          is_active: true,
         })
         .select()
         .single();
@@ -48,9 +48,9 @@ export async function seedDatabase() {
       .from('user_profiles')
       .upsert({
         id: 'profile-admin-001',
-        userId: adminUserId,
-        firstName: 'BrightonHub',
-        lastName: 'Admin',
+        user_id: adminUserId,
+        first_name: 'BrightonHub',
+        last_name: 'Admin',
         avatar: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=150',
         bio: 'System Administrator for BrightonHub platform. Managing real estate, food, and project operations.',
         businessName: 'BrightonHub Management',
@@ -150,42 +150,42 @@ export async function seedDatabase() {
         question: 'What is BrightonHub?',
         answer: 'BrightonHub is a comprehensive platform that connects you to premium properties, fresh farm produce, and showcase projects across Nigeria. We provide a one-stop solution for real estate, food marketplace, and project discovery.',
         category: 'general',
-        isActive: true
+        is_active: true
       },
       {
         id: 'ai-002',
         question: 'How can I contact BrightonHub?',
         answer: 'You can reach us via email at info@brightonhub.ng, call us at +234-800-BRIGHTON, or visit our office at Victoria Island, Lagos, Nigeria. We\'re here to help with all your property, food, and project needs.',
         category: 'contact',
-        isActive: true
+        is_active: true
       },
       {
         id: 'ai-003',
         question: 'What services does BrightonHub offer?',
         answer: 'BrightonHub offers three main services: 1) Real Estate - Find and list properties for sale or rent, 2) Food Marketplace - Buy fresh produce directly from farmers, 3) Project Showcase - Discover construction and development projects across Nigeria.',
         category: 'services',
-        isActive: true
+        is_active: true
       },
       {
         id: 'ai-004',
         question: 'How do I list my property on BrightonHub?',
         answer: 'To list your property, create an account, go to the Properties section, and click "Add Property". Fill in the details including title, description, price, location, and upload high-quality images. Our team will review and approve your listing.',
         category: 'properties',
-        isActive: true
+        is_active: true
       },
       {
         id: 'ai-005',
         question: 'Can I sell farm produce on BrightonHub?',
         answer: 'Yes! BrightonHub has a dedicated Food Marketplace where farmers and vendors can sell fresh produce. Simply register as a vendor, create your product listings with photos and descriptions, and start selling to customers across Nigeria.',
         category: 'food',
-        isActive: true
+        is_active: true
       },
       {
         id: 'ai-006',
         question: 'What areas does BrightonHub cover?',
         answer: 'BrightonHub operates across Nigeria, with strong presence in Lagos, Abuja, Port Harcourt, Kano, and other major cities. We connect buyers and sellers nationwide for properties, food, and projects.',
         category: 'coverage',
-        isActive: true
+        is_active: true
       }
     ];
 

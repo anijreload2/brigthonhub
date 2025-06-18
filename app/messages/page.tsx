@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import ComposeMessageModal from '@/components/messages/ComposeMessageModal';
+import { authenticatedFetch } from '@/lib/auth-utils';
 
 interface ContactMessage {
   id: string;
@@ -84,29 +85,35 @@ const PRIORITY_ICONS = {
 };
 
 function MessagesPageContent() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  
+  // State declarations
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [threads, setThreads] = useState<MessageThread[]>([]);
   const [selectedThread, setSelectedThread] = useState<MessageThread | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [newMessage, setNewMessage] = useState('');
   const [viewMode, setViewMode] = useState<'inbox' | 'thread'>('inbox');
   const [showComposeModal, setShowComposeModal] = useState(false);
 
   // Auto-select thread from URL parameter
-  const threadId = searchParams?.get('thread');
+  const threadId = searchParams?.get('thread');  useEffect(() => {
+    // Only redirect after the auth loading is complete and user is null
+    if (!isLoading && !user) {
+      router.push('/auth/login?redirect=/messages');
+    }
+  }, [user, isLoading, router]);
 
   useEffect(() => {
-    if (!user) {
-      router.push('/auth/login?redirect=/messages');
-      return;
+    if (user) {
+      fetchMessages();
     }
-    fetchMessages();
-  }, [user, router]);
+  }, [user]);
 
   useEffect(() => {
     if (threadId && threads.length > 0) {
@@ -116,19 +123,15 @@ function MessagesPageContent() {
         setViewMode('thread');
       }
     }
-  }, [threadId, threads]);
-  const fetchMessages = async () => {
+  }, [threadId, threads]);  const fetchMessages = async () => {
     if (!user) return;
 
     try {
       setLoading(true);
       
-      // Use the new unified contact-messages API
-      const response = await fetch('/api/contact-messages', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+      // Use the new unified contact-messages API with authentication
+      const response = await authenticatedFetch('/api/contact-messages', {
+        method: 'GET'
       });
 
       if (!response.ok) {
@@ -179,8 +182,7 @@ function MessagesPageContent() {
     } finally {
       setLoading(false);
     }
-  };
-  const sendMessage = async () => {
+  };  const sendMessage = async () => {
     if (!user || !selectedThread || !newMessage.trim()) return;
 
     setSending(true);
@@ -188,14 +190,19 @@ function MessagesPageContent() {
       const recipientId = selectedThread.participants.find(p => p !== user.id);
       const lastMessage = selectedThread.last_message;
       
-      const response = await fetch('/api/contact-messages', {
+      if (!lastMessage) {
+        console.error('No last message found in thread');
+        return;
+      }
+      
+      const response = await authenticatedFetch('/api/contact-messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           recipient_id: recipientId,
-          subject: `Re: ${lastMessage.subject}`,
+          subject: `Re: ${lastMessage.subject || 'No subject'}`,
           message: newMessage.trim(),
           item_type: lastMessage.item_type,
           item_id: lastMessage.item_id,
@@ -216,10 +223,9 @@ function MessagesPageContent() {
     } finally {
       setSending(false);
     }
-  };
-  const markAsRead = async (messageId: string) => {
+  };  const markAsRead = async (messageId: string) => {
     try {
-      const response = await fetch('/api/contact-messages', {
+      const response = await authenticatedFetch('/api/contact-messages', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
@@ -238,10 +244,9 @@ function MessagesPageContent() {
     } catch (error) {
       console.error('Error marking message as read:', error);
     }
-  };
-  const updateMessageStatus = async (messageId: string, status: string) => {
+  };  const updateMessageStatus = async (messageId: string, status: string) => {
     try {
-      const response = await fetch('/api/contact-messages', {
+      const response = await authenticatedFetch('/api/contact-messages', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
@@ -287,12 +292,11 @@ function MessagesPageContent() {
       };
     }
   };
-
   const filteredThreads = threads.filter(thread => {
     const otherParticipant = getOtherParticipant(thread);
     const matchesSearch = searchTerm === '' || 
-      thread.last_message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      thread.last_message.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      thread.last_message?.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      thread.last_message?.message?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (otherParticipant?.name && otherParticipant.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (otherParticipant?.email && otherParticipant.email.toLowerCase().includes(searchTerm.toLowerCase()));
     
@@ -302,13 +306,35 @@ function MessagesPageContent() {
     
     return matchesSearch && matchesStatus;
   });
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your messages...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while auth is being checked
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated (handled by useEffect)
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Redirecting to login...</p>
         </div>
       </div>
     );
@@ -413,8 +439,8 @@ function MessagesPageContent() {
               <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                 <div className="divide-y divide-gray-200">                  {filteredThreads.map((thread) => {
                     const otherParticipant = getOtherParticipant(thread);
-                    const StatusIcon = MESSAGE_STATUS_ICONS[thread.last_message.status];
-                    const PriorityIcon = PRIORITY_ICONS[thread.last_message.priority || 'normal'];
+                    const StatusIcon = MESSAGE_STATUS_ICONS[thread.last_message?.status || 'unread'];
+                    const PriorityIcon = PRIORITY_ICONS[thread.last_message?.priority || 'normal'];
                     
                     return (
                       <div
@@ -443,8 +469,7 @@ function MessagesPageContent() {
                                   <h3 className="text-sm font-medium text-gray-900 truncate">
                                     {otherParticipant?.name || 'Unknown User'}
                                   </h3>
-                                  <div className="flex items-center space-x-2">
-                                    {thread.last_message.priority && thread.last_message.priority !== 'normal' && (
+                                  <div className="flex items-center space-x-2">                                    {thread.last_message?.priority && thread.last_message.priority !== 'normal' && (
                                       <span className={`px-2 py-1 text-xs rounded-full ${PRIORITY_COLORS[thread.last_message.priority]}`}>
                                         <PriorityIcon className="w-3 h-3 inline mr-1" />
                                         {thread.last_message.priority}
@@ -464,33 +489,33 @@ function MessagesPageContent() {
                               </div>
                             </div>
                             <div className="mb-2">
-                              <div className="flex items-center justify-between mb-1">
-                                <h4 className="text-sm font-medium text-gray-900 truncate">
-                                  {thread.last_message.subject}
+                              <div className="flex items-center justify-between mb-1">                                <h4 className="text-sm font-medium text-gray-900 truncate">
+                                  {thread.last_message?.subject || 'No subject'}
                                 </h4>
-                                {thread.last_message.item_type && (
+                                {thread.last_message?.item_type && (
                                   <span className="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full">
                                     {thread.last_message.item_type}
                                   </span>
                                 )}
                               </div>
                               <p className="text-sm text-gray-600 line-clamp-2">
-                                {thread.last_message.message}
+                                {thread.last_message?.message || 'No message content'}
                               </p>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-2">
-                                <span className={`px-2 py-1 text-xs rounded-full ${MESSAGE_STATUS_COLORS[thread.last_message.status]}`}>
-                                  {thread.last_message.status.charAt(0).toUpperCase() + thread.last_message.status.slice(1)}
+                            <div className="flex items-center justify-between">                              <div className="flex items-center space-x-2">
+                                <span className={`px-2 py-1 text-xs rounded-full ${MESSAGE_STATUS_COLORS[thread.last_message?.status || 'unread']}`}>
+                                  {(thread.last_message?.status || 'unread').charAt(0).toUpperCase() + (thread.last_message?.status || 'unread').slice(1)}
                                 </span>
-                                {thread.last_message.tags && thread.last_message.tags.length > 0 && (
+                                {thread.last_message?.tags && thread.last_message.tags.length > 0 && (
                                   <span className="text-xs text-gray-500">
                                     #{thread.last_message.tags[0]}
                                   </span>
                                 )}
-                              </div>
-                              <span className="text-xs text-gray-500">
-                                {format(new Date(thread.last_message.created_at), 'MMM d, h:mm a')}
+                              </div>                              <span className="text-xs text-gray-500">
+                                {thread.last_message?.created_at && !isNaN(new Date(thread.last_message.created_at).getTime()) 
+                                  ? format(new Date(thread.last_message.created_at), 'MMM d, h:mm a') 
+                                  : 'No date'
+                                }
                               </span>
                             </div>
                           </div>
@@ -547,11 +572,13 @@ function MessagesPageContent() {
                             ? 'bg-blue-600 text-white' 
                             : 'bg-gray-100 text-gray-900'
                         }`}>
-                          <p className="text-sm">{message.message}</p>
-                          <p className={`text-xs mt-1 ${
+                          <p className="text-sm">{message.message}</p>                          <p className={`text-xs mt-1 ${
                             isFromUser ? 'text-blue-100' : 'text-gray-500'
                           }`}>
-                            {format(new Date(message.created_at), 'MMM d, h:mm a')}
+                            {message.created_at && !isNaN(new Date(message.created_at).getTime()) 
+                              ? format(new Date(message.created_at), 'MMM d, h:mm a')
+                              : 'Invalid date'
+                            }
                           </p>
                         </div>
                       </div>

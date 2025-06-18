@@ -47,16 +47,15 @@ const AITrainingTab: React.FC<AITrainingTabProps> = ({ onAdd, onEdit, onView, on
   });
   // Get unique categories and languages for filters
   const categories = Array.from(new Set(trainingData.map(item => item.category)));
-  const languages = Array.from(new Set(trainingData.map(item => item.language)));
-  const toggleActive = async (id: string, isActive: boolean) => {
+  const languages = Array.from(new Set(trainingData.map(item => item.language)));  const toggleActive = async (id: string, is_active: boolean) => {
     try {
       const response = await fetch('/api/ai-training-data', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           id, 
-          isActive: !isActive, 
-          updatedAt: new Date().toISOString() 
+          is_active: !is_active, 
+          updated_at: new Date().toISOString() 
         })
       });
 
@@ -64,10 +63,10 @@ const AITrainingTab: React.FC<AITrainingTabProps> = ({ onAdd, onEdit, onView, on
       
       // Update local state
       setTrainingData(prev => prev.map(item => 
-        item.id === id ? { ...item, isActive: !isActive } : item
+        item.id === id ? { ...item, is_active: !is_active } : item
       ));
       
-      alert(`Training data ${!isActive ? 'activated' : 'deactivated'} successfully`);
+      alert(`Training data ${!is_active ? 'activated' : 'deactivated'} successfully`);
     } catch (error: any) {
       console.error('Error updating training data:', error);
       alert(`Error: ${error.message}`);
@@ -165,11 +164,11 @@ const AITrainingTab: React.FC<AITrainingTabProps> = ({ onAdd, onEdit, onView, on
                             {item.language.toUpperCase()}
                           </span>
                           <button
-                            onClick={() => toggleActive(item.id, item.isActive)}
-                            className={`p-1 rounded ${item.isActive ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'}`}
-                            title={item.isActive ? 'Deactivate' : 'Activate'}
+                            onClick={() => toggleActive(item.id, item.is_active)}
+                            className={`p-1 rounded ${item.is_active ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'}`}
+                            title={item.is_active ? 'Deactivate' : 'Activate'}
                           >
-                            {item.isActive ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                            {item.is_active ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                           </button>
                         </div>
                         <h3 className="font-medium text-text-primary mb-2 line-clamp-2">
@@ -179,7 +178,7 @@ const AITrainingTab: React.FC<AITrainingTabProps> = ({ onAdd, onEdit, onView, on
                           A: {item.answer}
                         </p>
                         <div className="text-xs text-text-light">
-                          Created: {new Date(item.createdAt).toLocaleDateString()}
+                          Created: {new Date(item.created_at).toLocaleDateString()}
                         </div>
                       </div>
                     </div>
@@ -222,8 +221,8 @@ const AITrainingTab: React.FC<AITrainingTabProps> = ({ onAdd, onEdit, onView, on
           <div className="mt-4 text-sm text-text-light flex justify-between">
             <span>Showing {filteredData.length} of {trainingData.length} training entries</span>
             <span>
-              Active: {trainingData.filter(item => item.isActive).length} | 
-              Inactive: {trainingData.filter(item => !item.isActive).length}
+              Active: {trainingData.filter(item => item.is_active).length} | 
+              Inactive: {trainingData.filter(item => !item.is_active).length}
             </span>
           </div>
         </>

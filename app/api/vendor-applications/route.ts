@@ -1,57 +1,119 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, getAdminClient } from '@/lib/supabase';
 import { getAuthUser } from '@/lib/auth';
+
+// Function to get Supabase user from Authorization header
+async function getSupabaseUser(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return null;
+    }
+
+    const token = authHeader.substring(7);
+    const adminClient = getAdminClient();
+    
+    const { data: { user }, error } = await adminClient.auth.getUser(token);
+    
+    if (error || !user) {
+      console.error('Supabase auth error:', error);
+      return null;
+    }    // Get user role from our user_profiles table (not users table)
+    const { data: userData, error: userError } = await adminClient
+      .from('user_profiles')
+      .select('user_id, first_name, last_name, role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (userError || !userData) {
+      console.error('Error fetching user data:', userError);
+      return null;
+    }    return {
+      id: userData.user_id,
+      email: user.email || '', // Get email from Supabase auth user, fallback to empty string
+      name: `${userData.first_name} ${userData.last_name}`.trim(),
+      role: userData.role
+    };
+  } catch (error) {
+    console.error('Error verifying Supabase token:', error);
+    return null;
+  }
+}
 
 // GET /api/vendor-applications - Get all vendor applications (admin only)
 export async function GET(request: NextRequest) {
   try {
-    // Verify user is authenticated and is admin
-    const authUser = getAuthUser(request);
+    console.log('🔍 GET /api/vendor-applications - Starting request');
+    
+    // Try to get authenticated user from either system
+    let authUser = getAuthUser(request); // Custom JWT
+    console.log('📝 Custom JWT auth result:', authUser ? 'Found user' : 'No user found');
+    
     if (!authUser) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }    // Check if user is admin
-    if (authUser.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
+      console.log('🔍 Trying Supabase auth...');
+      authUser = await getSupabaseUser(request); // Supabase token
+      console.log('📝 Supabase auth result:', authUser ? `Found user: ${authUser.email}` : 'No user found');
     }
+    
+    if (!authUser) {
+      console.log('❌ No authenticated user found');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    console.log('✅ Authenticated user:', { id: authUser.id, email: authUser.email, role: authUser.role });
+
+    // Check if user is admin
+    if (authUser.role !== 'ADMIN') {
+      console.log('❌ User is not admin, role:', authUser.role);
+      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
+    }    console.log('✅ User is admin, proceeding with query...');
 
     const url = new URL(request.url);
     const status = url.searchParams.get('status');
     const limit = url.searchParams.get('limit') || '50';
-    const offset = url.searchParams.get('offset') || '0';
+    const offset = url.searchParams.get('offset') || '0';    console.log('📊 Query parameters:', { status, limit, offset });
 
-    let query = supabase
+    // Use admin client to bypass RLS since user is already authenticated as admin
+    const adminClient = getAdminClient();
+    
+    // Simplified query without the join first to test
+    let query = adminClient
       .from('vendor_applications')
-      .select(`
-        *,
-        user:users(name, email, phone)
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
       .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1);
 
-    if (status) {
+    if (status && status !== 'all') {
       query = query.eq('status', status);
     }
 
+    console.log('🔍 Executing database query...');
     const { data: applications, error } = await query;
 
     if (error) {
-      console.error('Error fetching vendor applications:', error);
+      console.error('❌ Database error:', error);
       return NextResponse.json({ error: 'Failed to fetch vendor applications' }, { status: 500 });
-    }
-
+    }    console.log('✅ Query successful, found', applications?.length || 0, 'applications');
     return NextResponse.json({ applications });
 
   } catch (error) {
-    console.error('Error in vendor applications API:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('❌ Unexpected error in vendor applications GET API:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
 
 // POST /api/vendor-applications - Create new vendor application
 export async function POST(request: NextRequest) {
   try {
-    // Get user (can be authenticated or anonymous)
-    const authUser = getAuthUser(request);
+    // Try to get authenticated user from either system
+    let authUser = getAuthUser(request); // Custom JWT
+    if (!authUser) {
+      authUser = await getSupabaseUser(request); // Supabase token
+    }
     
     const body = await request.json();
     const {
@@ -121,8 +183,12 @@ export async function POST(request: NextRequest) {
 // PUT /api/vendor-applications - Update vendor application status (admin only)
 export async function PUT(request: NextRequest) {
   try {
-    // Verify user is authenticated and is admin
-    const authUser = getAuthUser(request);
+    // Try to get authenticated user from either system
+    let authUser = getAuthUser(request); // Custom JWT
+    if (!authUser) {
+      authUser = await getSupabaseUser(request); // Supabase token
+    }
+    
     if (!authUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

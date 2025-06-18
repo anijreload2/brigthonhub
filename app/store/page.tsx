@@ -44,7 +44,7 @@ export default function StorePage() {
         const { data: categoriesData, error: categoriesError } = await supabase
           .from('store_categories')
           .select('*')
-          .eq('isActive', true)
+          .eq('is_active', true)
           .order('name');
 
         if (categoriesError) {
@@ -58,12 +58,12 @@ export default function StorePage() {
           .from('store_products')
           .select(`
             *,
-            store_categories:categoryId (
+            store_categories (
               id,
               name
             )
           `)
-          .eq('isActive', true)
+          .eq('is_active', true)
           .order('name');
 
         if (productsError) {
@@ -86,7 +86,7 @@ export default function StorePage() {
     .filter(product => {
       const matchesSearch = product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            product.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory === 'all' || product.categoryId === selectedCategory;
+      const matchesCategory = selectedCategory === 'all' || product.category_id === selectedCategory;
       return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {

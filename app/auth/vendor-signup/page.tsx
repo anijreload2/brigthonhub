@@ -71,12 +71,11 @@ export default function VendorSignupPage() {
       platform_messages: true
     }
   });
-
-  const toggleCategory = (categoryId: string) => {
+  const toggleCategory = (category_id: string) => {
     setSelectedCategories(prev => 
-      prev.includes(categoryId) 
-        ? prev.filter(id => id !== categoryId)
-        : [...prev, categoryId]
+      prev.includes(category_id) 
+        ? prev.filter(id => id !== category_id)
+        : [...prev, category_id]
     );
   };
 
@@ -212,8 +211,7 @@ export default function VendorSignupPage() {
       alert(error?.message || 'Failed to create vendor account. Please try again.');
     } finally {
       setIsSubmitting(false);
-    }
-  };
+    }  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">

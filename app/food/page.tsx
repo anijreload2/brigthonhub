@@ -25,7 +25,8 @@ import { FoodItem, FoodCategory } from '@/lib/types';
 import { CURRENCY } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
 
-export default function FoodPage() {  const [items, setItems] = useState<FoodItem[]>([]);
+export default function FoodPage() {
+  const [items, setItems] = useState<FoodItem[]>([]);
   const [categories, setCategories] = useState<FoodCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,14 +37,13 @@ export default function FoodPage() {  const [items, setItems] = useState<FoodIte
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        setLoading(true);
+      try {        setLoading(true);
         
         // Fetch categories
         const { data: categoriesData, error: categoriesError } = await supabase
           .from('food_categories')
           .select('*')
-          .eq('isActive', true)
+          .eq('is_active', true)
           .order('name');
 
         if (categoriesError) {
@@ -52,16 +52,15 @@ export default function FoodPage() {  const [items, setItems] = useState<FoodIte
           setCategories(categoriesData || []);
         }        // Fetch food items
         const { data: itemsData, error: itemsError } = await supabase
-          .from('food_items')
-          .select(`
+          .from('food_items')          .select(`
             *,
-            food_categories:categoryId (
+            food_categories:category_id (
               id,
               name
             )
           `)
-          .eq('isActive', true)
-          .order('createdAt', { ascending: false });
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
 
         if (itemsError) {
           console.error('Error fetching food items:', itemsError);
@@ -76,14 +75,12 @@ export default function FoodPage() {  const [items, setItems] = useState<FoodIte
     };
 
     fetchData();
-  }, []);
-
-  // Filter and sort items
+  }, []);  // Filter and sort items
   const filteredAndSortedItems = items
     .filter(item => {
       const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            item.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory === 'all' || item.categoryId === selectedCategory;
+      const matchesCategory = selectedCategory === 'all' || item.category_id === selectedCategory;
       return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {

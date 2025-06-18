@@ -21,16 +21,15 @@ const BlogTab: React.FC<BlogTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
 
   const fetchBlogPosts = async () => {
     try {
-      setLoading(true);      const { data, error } = await supabase
-        .from('blog_posts')
+      setLoading(true);      const { data, error } = await supabase        .from('blog_posts')
         .select(`
           *,
-          blog_categories:categoryId (
+          blog_categories:category_id (
             id,
             name
           )
         `)
-        .order('createdAt', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching blog posts:', error);
@@ -43,13 +42,12 @@ const BlogTab: React.FC<BlogTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
       setLoading(false);
     }
   };
-
   const fetchCategories = async () => {
     try {
       const { data, error } = await supabase
         .from('blog_categories')
         .select('*')
-        .eq('isActive', true)
+        .eq('is_active', true)
         .order('name');
 
       if (error) {
@@ -71,7 +69,7 @@ const BlogTab: React.FC<BlogTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
     const matchesSearch = post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.tags?.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = filterCategory === 'all' || post.categoryId === filterCategory;
+    const matchesCategory = filterCategory === 'all' || post.category_id === filterCategory;
     const matchesPublished = filterPublished === 'all' || 
       (filterPublished === 'published' && post.isPublished) ||
       (filterPublished === 'draft' && !post.isPublished);
@@ -185,7 +183,7 @@ const BlogTab: React.FC<BlogTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
-                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                      <span>{new Date(post.created_at).toLocaleDateString()}</span>
                     </div>
                     <span className={`px-2 py-1 rounded-full text-xs ${
                       post.isPublished 

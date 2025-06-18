@@ -62,12 +62,11 @@ export default function ProjectsPage() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
-        // Fetch categories
+          // Fetch categories
         const { data: categoriesData, error: categoriesError } = await supabase
           .from('project_categories')
           .select('*')
-          .eq('isActive', true)
+          .eq('is_active', true)
           .order('name');
 
         if (categoriesError) {
@@ -81,13 +80,13 @@ export default function ProjectsPage() {
           .from('projects')
           .select(`
             *,
-            project_categories:categoryId (
+            project_categories:category_id (
               id,
               name
             )
           `)
-          .eq('isActive', true)
-          .order('createdAt', { ascending: false });
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
 
         if (projectsError) {
           console.error('Error fetching projects:', projectsError);
@@ -108,8 +107,7 @@ export default function ProjectsPage() {
   const filteredAndSortedProjects = projects
     .filter(project => {
       const matchesSearch = project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           project.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory === 'all' || (project as any).categoryId === selectedCategory;
+                           project.description?.toLowerCase().includes(searchTerm.toLowerCase());      const matchesCategory = selectedCategory === 'all' || (project as any).category_id === selectedCategory;
       const matchesStatus = selectedStatus === 'all' || project.status === selectedStatus;
       return matchesSearch && matchesCategory && matchesStatus;
     })
@@ -118,7 +116,7 @@ export default function ProjectsPage() {
         case 'budget':
           return (b.budget || 0) - (a.budget || 0);
         case 'date':
-          return new Date((b as any).createdAt || '').getTime() - new Date((a as any).createdAt || '').getTime();
+          return new Date((b as any).created_at || '').getTime() - new Date((a as any).created_at || '').getTime();
         case 'name':
         default:
           return (a.title || '').localeCompare(b.title || '');
@@ -275,10 +273,10 @@ export default function ProjectsPage() {
                   >
                     <Card className="h-full hover:shadow-xl transition-shadow">
                       <CardHeader className="p-0">
-                        {(project as any).afterImages && (project as any).afterImages.length > 0 && (
+                        {(project as any).after_images && (project as any).after_images.length > 0 && (
                           <div className="relative w-full h-48 rounded-t-lg overflow-hidden">
                             <Image
-                              src={(project as any).afterImages[0]}
+                              src={(project as any).after_images[0]}
                               alt={project.title || 'Project image'}
                               fill
                               className="object-cover transition-transform duration-300 hover:scale-105"
@@ -307,23 +305,23 @@ export default function ProjectsPage() {
                               Budget: {formatBudget(project.budget)}
                             </div>
                           )}
-                          {(project as any).startDate && (
+                          {(project as any).start_date && (
                             <div className="flex items-center text-sm text-gray-600">
                               <Calendar className="h-4 w-4 mr-2" />
-                              Started: {new Date((project as any).startDate).toLocaleDateString()}
+                              Started: {new Date((project as any).start_date).toLocaleDateString()}
                             </div>
                           )}
-                          {(project as any).endDate && (
+                          {(project as any).end_date && (
                             <div className="flex items-center text-sm text-gray-600">
                               <Clock className="h-4 w-4 mr-2" />
-                              Completed: {new Date((project as any).endDate).toLocaleDateString()}
+                              Completed: {new Date((project as any).end_date).toLocaleDateString()}
                             </div>
                           )}
                         </div>
 
-                        {(project as any).clientName && (
+                        {(project as any).client_name && (
                           <div className="mb-4">
-                            <p className="text-sm text-gray-500">Client: <span className="font-medium">{(project as any).clientName}</span></p>
+                            <p className="text-sm text-gray-500">Client: <span className="font-medium">{(project as any).client_name}</span></p>
                           </div>
                         )}
 
@@ -343,7 +341,7 @@ export default function ProjectsPage() {
                               View Details
                             </Button>
                           </Link>
-                          {(project as any).beforeImages && (project as any).beforeImages.length > 0 && (
+                          {(project as any).before_images && (project as any).before_images.length > 0 && (
                             <Badge variant="secondary">
                               Before/After Available
                             </Badge>

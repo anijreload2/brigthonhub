@@ -81,9 +81,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           name: userData.name,
           role: userData.role,
           phone: userData.phone,
-          isActive: userData.isActive,
-          createdAt: userData.createdAt,
-          updatedAt: userData.updatedAt,
+          is_active: userData.is_active,
+          created_at: userData.created_at,
+          updated_at: userData.updated_at,
           profile: userData.profile
         });
       }
@@ -108,9 +108,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: supabaseUser.email,
           name: supabaseUser.user_metadata?.name || '',
           role: 'REGISTERED',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         });
 
       if (userError) {
@@ -123,11 +123,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('user_profiles')
         .insert({
           id: profileId,
-          userId: userId,
-          firstName: supabaseUser.user_metadata?.name?.split(' ')[0] || '',
-          lastName: supabaseUser.user_metadata?.name?.split(' ').slice(1).join(' ') || '',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          user_id: userId,
+          first_name: supabaseUser.user_metadata?.name?.split(' ')[0] || '',
+          last_name: supabaseUser.user_metadata?.name?.split(' ').slice(1).join(' ') || '',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         });
 
       if (profileError) {

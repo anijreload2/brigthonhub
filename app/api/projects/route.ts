@@ -8,21 +8,18 @@ export async function GET(request: NextRequest) {
     console.log('Projects API: Starting request');
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '6');
-    const offset = parseInt(searchParams.get('offset') || '0');
-    const categoryId = searchParams.get('categoryId');
-    const status = searchParams.get('status');    let query = supabase
+    const offset = parseInt(searchParams.get('offset') || '0');    const category_id = searchParams.get('category_id');
+    const status = searchParams.get('status');let query = supabase
       .from('projects')
       .select(`
         *,
         project_categories(*)
       `)
-      .eq('isActive', true)
-      .order('createdAt', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    // Apply filters if provided
-    if (categoryId) {
-      query = query.eq('categoryId', categoryId);
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);    // Apply filters if provided
+    if (category_id) {
+      query = query.eq('category_id', category_id);
     }
     if (status) {
       query = query.eq('status', status);

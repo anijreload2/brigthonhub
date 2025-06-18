@@ -21,15 +21,14 @@ const FoodTab: React.FC<FoodTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('food_items')
-        .select(`
+        .from('food_items')        .select(`
           *,
-          food_categories:categoryId (
+          food_categories:category_id (
             id,
             name
           )
         `)
-        .order('createdAt', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching food items:', error);
@@ -42,13 +41,12 @@ const FoodTab: React.FC<FoodTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
       setLoading(false);
     }
   };
-
   const fetchFoodCategories = async () => {
     try {
       const { data, error } = await supabase
         .from('food_categories')
         .select('*')
-        .eq('isActive', true)
+        .eq('is_active', true)
         .order('name');
 
       if (error) {
@@ -69,7 +67,7 @@ const FoodTab: React.FC<FoodTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
   const filteredFoodItems = foodItems.filter(item => {
     const matchesSearch = item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === 'all' || item.categoryId === filterCategory;
+    const matchesCategory = filterCategory === 'all' || item.category_id === filterCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -181,11 +179,11 @@ const FoodTab: React.FC<FoodTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
                   <div className="flex items-center gap-2">
                     <Package className="w-3 h-3" />
                     <span className={`px-2 py-1 rounded-full text-xs ${
-                      item.isActive 
+                      item.is_active 
                         ? 'bg-success bg-opacity-10 text-success'
                         : 'bg-gray-100 text-gray-500'
                     }`}>
-                      {item.isActive ? 'Active' : 'Inactive'}
+                      {item.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </div>
                 </div>

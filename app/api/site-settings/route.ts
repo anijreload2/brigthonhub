@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
       key,
       value: String(value),
       type,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
 
     const { data, error } = await supabase
@@ -81,7 +81,7 @@ export async function PUT(request: NextRequest) {
       .update({ 
         value: String(value), 
         type: type || 'string',
-        updatedAt: new Date().toISOString() 
+        updated_at: new Date().toISOString() 
       })
       .eq('key', key)
       .select()

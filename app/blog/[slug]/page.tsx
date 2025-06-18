@@ -47,7 +47,7 @@ interface BlogPost {
   views?: number;
   likes?: number;
   isPublished: boolean;
-  isActive: boolean;
+  is_active: boolean;
 }
 
 interface BlogDetailPageProps {

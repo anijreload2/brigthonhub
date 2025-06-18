@@ -9,8 +9,8 @@ export async function GET() {
     const { data: trainingData, error } = await adminClient
       .from('ai_training_data')
       .select('question, category')
-      .eq('isActive', true)
-      .order('createdAt', { ascending: false })
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
       .limit(20);
 
     if (error) {

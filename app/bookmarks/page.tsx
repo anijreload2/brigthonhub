@@ -131,7 +131,6 @@ export default function BookmarksPage() {
     
     return matchesType && matchesSearch && bookmark.item_data; // Only show bookmarks with valid item data
   });
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -272,10 +271,10 @@ export default function BookmarksPage() {
               if (viewMode === 'grid') {
                 return (
                   <div key={bookmark.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                    {item.imageUrl && (
+                    {item.image_url && (
                       <div className="relative h-48">
                         <Image
-                          src={item.imageUrl}
+                          src={item.image_url}
                           alt={item.title || item.name}
                           fill
                           className="object-cover"
@@ -342,10 +341,10 @@ export default function BookmarksPage() {
                 return (
                   <div key={bookmark.id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
                     <div className="flex items-start space-x-4">
-                      {item.imageUrl && (
+                      {item.image_url && (
                         <div className="relative w-24 h-24 flex-shrink-0">
                           <Image
-                            src={item.imageUrl}
+                            src={item.image_url}
                             alt={item.title || item.name}
                             fill
                             className="object-cover rounded-md"

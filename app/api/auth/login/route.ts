@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     //   );
     // }
 
-    if (!user.isActive) {
+    if (!user.is_active) {
       return NextResponse.json(
         { error: 'Account is deactivated' },
         { status: 401 }

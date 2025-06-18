@@ -57,7 +57,7 @@ interface Property {
     author: string;
     date: string;
   }[];
-  isActive: boolean;
+  is_active: boolean;
   created_at: string;
 }
 

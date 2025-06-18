@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     let queryBuilder = adminClient
       .from('ai_training_data')
       .select('*')
-      .eq('isActive', true);
+      .eq('is_active', true);
 
     // Add category filter if provided
     if (category) {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     // Search for relevant training data using text search
     queryBuilder = queryBuilder
       .or(`question.ilike.%${query}%, answer.ilike.%${query}%`)
-      .order('createdAt', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(10);
 
     const { data, error } = await queryBuilder;

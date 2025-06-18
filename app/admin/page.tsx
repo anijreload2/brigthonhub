@@ -11,16 +11,21 @@ export default function AdminPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) {
-      router.push('/auth/login');
-      return;
-    }
+    // Add a small delay to allow auth state to stabilize
+    const timeout = setTimeout(() => {
+      if (!user) {
+        router.push('/auth/login?redirect=/admin');
+        return;
+      }
 
-    // Check if user is admin (you can add more sophisticated role checking)
-    if (user.role !== UserRole.ADMIN) {
-      router.push('/');
-      return;
-    }
+      // Check if user is admin
+      if (user.role !== UserRole.ADMIN) {
+        router.push('/');
+        return;
+      }
+    }, 200);
+
+    return () => clearTimeout(timeout);
   }, [user, router]);
 
   if (!user || user.role !== UserRole.ADMIN) {

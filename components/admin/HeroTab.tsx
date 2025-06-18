@@ -79,12 +79,12 @@ const HeroTab: React.FC<HeroTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
       // Swap sort orders
       const { error: error1 } = await supabase
         .from('content_blocks')
-        .update({ sort_order: targetBlock.sort_order, updatedAt: new Date().toISOString() })
+        .update({ sort_order: targetBlock.sort_order, updated_at: new Date().toISOString() })
         .eq('id', currentBlock.id);
 
       const { error: error2 } = await supabase
         .from('content_blocks')
-        .update({ sort_order: currentBlock.sort_order, updatedAt: new Date().toISOString() })
+        .update({ sort_order: currentBlock.sort_order, updated_at: new Date().toISOString() })
         .eq('id', targetBlock.id);
 
       if (error1 || error2) throw error1 || error2;
@@ -97,22 +97,21 @@ const HeroTab: React.FC<HeroTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
       alert(`Error: ${error.message}`);
     }
   };
-
-  const toggleActive = async (id: string, isActive: boolean) => {
+  const toggleActive = async (id: string, is_active: boolean) => {
     try {
       const { error } = await supabase
         .from('content_blocks')
-        .update({ isActive: !isActive, updatedAt: new Date().toISOString() })
+        .update({ is_active: !is_active, updated_at: new Date().toISOString() })
         .eq('id', id);
 
       if (error) throw error;
       
       // Update local state
       setContentBlocks(prev => prev.map(block => 
-        block.id === id ? { ...block, isActive: !isActive } : block
+        block.id === id ? { ...block, is_active: !is_active } : block
       ));
       
-      alert(`Content block ${!isActive ? 'activated' : 'deactivated'} successfully`);
+      alert(`Content block ${!is_active ? 'activated' : 'deactivated'} successfully`);
     } catch (error: any) {
       console.error('Error updating content block:', error);
       alert(`Error: ${error.message}`);
@@ -194,9 +193,9 @@ const HeroTab: React.FC<HeroTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
                             Order: {block.sort_order}
                           </span>
                           <span className={`px-2 py-1 rounded-full text-xs ${
-                            block.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            block.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                           }`}>
-                            {block.isActive ? 'Active' : 'Inactive'}
+                            {block.is_active ? 'Active' : 'Inactive'}
                           </span>
                         </div>
                         <h3 className="font-medium text-text-primary mb-2">
@@ -212,7 +211,7 @@ const HeroTab: React.FC<HeroTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
                           </div>
                         )}
                         <div className="text-xs text-text-light">
-                          Updated: {new Date(block.updatedAt).toLocaleDateString()}
+                          Updated: {new Date(block.updated_at).toLocaleDateString()}
                         </div>
                       </div>
                     </div>
@@ -232,11 +231,11 @@ const HeroTab: React.FC<HeroTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
                         <ArrowDown className="w-4 h-4 text-text-light" />
                       </button>
                       <button
-                        onClick={() => toggleActive(block.id, block.isActive)}
-                        className={`p-1 rounded ${block.isActive ? 'text-red-600 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'}`}
-                        title={block.isActive ? 'Deactivate' : 'Activate'}
+                        onClick={() => toggleActive(block.id, block.is_active)}
+                        className={`p-1 rounded ${block.is_active ? 'text-red-600 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'}`}
+                        title={block.is_active ? 'Deactivate' : 'Activate'}
                       >
-                        {block.isActive ? '❌' : '✅'}
+                        {block.is_active ? '❌' : '✅'}
                       </button>
                       <button 
                         onClick={() => onView(block)}
@@ -276,8 +275,8 @@ const HeroTab: React.FC<HeroTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
           <div className="mt-4 text-sm text-text-light flex justify-between">
             <span>Showing {filteredBlocks.length} of {contentBlocks.length} content blocks</span>
             <span>
-              Active: {contentBlocks.filter(block => block.isActive).length} | 
-              Inactive: {contentBlocks.filter(block => !block.isActive).length}
+              Active: {contentBlocks.filter(block => block.is_active).length} | 
+              Inactive: {contentBlocks.filter(block => !block.is_active).length}
             </span>
           </div>
         </>

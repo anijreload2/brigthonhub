@@ -22,14 +22,14 @@ const tableConfigs: Record<string, any> = {
       { name: 'name', label: 'Full Name', type: 'text' },
       { name: 'phone', label: 'Phone', type: 'tel' },
       { name: 'role', label: 'Role', type: 'select', options: ['GUEST', 'REGISTERED', 'VENDOR', 'AGENT', 'ADMIN'], required: true },
-      { name: 'isActive', label: 'Active', type: 'boolean' }
+      { name: 'is_active', label: 'Active', type: 'boolean' }
     ]
   },
   user_profiles: {
     title: 'User Profile',
     fields: [
-      { name: 'firstName', label: 'First Name', type: 'text' },
-      { name: 'lastName', label: 'Last Name', type: 'text' },
+      { name: 'first_name', label: 'First Name', type: 'text' },
+      { name: 'last_name', label: 'Last Name', type: 'text' },
       { name: 'avatar', label: 'Avatar URL', type: 'url' },
       { name: 'bio', label: 'Bio', type: 'textarea' },
       { name: 'businessName', label: 'Business Name', type: 'text' },
@@ -43,8 +43,8 @@ const tableConfigs: Record<string, any> = {
     fields: [
       { name: 'title', label: 'Title', type: 'text', required: true },
       { name: 'description', label: 'Description', type: 'textarea', required: true },
-      { name: 'propertyType', label: 'Property Type', type: 'select', options: ['RESIDENTIAL', 'COMMERCIAL', 'LAND', 'MIXED_USE'], required: true },
-      { name: 'listingType', label: 'Listing Type', type: 'select', options: ['SALE', 'RENT'], required: true },
+      { name: 'property_type', label: 'Property Type', type: 'select', options: ['RESIDENTIAL', 'COMMERCIAL', 'LAND', 'MIXED_USE'], required: true },
+      { name: 'listing_type', label: 'Listing Type', type: 'select', options: ['SALE', 'RENT'], required: true },
       { name: 'price', label: 'Price', type: 'number', required: true },
       { name: 'location', label: 'Location', type: 'text', required: true },
       { name: 'address', label: 'Address', type: 'text', required: true },
@@ -53,7 +53,7 @@ const tableConfigs: Record<string, any> = {
       { name: 'area', label: 'Area (sq ft)', type: 'number' },
       { name: 'images', label: 'Image URLs (comma-separated)', type: 'textarea' },
       { name: 'features', label: 'Features (comma-separated)', type: 'textarea' },
-      { name: 'isActive', label: 'Active', type: 'boolean' }
+      { name: 'is_active', label: 'Active', type: 'boolean' }
     ]
   },
   food_items: {
@@ -61,7 +61,7 @@ const tableConfigs: Record<string, any> = {
     fields: [
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'description', label: 'Description', type: 'textarea', required: true },
-      { name: 'categoryId', label: 'Category ID', type: 'text', required: true },
+      { name: 'category_id', label: 'Category ID', type: 'text', required: true },
       { name: 'price', label: 'Price', type: 'number', required: true },
       { name: 'unit', label: 'Unit', type: 'text', required: true },
       { name: 'minimumOrder', label: 'Minimum Order', type: 'number' },
@@ -73,7 +73,7 @@ const tableConfigs: Record<string, any> = {
       { name: 'sellerEmail', label: 'Seller Email', type: 'email' },
       { name: 'sellerAddress', label: 'Seller Address', type: 'textarea' },
       { name: 'sellerDescription', label: 'Seller Description', type: 'textarea' },
-      { name: 'isActive', label: 'Active', type: 'boolean' }
+      { name: 'is_active', label: 'Active', type: 'boolean' }
     ]
   },
   store_products: {
@@ -81,7 +81,7 @@ const tableConfigs: Record<string, any> = {
     fields: [
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'description', label: 'Description', type: 'textarea', required: true },
-      { name: 'categoryId', label: 'Category ID', type: 'text', required: true },
+      { name: 'category_id', label: 'Category ID', type: 'text', required: true },
       { name: 'price', label: 'Price', type: 'number', required: true },
       { name: 'stock', label: 'Stock', type: 'number' },
       { name: 'images', label: 'Image URLs (comma-separated)', type: 'textarea' },
@@ -91,7 +91,7 @@ const tableConfigs: Record<string, any> = {
       { name: 'sellerEmail', label: 'Seller Email', type: 'email' },
       { name: 'sellerAddress', label: 'Seller Address', type: 'textarea' },
       { name: 'sellerDescription', label: 'Seller Description', type: 'textarea' },
-      { name: 'isActive', label: 'Active', type: 'boolean' }
+      { name: 'is_active', label: 'Active', type: 'boolean' }
     ]
   },
   projects: {
@@ -99,7 +99,7 @@ const tableConfigs: Record<string, any> = {
     fields: [
       { name: 'title', label: 'Title', type: 'text', required: true },
       { name: 'description', label: 'Description', type: 'textarea', required: true },
-      { name: 'categoryId', label: 'Category ID', type: 'text', required: true },
+      { name: 'category_id', label: 'Category ID', type: 'text', required: true },
       { name: 'status', label: 'Status', type: 'select', options: ['PLANNING', 'IN_PROGRESS', 'COMPLETED', 'ON_HOLD'], required: true },
       { name: 'budget', label: 'Budget', type: 'number' },
       { name: 'location', label: 'Location', type: 'text' },
@@ -110,7 +110,7 @@ const tableConfigs: Record<string, any> = {
       { name: 'contactPhone', label: 'Contact Phone', type: 'tel' },
       { name: 'contactEmail', label: 'Contact Email', type: 'email' },
       { name: 'contactAddress', label: 'Contact Address', type: 'textarea' },
-      { name: 'isActive', label: 'Active', type: 'boolean' }
+      { name: 'is_active', label: 'Active', type: 'boolean' }
     ]
   },
   blog_posts: {
@@ -120,7 +120,7 @@ const tableConfigs: Record<string, any> = {
       { name: 'slug', label: 'Slug', type: 'text', required: true },
       { name: 'excerpt', label: 'Excerpt', type: 'textarea' },
       { name: 'content', label: 'Content', type: 'textarea', required: true },
-      { name: 'categoryId', label: 'Category ID', type: 'text', required: true },
+      { name: 'category_id', label: 'Category ID', type: 'text', required: true },
       { name: 'featuredImage', label: 'Featured Image URL', type: 'url' },
       { name: 'tags', label: 'Tags (comma-separated)', type: 'text' },
       { name: 'authorName', label: 'Author Name', type: 'text' },
@@ -158,7 +158,7 @@ const tableConfigs: Record<string, any> = {
       { name: 'question', label: 'Question', type: 'textarea', required: true },
       { name: 'answer', label: 'Answer', type: 'textarea', required: true },
       { name: 'language', label: 'Language', type: 'select', options: ['en', 'fr', 'es', 'de', 'zh', 'ar'], required: true },
-      { name: 'isActive', label: 'Active', type: 'boolean' }
+      { name: 'is_active', label: 'Active', type: 'boolean' }
     ]
   },
   content_blocks: {
@@ -169,7 +169,7 @@ const tableConfigs: Record<string, any> = {
       { name: 'block_content', label: 'Block Content (JSON)', type: 'textarea' },
       { name: 'page_location', label: 'Page Location', type: 'select', options: ['home', 'about', 'services', 'contact'], required: true },
       { name: 'sort_order', label: 'Sort Order', type: 'number' },
-      { name: 'isActive', label: 'Active', type: 'boolean' }
+      { name: 'is_active', label: 'Active', type: 'boolean' }
     ]
   },
   media_gallery: {
@@ -181,7 +181,7 @@ const tableConfigs: Record<string, any> = {
       { name: 'file_type', label: 'File Type', type: 'select', options: ['image', 'video', 'document', 'audio'], required: true },
       { name: 'file_size', label: 'File Size (bytes)', type: 'number' },
       { name: 'alt_text', label: 'Alt Text', type: 'text' },
-      { name: 'isActive', label: 'Active', type: 'boolean' }
+      { name: 'is_active', label: 'Active', type: 'boolean' }
     ]
   }
 };

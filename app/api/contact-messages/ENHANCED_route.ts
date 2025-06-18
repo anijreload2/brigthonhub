@@ -428,12 +428,12 @@ async function addThreadParticipants(threadId: string, userIds: string[]) {
     user_type: 'user', // Will be updated by trigger based on user role
     joined_at: new Date().toISOString()
   }));
-
   await supabase
     .from('message_participants')
-    .insert(participants)
-    .onConflict('thread_id, user_id')
-    .ignoreDuplicates();
+    .upsert(participants, {
+      onConflict: 'thread_id, user_id',
+      ignoreDuplicates: true
+    });
 }
 
 async function fetchItemContext(contentType: string, contentId: string) {

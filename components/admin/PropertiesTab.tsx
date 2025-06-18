@@ -21,7 +21,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ onAdd, onEdit, onView, on
       setLoading(true);      const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .order('createdAt', { ascending: false });      if (error) {
+        .order('created_at', { ascending: false });if (error) {
         console.error('Error fetching properties:', error);
       } else {
         console.log('Fetched properties:', data); // Debug log
@@ -76,9 +76,9 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ onAdd, onEdit, onView, on
               <div key={property.id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                 {/* Property Image */}
                 <div className="h-48 bg-gray-200 overflow-hidden">
-                  {property.imageUrl ? (
+                  {property.image_url ? (
                     <img 
-                      src={property.imageUrl} 
+                      src={property.image_url} 
                       alt={property.title}
                       className="w-full h-full object-cover"
                       onError={(e) => {

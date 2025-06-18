@@ -21,15 +21,14 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ onAdd, onEdit, onView, onDele
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase        .from('projects')
-        .select(`
+      const { data, error } = await supabase        .from('projects')        .select(`
           *,
-          project_categories:categoryId (
+          project_categories:category_id (
             id,
             name
           )
         `)
-        .order('createdAt', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching projects:', error);
@@ -42,13 +41,12 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ onAdd, onEdit, onView, onDele
       setLoading(false);
     }
   };
-
   const fetchCategories = async () => {
     try {
       const { data, error } = await supabase
         .from('project_categories')
         .select('*')
-        .eq('isActive', true)
+        .eq('is_active', true)
         .order('name');
 
       if (error) {
@@ -69,7 +67,7 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ onAdd, onEdit, onView, onDele
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.clientName?.toLowerCase().includes(searchTerm.toLowerCase());
+                         project.client_name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || project.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -174,10 +172,10 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ onAdd, onEdit, onView, onDele
                   </div>
                 </div>
                 
-                {project.beforeImages && project.beforeImages.length > 0 && (
+                {project.before_images && project.before_images.length > 0 && (
                   <div className="mb-3">
                     <img 
-                      src={project.beforeImages[0]} 
+                      src={project.before_images[0]} 
                       alt={project.title}
                       className="w-full h-32 object-cover rounded-lg"
                       onError={(e) => {
@@ -190,14 +188,14 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ onAdd, onEdit, onView, onDele
                 <h4 className="font-semibold text-text-primary mb-1">{project.title}</h4>
                 <p className="text-sm text-text-light mb-2 line-clamp-2">{project.description}</p>
                 <div className="text-xs text-text-light space-y-1">
-                  {project.clientName && <p>Client: {project.clientName}</p>}
+                  {project.client_name && <p>Client: {project.client_name}</p>}
                   {project.location && <p>Location: {project.location}</p>}
                   <p>Budget: {formatCurrency(project.budget)}</p>
                   <p>Category: {project.project_categories?.name || 'N/A'}</p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
-                      <span>{project.startDate ? new Date(project.startDate).toLocaleDateString() : 'TBD'}</span>
+                      <span>{project.start_date ? new Date(project.start_date).toLocaleDateString() : 'TBD'}</span>
                     </div>
                     <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(project.status)}`}>
                       {project.status.replace('_', ' ')}

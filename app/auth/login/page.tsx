@@ -1,9 +1,9 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/components/auth/auth-provider';
@@ -13,25 +13,47 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 
-export default function LoginPage() {  const [email, setEmail] = useState('');
+function LoginForm() {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const router = useRouter();
-  const { toast } = useToast();  const handleSubmit = async (e: React.FormEvent) => {
+  const searchParams = useSearchParams();
+  const { toast } = useToast();  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      // Small delay to ensure auth state is stable
+      const timeout = setTimeout(() => {
+        const redirectTo = searchParams.get('redirect');
+        
+        if (redirectTo) {
+          router.replace(redirectTo);
+        } else if (user.role === 'ADMIN') {
+          router.replace('/admin');
+        } else if (user.role === 'VENDOR') {
+          router.replace('/vendor/dashboard');
+        } else {
+          router.replace('/profile');
+        }
+      }, 100);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [user, searchParams, router]);const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      await login(email, password, true); // Enable redirect after login
+      await login(email, password); // Login with email and password
       
       toast({
         title: 'Welcome back!',
         description: 'You have been successfully logged in.',
       });
       
-      // Note: Redirect will be handled automatically by AuthProvider
+      // Don't redirect here - let useEffect handle it when user state updates
     } catch (error) {
       console.error('Login error:', error);
       toast({
@@ -39,8 +61,7 @@ export default function LoginPage() {  const [email, setEmail] = useState('');
         description: error instanceof Error ? error.message : 'Please check your credentials and try again.',
         variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Only set loading false on error
     }
   };
 
@@ -144,19 +165,26 @@ export default function LoginPage() {  const [email, setEmail] = useState('');
                 </Link>
               </p>
               <p className="text-gray-600">
-                Need admin access?{' '}
+                Want to become a vendor?{' '}
                 <Link
-                  href="/auth/admin-signup"
-                  className="text-red-600 hover:text-red-700 font-medium"
+                  href="/auth/vendor-signup"
+                  className="text-green-600 hover:text-green-700 font-medium"
                 >
-                  Create Admin Account
-                </Link>
-              </p>
+                  Vendor Registration
+                </Link>              </p>
             </div>
           </CardContent>
         </Card>
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

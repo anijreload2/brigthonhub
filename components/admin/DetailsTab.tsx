@@ -58,7 +58,7 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ onAdd, onEdit, onView, onDelete
       const { data, error } = await supabase
         .from(contentType)
         .select('*')
-        .order('createdAt', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error(`Error fetching ${contentType}:`, error);
@@ -81,23 +81,23 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ onAdd, onEdit, onView, onDelete
             if (!item.contact_email || !item.contact_phone) {
               needsAttention++;
             }
-            if (item.isActive) published++;
+            if (item.is_active) published++;
           } else if (contentType === 'food_items') {
-            if (item.images?.length > 0 && item.description && item.nutritionalInfo) {
+            if (item.images?.length > 0 && item.description && item.nutritional_info) {
               withDetails++;
             }
-            if (!item.supplier_info || item.stock < item.minimumOrder) {
+            if (!item.supplier_info || item.stock < item.minimum_order) {
               needsAttention++;
             }
-            if (item.isActive) published++;
+            if (item.is_active) published++;
           } else if (contentType === 'projects') {
-            if (item.beforeImages?.length > 0 && item.afterImages?.length > 0 && item.description) {
+            if (item.before_images?.length > 0 && item.after_images?.length > 0 && item.description) {
               withDetails++;
             }
-            if (!item.clientName || !item.testimonial) {
+            if (!item.client_name || !item.testimonial) {
               needsAttention++;
             }
-            if (item.isActive) published++;
+            if (item.is_active) published++;
           } else if (contentType === 'blog_posts') {
             if (item.content && item.featuredImage && item.excerpt) {
               withDetails++;
@@ -113,7 +113,7 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ onAdd, onEdit, onView, onDelete
             if (!item.sku || item.stock <= 0) {
               needsAttention++;
             }
-            if (item.isActive) published++;
+            if (item.is_active) published++;
           }
         });
 
@@ -159,16 +159,16 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ onAdd, onEdit, onView, onDelete
     } else if (contentType === 'food_items') {
       if (item.images?.length > 0) score += 2;
       if (item.description?.length > 100) score += 2;
-      if (item.nutritionalInfo) score += 2;
+      if (item.nutritional_info) score += 2;
       if (item.supplier_info) score += 1;
       if (item.ingredients?.length > 0) score += 1;
       if (item.certifications?.length > 0) score += 1;
       if (item.origin) score += 1;
     } else if (contentType === 'projects') {
-      if (item.beforeImages?.length > 0) score += 2;
-      if (item.afterImages?.length > 0) score += 2;
+      if (item.before_images?.length > 0) score += 2;
+      if (item.after_images?.length > 0) score += 2;
       if (item.description?.length > 100) score += 2;
-      if (item.clientName) score += 1;
+      if (item.client_name) score += 1;
       if (item.testimonial) score += 1;
       if (item.timeline_phases) score += 1;
       if (item.team_members) score += 1;
@@ -351,12 +351,12 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ onAdd, onEdit, onView, onDelete
                             <>
                               <span>{item.status}</span>
                               <span>{item.location}</span>
-                              <span>{(item.beforeImages?.length || 0) + (item.afterImages?.length || 0)} images</span>
+                              <span>{(item.before_images?.length || 0) + (item.after_images?.length || 0)} images</span>
                             </>
                           )}
                           {contentType === 'blog_posts' && (
                             <>
-                              <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                              <span>{new Date(item.created_at).toLocaleDateString()}</span>
                               <span>{item.readingTime} min read</span>
                               <span>{item.views || 0} views</span>
                             </>
@@ -412,7 +412,7 @@ const DetailsTab: React.FC<DetailsTabProps> = ({ onAdd, onEdit, onView, onDelete
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                    {(item.isActive || item.isPublished) && (
+                    {(item.is_active || item.isPublished) && (
                       <a 
                         href={`/${contentType.replace('_items', '').replace('_posts', '').replace('_products', '')}/${contentType === 'blog_posts' ? item.slug : item.id}`}
                         target="_blank"

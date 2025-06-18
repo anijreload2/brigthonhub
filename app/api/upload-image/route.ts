@@ -154,13 +154,13 @@ export async function POST(request: NextRequest) {
         originalFilename: dbData.original_filename,
         fileSize: dbData.file_size,
         mimeType: dbData.mime_type,
-        fileUrl: dbData.file_url,
+        file_url: dbData.file_url,
         uploadPurpose: dbData.upload_purpose,
         contentType: dbData.content_type,
         contentId: dbData.content_id,
         altText: dbData.alt_text,
         isPrimary: dbData.is_primary,
-        createdAt: dbData.created_at
+        created_at: dbData.created_at
       }
     });
 

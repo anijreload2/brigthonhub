@@ -146,6 +146,7 @@ const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
   }
 };
 
+
 export default function EditListing() {
   const { user } = useAuth();
   const router = useRouter();
@@ -328,7 +329,6 @@ export default function EditListing() {
       setSubmitting(false);
     }
   };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

@@ -25,9 +25,10 @@ interface Property {
   bedrooms?: number;
   bathrooms?: number;
   area?: number;
-  images: string[];  propertyType: string;
-  listingType: string;
-  isActive: boolean;
+  images: string[];
+  property_type: string;
+  listing_type: string;
+  is_active: boolean;
   created_at: string;
 }
 
@@ -156,15 +157,14 @@ export default function FeaturedProperties() {
                       <Eye className="w-8 h-8 mb-2" />
                       <span>No Image Available</span>
                     </div>
-                  </div>
-                  <div className="absolute top-4 left-4">
-                    <Badge className={`${property.listingType === 'SALE' ? 'bg-green-500' : 'bg-blue-500'} text-white`}>
-                      {property.listingType === 'SALE' ? 'For Sale' : 'For Rent'}
+                  </div>                  <div className="absolute top-4 left-4">
+                    <Badge className={`${property.listing_type === 'SALE' ? 'bg-green-500' : 'bg-blue-500'} text-white`}>
+                      {property.listing_type === 'SALE' ? 'For Sale' : 'For Rent'}
                     </Badge>
                   </div>
                   <div className="absolute top-4 right-4">
                     <Badge variant="secondary" className="bg-white/90 text-gray-800">
-                      {property.propertyType}
+                      {property.property_type}
                     </Badge>
                   </div>
                 </div>

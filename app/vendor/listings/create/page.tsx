@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useReducer } from 'react';
 import { useAuth } from '@/components/auth/auth-provider';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
@@ -313,7 +313,6 @@ export default function CreateListing() {
       setSubmitting(false);
     }
   };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

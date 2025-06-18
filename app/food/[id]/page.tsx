@@ -39,8 +39,8 @@ interface FoodItem {
   images: string[];
   nutritionalInfo?: any;
   origin?: string;
-  isActive: boolean;
-  createdAt: string;
+  is_active: boolean;
+  created_at: string;
   sellerName?: string;
   sellerPhone?: string;
   sellerEmail?: string;
@@ -74,7 +74,7 @@ export default function FoodDetailPage({ params }: FoodDetailPageProps) {
         const data = await response.json();
         setFoodItem(data.foodItem);
         setRelatedItems(data.relatedItems || []);
-        setQuantity(data.foodItem.minimumOrder || 1);
+        setQuantity(data.foodItem.minimum_order || 1);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {

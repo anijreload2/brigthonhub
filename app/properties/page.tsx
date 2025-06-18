@@ -48,8 +48,8 @@ const PropertiesPage = () => {
       const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .eq('isActive', true)
-        .order('createdAt', { ascending: false });
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching properties:', error);
@@ -68,7 +68,7 @@ const PropertiesPage = () => {
       const { data, error } = await supabase
         .from('property_categories')
         .select('*')
-        .eq('isActive', true)
+        .eq('is_active', true)
         .order('name');
 
       if (error) {
@@ -86,9 +86,9 @@ const PropertiesPage = () => {
                          property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          property.description.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesCategory = selectedCategory === 'all' || property.categoryId === selectedCategory;
-    const matchesType = selectedType === 'all' || property.propertyType === selectedType;
-    const matchesListing = selectedListing === 'all' || property.listingType === selectedListing;
+    const matchesCategory = selectedCategory === 'all' || property.category_id === selectedCategory;
+    const matchesType = selectedType === 'all' || property.property_type === selectedType;
+    const matchesListing = selectedListing === 'all' || property.listing_type === selectedListing;
     
     let matchesPrice = true;
     if (priceRange !== 'all') {

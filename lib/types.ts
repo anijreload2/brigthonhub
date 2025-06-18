@@ -1,4 +1,3 @@
-
 // BrightonHub Type Definitions
 
 // Supabase Database Type
@@ -261,6 +260,147 @@ export type Database = {
           updated_at?: string
         }
       }
+      blogs: {
+        Row: {
+          id: string
+          title: string
+          content: string
+          excerpt: string | null
+          author_id: string
+          category_id: string | null
+          status: string
+          published_at: string | null
+          featured_image: string | null
+          tags: string[]
+          meta_title: string | null
+          meta_description: string | null
+          slug: string
+          views_count: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          content: string
+          excerpt?: string | null
+          author_id: string
+          category_id?: string | null
+          status?: string
+          published_at?: string | null
+          featured_image?: string | null
+          tags?: string[]
+          meta_title?: string | null
+          meta_description?: string | null
+          slug: string
+          views_count?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          content?: string
+          excerpt?: string | null
+          author_id?: string
+          category_id?: string | null
+          status?: string
+          published_at?: string | null
+          featured_image?: string | null
+          tags?: string[]
+          meta_title?: string | null
+          meta_description?: string | null
+          slug?: string
+          views_count?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      messages: {
+        Row: {
+          id: string
+          sender_id: string
+          recipient_id: string
+          subject: string | null
+          content: string
+          message_type: string
+          thread_id: string | null
+          parent_id: string | null
+          is_read: boolean
+          read_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          sender_id: string
+          recipient_id: string
+          subject?: string | null
+          content: string
+          message_type?: string
+          thread_id?: string | null
+          parent_id?: string | null
+          is_read?: boolean
+          read_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          sender_id?: string
+          recipient_id?: string
+          subject?: string | null
+          content?: string
+          message_type?: string
+          thread_id?: string | null
+          parent_id?: string | null
+          is_read?: boolean
+          read_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      categories: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          type: string
+          slug: string
+          parent_id: string | null
+          sort_order: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          type: string
+          slug: string
+          parent_id?: string | null
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          type?: string
+          slug?: string
+          parent_id?: string | null
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -284,9 +424,9 @@ export interface User {
   name?: string;
   phone?: string;
   role: UserRole;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
   profile?: UserProfile;
 }
 
@@ -300,17 +440,19 @@ export enum UserRole {
 
 export interface UserProfile {
   id: string;
-  userId: string;
-  firstName?: string;
-  lastName?: string;
+  user_id: string;
+  first_name?: string;
+  last_name?: string;
   avatar?: string;
   bio?: string;
-  businessName?: string;
-  businessAddress?: string;
-  businessPhone?: string;
+  business_name?: string;
+  business_address?: string;
+  business_phone?: string;
   location?: string;
   preferences?: any;
   notifications?: any;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface PropertyCategory {
@@ -318,19 +460,19 @@ export interface PropertyCategory {
   name: string;
   description?: string;
   image?: string;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface Property {
   id: string;
   title: string;
   description: string;
-  categoryId?: string;
+  category_id?: string;
   category?: PropertyCategory;
-  propertyType: PropertyType;
-  listingType: ListingType;
+  property_type: PropertyType;
+  listing_type: ListingType;
   price: number;
   location: string;
   address: string;
@@ -340,10 +482,10 @@ export interface Property {
   images: string[];
   features: string[];
   coordinates?: any;
-  isActive: boolean;
-  agentId?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  is_active: boolean;
+  agent_id?: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export enum PropertyType {
@@ -362,19 +504,19 @@ export interface FoodItem {
   id: string;
   name: string;
   description: string;
-  categoryId: string;
+  category_id: string;
   price: number;
   unit: string;
-  minimumOrder: number;
+  minimum_order: number;
   stock: number;
   images: string[];
-  nutritionalInfo?: any;
+  nutritional_info?: any;
   origin?: string;
-  isActive: boolean;
-  vendorId?: string;
+  is_active: boolean;
+  vendor_id?: string;
   category?: FoodCategory;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface FoodCategory {
@@ -382,24 +524,24 @@ export interface FoodCategory {
   name: string;
   description?: string;
   image?: string;
-  isActive: boolean;
+  is_active: boolean;
 }
 
 export interface StoreProduct {
   id: string;
   name: string;
   description: string;
-  categoryId: string;
+  category_id: string;
   price: number;
   stock: number;
   images: string[];
   features: string[];
   brand?: string;
   model?: string;
-  isActive: boolean;
+  is_active: boolean;
   category?: StoreCategory;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface StoreCategory {
@@ -407,27 +549,27 @@ export interface StoreCategory {
   name: string;
   description?: string;
   image?: string;
-  isActive: boolean;
+  is_active: boolean;
 }
 
 export interface Project {
   id: string;
   title: string;
   description: string;
-  categoryId: string;
-  beforeImages: string[];
-  afterImages: string[];
+  category_id: string;
+  before_images: string[];
+  after_images: string[];
   status: ProjectStatus;
   budget?: number;
-  startDate?: Date;
-  endDate?: Date;
+  start_date?: Date;
+  end_date?: Date;
   location?: string;
-  clientName?: string;
+  client_name?: string;
   testimonial?: string;
-  isActive: boolean;
+  is_active: boolean;
   category?: ProjectCategory;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export enum ProjectStatus {
@@ -441,7 +583,7 @@ export interface ProjectCategory {
   id: string;
   name: string;
   description?: string;
-  isActive: boolean;
+  is_active: boolean;
 }
 
 export interface BlogPost {
@@ -450,33 +592,37 @@ export interface BlogPost {
   slug: string;
   content: string;
   excerpt?: string;
-  categoryId: string;
-  featuredImage?: string;
+  category_id: string;
+  featured_image?: string;
   tags: string[];
-  readingTime?: number;
-  isPublished: boolean;
-  publishedAt?: Date;
-  authorId: string;
+  meta_title?: string;
+  meta_description?: string;
+  reading_time?: number;
+  status: string;
+  published_at?: Date;
+  author_id: string;
+  views_count: number;
   category?: BlogCategory;
-  createdAt: Date;
-  updatedAt: Date;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface BlogCategory {
   id: string;
   name: string;
   description?: string;
-  isActive: boolean;
+  is_active: boolean;
 }
 
 export interface AiConversation {
   id: string;
-  userId: string;
+  user_id: string;
   title?: string;
   language: string;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
   messages?: AiMessage[];
 }
 
@@ -486,7 +632,7 @@ export interface AiMessage {
   role: MessageRole;
   content: string;
   metadata?: any;
-  createdAt: Date;
+  created_at: Date;
 }
 
 export enum MessageRole {
@@ -540,7 +686,7 @@ export interface PropertyFilters {
 }
 
 export interface FoodFilters {
-  categoryId?: string;
+  category_id?: string;
   minPrice?: number;
   maxPrice?: number;
   origin?: string;
@@ -548,7 +694,7 @@ export interface FoodFilters {
 }
 
 export interface StoreFilters {
-  categoryId?: string;
+  category_id?: string;
   minPrice?: number;
   maxPrice?: number;
   brand?: string;
@@ -556,9 +702,50 @@ export interface StoreFilters {
 }
 
 export interface ProjectFilters {
-  categoryId?: string;
+  category_id?: string;
   status?: ProjectStatus;
   minBudget?: number;
   maxBudget?: number;
   location?: string;
+}
+
+export interface Message {
+  id: string;
+  sender_id: string;
+  recipient_id: string;
+  subject?: string;
+  content: string;
+  message_type: string;
+  thread_id?: string;
+  parent_id?: string;
+  is_read: boolean;
+  read_at?: Date;
+  created_at: Date;
+  updated_at: Date;
+  sender?: User;
+  recipient?: User;
+  parent?: Message;
+  replies?: Message[];
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  type: CategoryType;
+  slug: string;
+  parent_id?: string;
+  sort_order: number;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+  parent?: Category;
+  children?: Category[];
+}
+
+export enum CategoryType {
+  PROJECT = 'project',
+  PROPERTY = 'property',
+  FOOD = 'food',
+  BLOG = 'blog'
 }

@@ -243,14 +243,14 @@ const AdminDashboard: React.FC = () => {
             type: 'new_user',
             title: 'New user registration',
             description: `${user.email} registered`,
-            timestamp: user.createdAt
+            timestamp: user.created_at
           })) || []),
           ...(foodOrdersResult.data?.slice(-2).map((order: any) => ({
             id: `food-${order.id}`,
             type: 'new_order',
             title: 'New food order',
             description: `Order #${order.orderNumber} - ₦${order.totalAmount?.toLocaleString()}`,
-            timestamp: order.createdAt
+            timestamp: order.created_at
           })) || [])
         ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 5);
 
@@ -305,9 +305,7 @@ const AdminDashboard: React.FC = () => {
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'images', label: 'Image Management', icon: Image },
-    { id: 'hero', label: 'Hero Sections', icon: Image },
-    { id: 'details', label: 'Detail Pages', icon: Layers },
-    { id: 'users', label: 'User Management', icon: Users },
+    { id: 'hero', label: 'Hero Sections', icon: Image },    { id: 'details', label: 'Detail Pages', icon: Layers },    { id: 'users', label: 'User Management', icon: Users },
     { id: 'vendor-applications', label: 'Vendor Applications', icon: Users },
     { id: 'properties', label: 'Properties', icon: Home },
     { id: 'food', label: 'Food Services', icon: ShoppingCart },

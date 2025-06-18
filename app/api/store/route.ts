@@ -9,20 +9,17 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '6');
     const offset = parseInt(searchParams.get('offset') || '0');
-    const categoryId = searchParams.get('categoryId');
-      let query = supabase
+    const category_id = searchParams.get('category_id');      let query = supabase
       .from('store_products')
       .select(`
         *,
         store_categories(*)
       `)
-      .eq('isActive', true)
-      .order('createdAt', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    // Apply category filter if provided
-    if (categoryId) {
-      query = query.eq('categoryId', categoryId);
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);    // Apply category filter if provided
+    if (category_id) {
+      query = query.eq('category_id', category_id);
     }
 
     console.log('Store API: Executing Supabase query');

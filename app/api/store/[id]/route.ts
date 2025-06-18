@@ -20,7 +20,7 @@ export async function GET(
       .from('store_products')
       .select('*')
       .eq('id', id)
-      .eq('isActive', true)
+      .eq('is_active', true)
       .single();
 
     if (error) {
@@ -42,7 +42,7 @@ export async function GET(
     const { data: relatedProducts } = await supabase
       .from('store_products')
       .select('*')
-      .eq('isActive', true)
+      .eq('is_active', true)
       .eq('category', product.category)
       .neq('id', id)
       .limit(4);

@@ -7,8 +7,8 @@ export async function GET() {
     const { data, error } = await adminClient
       .from('ai_training_data')
       .select('*')
-      .eq('isActive', true)
-      .order('createdAt', { ascending: false });
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching AI training data:', error);
@@ -32,9 +32,9 @@ export async function POST(request: NextRequest) {
       question: body.question,
       answer: body.answer,
       language: body.language || 'en',
-      isActive: body.isActive !== false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      is_active: body.is_active !== false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };    const adminClient = getAdminClient();
     const { data, error } = await adminClient
       .from('ai_training_data')
@@ -65,7 +65,7 @@ export async function PUT(request: NextRequest) {
 
     const updatedItem = {
       ...updateData,
-      updatedAt: new Date().toISOString()
+      updated_at: new Date().toISOString()
     };    const adminClient = getAdminClient();
     const { data, error } = await adminClient
       .from('ai_training_data')

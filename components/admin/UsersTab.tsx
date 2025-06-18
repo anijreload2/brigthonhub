@@ -21,24 +21,23 @@ const UsersTab: React.FC<UsersTabProps> = ({ onAdd, onEdit, onView, onDelete }) 
       setLoading(true);
       
       // Join users with user_profiles to get complete user information
-      const { data, error } = await supabase
-        .from('users')
+      const { data, error } = await supabase        .from('users')
         .select(`
           *,
           user_profiles (
-            firstName,
-            lastName,
+            first_name,
+            last_name,
             avatar,
             bio,
-            businessName,
-            businessAddress,
-            businessPhone,
+            business_name,
+            business_address,
+            business_phone,
             location,
             preferences,
             notifications
           )
         `)
-        .order('createdAt', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching users:', error);
@@ -57,7 +56,7 @@ const UsersTab: React.FC<UsersTabProps> = ({ onAdd, onEdit, onView, onDelete }) 
     fetchUsers();
   }, []);  const filteredUsers = users.filter(user => {
     const profile = user.user_profiles?.[0]; // Get the first profile if it exists
-    const searchText = `${profile?.firstName || ''} ${profile?.lastName || ''} ${user.name || ''} ${user.email || ''}`.toLowerCase();
+    const searchText = `${profile?.first_name || ''} ${profile?.last_name || ''} ${user.name || ''} ${user.email || ''}`.toLowerCase();
     const matchesSearch = searchText.includes(searchTerm.toLowerCase()) || 
                          profile?.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -135,8 +134,8 @@ const UsersTab: React.FC<UsersTabProps> = ({ onAdd, onEdit, onView, onDelete }) 
                           </div>
                           <div>
                             <div className="font-medium text-text-primary">
-                              {profile?.firstName && profile?.lastName 
-                                ? `${profile.firstName} ${profile.lastName}` 
+                              {profile?.first_name && profile?.last_name 
+                                ? `${profile.first_name} ${profile.last_name}` 
                                 : user.name || 'No name'}
                             </div>
                             <div className="text-sm text-text-light">ID: {user.id.slice(0, 8)}...</div>
@@ -164,13 +163,13 @@ const UsersTab: React.FC<UsersTabProps> = ({ onAdd, onEdit, onView, onDelete }) 
                       </td>
                       <td className="py-3 px-4">
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          user.isActive ? 'bg-success bg-opacity-10 text-success' : 'bg-red-100 text-red-800'
+                          user.is_active ? 'bg-success bg-opacity-10 text-success' : 'bg-red-100 text-red-800'
                         }`}>
-                          {user.isActive ? 'Active' : 'Inactive'}
+                          {user.is_active ? 'Active' : 'Inactive'}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-text-light">
-                        {new Date(user.createdAt).toLocaleDateString()}
+                        {new Date(user.created_at).toLocaleDateString()}
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">

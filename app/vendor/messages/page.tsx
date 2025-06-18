@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useReducer } from 'react';
 import { useAuth } from '@/components/auth/auth-provider';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,8 +14,22 @@ import {
   Phone, Mail, MapPin, AlertCircle, Plus,
   Store, Package, TrendingUp, Bell
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import ComposeMessageModal from '@/components/messages/ComposeMessageModal';
+import { authenticatedFetch } from '@/lib/auth-utils';
+
+// Safe date formatting utility
+const formatSafeDate = (dateString: string, formatStr: string = 'MMM d, h:mm a'): string => {
+  try {
+    if (!dateString) return 'Invalid date';
+    const date = new Date(dateString);
+    if (!isValid(date)) return 'Invalid date';
+    return format(date, formatStr);
+  } catch (error) {
+    console.error('Date formatting error:', error, 'Date string:', dateString);
+    return 'Invalid date';
+  }
+};
 
 interface ContactMessage {
   id: string;
@@ -89,6 +104,8 @@ function VendorMessagesPageContent() {
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  
+  // State declarations
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [threads, setThreads] = useState<MessageThread[]>([]);
   const [selectedThread, setSelectedThread] = useState<MessageThread | null>(null);
@@ -109,16 +126,23 @@ function VendorMessagesPageContent() {
 
   // Auto-select thread from URL parameter
   const threadId = searchParams?.get('thread');
-
   useEffect(() => {
-    if (!user) {
+    if (user === null) {
+      // User is not authenticated
       router.push('/auth/login?redirect=/vendor/messages');
       return;
     }
-    if (user.role !== 'vendor' && user.role !== 'admin') {
+    
+    if (user === undefined) {
+      // Still loading user auth state
+      return;
+    }
+    
+    if (user.role !== 'VENDOR' && user.role !== 'ADMIN') {
       router.push('/messages');
       return;
     }
+    
     fetchMessages();
   }, [user, router]);
 
@@ -130,42 +154,45 @@ function VendorMessagesPageContent() {
         setViewMode('thread');
       }
     }
-  }, [threadId, threads]);
-
-  const fetchMessages = async () => {
+  }, [threadId, threads]);  const fetchMessages = async () => {
     if (!user) return;
 
     try {
       setLoading(true);
       
+      console.log('🔍 Fetching messages for vendor ID:', user.id);
+      
       // Use the new unified contact-messages API with vendor filtering
-      const response = await fetch('/api/contact-messages?role=vendor', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+      const response = await authenticatedFetch('/api/contact-messages?role=vendor', {
+        method: 'GET'
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch messages');
+        const errorText = await response.text();
+        console.error('❌ API Error Response:', response.status, errorText);
+        throw new Error(`Failed to fetch messages: ${response.status}`);
       }
 
       const data = await response.json();
-      const messages = data.messages || [];
-      setMessages(messages);
+      const fetchedMessages = data.messages || [];
+      
+      console.log('✅ Successfully fetched messages count:', fetchedMessages.length);
+      console.log('📋 Messages data:', fetchedMessages);
+      
+      setMessages(fetchedMessages);
 
       // Calculate stats
       const statsData = {
-        total: messages.length,
-        unread: messages.filter((m: ContactMessage) => m.status === 'unread' && m.recipient_id === user.id).length,
-        inquiries: messages.filter((m: ContactMessage) => m.message_type === 'inquiry').length,
-        urgent: messages.filter((m: ContactMessage) => m.priority === 'urgent').length
+        total: fetchedMessages.length,
+        unread: fetchedMessages.filter((m: ContactMessage) => m.status === 'unread' && m.recipient_id === user.id).length,
+        inquiries: fetchedMessages.filter((m: ContactMessage) => m.message_type === 'inquiry').length,
+        urgent: fetchedMessages.filter((m: ContactMessage) => m.priority === 'urgent').length
       };
       setStats(statsData);
 
       // Group messages into threads
       const threadsMap = new Map<string, MessageThread>();
-      messages.forEach((message: ContactMessage) => {
+      fetchedMessages.forEach((message: ContactMessage) => {
         // Use the thread_id from the database, or create one if missing
         const threadKey = message.thread_id || `${[message.sender_id, message.recipient_id].sort().join('-')}-${message.item_type}-${message.item_id}`;
         
@@ -204,16 +231,15 @@ function VendorMessagesPageContent() {
       setLoading(false);
     }
   };
-
   const sendMessage = async () => {
     if (!user || !selectedThread || !newMessage.trim()) return;
 
     setSending(true);
     try {
-      const recipientId = selectedThread.participants.find(p => p !== user.id);
+      const recipientId = selectedThread.participants.find((p: string) => p !== user.id);
       const lastMessage = selectedThread.last_message;
       
-      const response = await fetch('/api/contact-messages', {
+      const response = await authenticatedFetch('/api/contact-messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -242,10 +268,9 @@ function VendorMessagesPageContent() {
       setSending(false);
     }
   };
-
   const markAsRead = async (messageId: string) => {
     try {
-      const response = await fetch('/api/contact-messages', {
+      const response = await authenticatedFetch('/api/contact-messages', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
@@ -268,7 +293,7 @@ function VendorMessagesPageContent() {
 
   const updateMessageStatus = async (messageId: string, status: string) => {
     try {
-      const response = await fetch('/api/contact-messages', {
+      const response = await authenticatedFetch('/api/contact-messages', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
@@ -332,8 +357,18 @@ function VendorMessagesPageContent() {
       thread.last_message.message_type === typeFilter ||
       (typeFilter === 'product' && ['property', 'food', 'store', 'project'].includes(thread.last_message.item_type || ''));
     
-    return matchesSearch && matchesStatus && matchesType;
-  });
+    return matchesSearch && matchesStatus && matchesType;  });
+  // Handle auth loading state
+  if (user === undefined) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -572,7 +607,7 @@ function VendorMessagesPageContent() {
                                 )}
                               </div>
                               <span className="text-xs text-gray-500">
-                                {format(new Date(thread.last_message.created_at), 'MMM d, h:mm a')}
+                                {formatSafeDate(thread.last_message.created_at)}
                               </span>
                             </div>
                           </div>
@@ -633,7 +668,7 @@ function VendorMessagesPageContent() {
                           <p className={`text-xs mt-1 ${
                             isFromUser ? 'text-blue-100' : 'text-gray-500'
                           }`}>
-                            {format(new Date(message.created_at), 'MMM d, h:mm a')}
+                            {formatSafeDate(message.created_at)}
                           </p>
                         </div>
                       </div>
@@ -675,8 +710,7 @@ function VendorMessagesPageContent() {
       <ComposeMessageModal
         isOpen={showComposeModal}
         onClose={() => setShowComposeModal(false)}
-        onMessageSent={fetchMessages}
-      />
+        onMessageSent={fetchMessages}      />
     </div>
   );
 }

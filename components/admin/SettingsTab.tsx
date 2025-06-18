@@ -49,7 +49,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ onAdd, onEdit, onView, onDele
     try {
       const { error } = await supabase
         .from('site_settings')
-        .update({ value, updatedAt: new Date().toISOString() })
+        .update({ value, updated_at: new Date().toISOString() })
         .eq('id', id);
 
       if (error) throw error;
@@ -85,8 +85,8 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ onAdd, onEdit, onView, onDele
               key: setting.key,
               value: setting.value,
               type: setting.type,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
             }]);
 
           if (error) throw error;
@@ -239,7 +239,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({ onAdd, onEdit, onView, onDele
                   )}
                   
                   <div className="text-xs text-text-light mt-2">
-                    Updated: {new Date(setting.updatedAt).toLocaleString()}
+                    Updated: {new Date(setting.updated_at).toLocaleString()}
                   </div>
                 </div>
               ))

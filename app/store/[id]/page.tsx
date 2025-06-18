@@ -48,7 +48,7 @@ interface StoreProduct {
   dimensions?: string;
   averageRating?: number;
   reviewCount?: number;
-  isActive: boolean;
+  is_active: boolean;
   isFeatured: boolean;
   sellerName?: string;
   sellerPhone?: string;

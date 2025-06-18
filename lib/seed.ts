@@ -33,9 +33,9 @@ export async function seedDatabase() {
           name: 'BrightonHub Admin',
           phone: '+234-800-BRIGHTON',
           role: 'ADMIN',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         }, { onConflict: 'id' })
         .select()
         .single();
@@ -52,9 +52,9 @@ export async function seedDatabase() {
       .from('user_profiles')
       .upsert({
         id: 'profile-admin-001',
-        userId: adminUserId,
-        firstName: 'BrightonHub',
-        lastName: 'Admin',
+        user_id: adminUserId,
+        first_name: 'BrightonHub',
+        last_name: 'Admin',
         avatar: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=150',
         bio: 'System Administrator for BrightonHub platform. Managing real estate, food, and project operations.',
         businessName: 'BrightonHub Management',
@@ -70,8 +70,8 @@ export async function seedDatabase() {
           sms: true,
           push: true
         },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       });
 
     if (profileError) throw profileError;
@@ -84,80 +84,80 @@ export async function seedDatabase() {
         key: 'company_name',
         value: 'BrightonHub',
         type: 'string',
-        createdAt: currentTime,
-        updatedAt: currentTime
+        created_at: currentTime,
+        updated_at: currentTime
       },
       {
         id: 'site-002',
         key: 'company_tagline',
         value: 'Your Gateway to Property, Food, and Projects in Nigeria',
         type: 'string',
-        createdAt: currentTime,
-        updatedAt: currentTime
+        created_at: currentTime,
+        updated_at: currentTime
       },
       {
         id: 'site-003',
         key: 'contact_email',
         value: 'info@brightonhub.ng',
         type: 'string',
-        createdAt: currentTime,
-        updatedAt: currentTime
+        created_at: currentTime,
+        updated_at: currentTime
       },
       {
         id: 'site-004',
         key: 'contact_phone',
         value: '+234-800-BRIGHTON',
         type: 'string',
-        createdAt: currentTime,
-        updatedAt: currentTime
+        created_at: currentTime,
+        updated_at: currentTime
       },
       {
         id: 'site-005',
         key: 'business_address',
         value: 'Victoria Island, Lagos, Nigeria',
         type: 'string',
-        createdAt: currentTime,
-        updatedAt: currentTime
+        created_at: currentTime,
+        updated_at: currentTime
       },
       {
         id: 'site-006',
         key: 'hero_title',
         value: 'Find Your Perfect Property, Fresh Food & Top Projects',
         type: 'string',
-        createdAt: currentTime,
-        updatedAt: currentTime
+        created_at: currentTime,
+        updated_at: currentTime
       },
       {
         id: 'site-007',
         key: 'hero_subtitle',
         value: 'Discover premium properties, farm-fresh produce, and showcase projects all in one convenient platform designed for Nigeria.',
         type: 'string',
-        createdAt: currentTime,
-        updatedAt: currentTime
+        created_at: currentTime,
+        updated_at: currentTime
       },
       {
         id: 'site-008',
         key: 'facebook_url',
         value: 'https://facebook.com/brightonhub',
         type: 'string',
-        createdAt: currentTime,
-        updatedAt: currentTime
+        created_at: currentTime,
+        updated_at: currentTime
       },
       {
         id: 'site-009',
         key: 'twitter_url',
         value: 'https://twitter.com/brightonhub',
         type: 'string',
-        createdAt: currentTime,
-        updatedAt: currentTime
+        created_at: currentTime,
+        updated_at: currentTime
       },
       {
         id: 'site-010',
         key: 'instagram_url',
         value: 'https://instagram.com/brightonhub',
         type: 'string',
-        createdAt: currentTime,
-        updatedAt: currentTime
+        created_at: currentTime,
+        updated_at: currentTime
       }
     ];
 
@@ -174,54 +174,54 @@ export async function seedDatabase() {
         question: 'What is BrightonHub?',
         answer: 'BrightonHub is a comprehensive platform that connects you to premium properties, fresh farm produce, and showcase projects across Nigeria. We provide a one-stop solution for real estate, food marketplace, and project discovery.',
         category: 'general',
-        isActive: true,
-        createdAt: currentTime,
-        updatedAt: currentTime
+        is_active: true,
+        created_at: currentTime,
+        updated_at: currentTime
       },
       {
         id: 'ai-002',
         question: 'How can I contact BrightonHub?',
         answer: 'You can reach us via email at info@brightonhub.ng, call us at +234-800-BRIGHTON, or visit our office at Victoria Island, Lagos, Nigeria. We\'re here to help with all your property, food, and project needs.',
         category: 'contact',
-        isActive: true,
-        createdAt: currentTime,
-        updatedAt: currentTime
+        is_active: true,
+        created_at: currentTime,
+        updated_at: currentTime
       },
       {
         id: 'ai-003',
         question: 'What services does BrightonHub offer?',
         answer: 'BrightonHub offers three main services: 1) Real Estate - Find and list properties for sale or rent, 2) Food Marketplace - Buy fresh produce directly from farmers, 3) Project Showcase - Discover construction and development projects across Nigeria.',
         category: 'services',
-        isActive: true,
-        createdAt: currentTime,
-        updatedAt: currentTime
+        is_active: true,
+        created_at: currentTime,
+        updated_at: currentTime
       },
       {
         id: 'ai-004',
         question: 'How do I list my property on BrightonHub?',
         answer: 'To list your property, create an account, go to the Properties section, and click "Add Property". Fill in the details including title, description, price, location, and upload high-quality images. Our team will review and approve your listing.',
         category: 'properties',
-        isActive: true,
-        createdAt: currentTime,
-        updatedAt: currentTime
+        is_active: true,
+        created_at: currentTime,
+        updated_at: currentTime
       },
       {
         id: 'ai-005',
         question: 'Can I sell farm produce on BrightonHub?',
         answer: 'Yes! BrightonHub has a dedicated Food Marketplace where farmers and vendors can sell fresh produce. Simply register as a vendor, create your product listings with photos and descriptions, and start selling to customers across Nigeria.',
         category: 'food',
-        isActive: true,
-        createdAt: currentTime,
-        updatedAt: currentTime
+        is_active: true,
+        created_at: currentTime,
+        updated_at: currentTime
       },
       {
         id: 'ai-006',
         question: 'What areas does BrightonHub cover?',
         answer: 'BrightonHub operates across Nigeria, with strong presence in Lagos, Abuja, Port Harcourt, Kano, and other major cities. We connect buyers and sellers nationwide for properties, food, and projects.',
         category: 'coverage',
-        isActive: true,
-        createdAt: currentTime,
-        updatedAt: currentTime
+        is_active: true,
+        created_at: currentTime,
+        updated_at: currentTime
       }
     ];
 

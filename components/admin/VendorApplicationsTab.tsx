@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { supabase } from '../../lib/supabase';
+import { authenticatedFetch } from '../../lib/auth-utils';
 import { 
   Clock, CheckCircle, XCircle, Eye, 
   Store, Home, Utensils, Briefcase,
@@ -64,24 +65,24 @@ export default function VendorApplicationsTab() {
     fetchApplications();
   }, []);  const fetchApplications = async () => {
     try {
-      const response = await fetch(`/api/vendor-applications?status=${statusFilter}`);
+      setLoading(true);
+      console.log('🔍 Fetching vendor applications with status:', statusFilter);
+      
+      const response = await authenticatedFetch(`/api/vendor-applications?status=${statusFilter}`);
       const result = await response.json();
       
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch applications');
-      }
-      
+      console.log('✅ Successfully fetched applications:', result);
       setApplications(result.applications || []);
     } catch (error) {
-      console.error('Error fetching vendor applications:', error);
+      console.error('❌ Error fetching vendor applications:', error);
+      setApplications([]);
     } finally {
       setLoading(false);
     }
   };
   const reviewApplication = async (applicationId: string, newStatus: 'approved' | 'rejected') => {
     setIsReviewing(true);
-    try {
-      const response = await fetch('/api/vendor-applications', {
+    try {      const response = await authenticatedFetch('/api/vendor-applications', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -23,6 +23,7 @@ import { BlogPost, BlogCategory } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 
 export default function BlogPage() {
+
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +40,7 @@ export default function BlogPage() {
         const { data: categoriesData, error: categoriesError } = await supabase
           .from('blog_categories')
           .select('*')
-          .eq('isActive', true)
+          .eq('is_active', true)
           .order('name');
 
         if (categoriesError) {
@@ -53,13 +54,13 @@ export default function BlogPage() {
           .from('blog_posts')
           .select(`
             *,
-            blog_categories:categoryId (
+            blog_categories:category_id (
               id,
               name
             )
           `)
-          .eq('isPublished', true)
-          .order('publishedAt', { ascending: false });
+          .eq('is_published', true)
+          .order('published_at', { ascending: false });
 
         if (postsError) {
           console.error('Error fetching blog posts:', postsError);
@@ -82,7 +83,7 @@ export default function BlogPage() {
       const matchesSearch = post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            post.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-      const matchesCategory = selectedCategory === 'all' || post.categoryId === selectedCategory;
+      const matchesCategory = selectedCategory === 'all' || post.category_id === selectedCategory;
       return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
@@ -90,10 +91,10 @@ export default function BlogPage() {
         case 'title':
           return (a.title || '').localeCompare(b.title || '');
         case 'reading_time':
-          return (a.readingTime || 0) - (b.readingTime || 0);
+          return (a.reading_time || 0) - (b.reading_time || 0);
         case 'date':
         default:
-          return new Date(b.publishedAt || '').getTime() - new Date(a.publishedAt || '').getTime();
+          return new Date(b.published_at || '').getTime() - new Date(a.published_at || '').getTime();
       }
     });
 
@@ -211,10 +212,10 @@ export default function BlogPage() {
                   >
                     <Card className="h-full hover:shadow-xl transition-shadow">
                       <CardHeader className="p-0">
-                        {post.featuredImage && (
+                        {post.featured_image && (
                           <div className="relative w-full h-48 rounded-t-lg overflow-hidden">
                             <Image
-                              src={post.featuredImage}
+                              src={post.featured_image}
                               alt={post.title || 'Blog post image'}
                               fill
                               className="object-cover transition-transform duration-300 hover:scale-105"
