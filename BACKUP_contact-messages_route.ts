@@ -3,18 +3,6 @@ import { supabase } from '@/lib/supabase';
 import { getAuthUser } from '@/lib/auth';
 import { notifyVendorOfNewMessage } from '@/lib/email-notifications';
 
-// Create or update message thread ID
-function generateThreadId(senderId: string | null, recipientId: string | null, itemType: string, itemId: string | null): string {
-  if (itemType === 'general' || !itemId) {
-    // For general messages, create thread based on participants
-    const participants = [senderId, recipientId].filter(Boolean).sort();
-    return `thread-${participants.join('-')}-general`;
-  }
-  
-  // For item-specific messages, include item context
-  return `thread-${itemType}-${itemId}`;
-}
-
 export async function POST(request: NextRequest) {
   try {
     // Get authenticated user
@@ -30,11 +18,7 @@ export async function POST(request: NextRequest) {
       contentType,
       contentId,
       recipientId,
-      metadata,
-      parentMessageId,
-      messageType = 'direct_message',
-      priority = 'normal',
-      tags = []
+      metadata
     } = body;
 
     // Validate required fields
@@ -52,75 +36,42 @@ export async function POST(request: NextRequest) {
         { error: 'Invalid email format' },
         { status: 400 }
       );
-    }    // Map content types to database types
+    }
+
+    // Map content types to database types
     const itemTypeMap: Record<string, string> = {
       property: 'property',
       project: 'project',
       food_item: 'food',
       store_product: 'store',
-      blog_post: 'blog',
       general: 'general'
     };
 
     const itemType = itemTypeMap[contentType] || 'general';
 
     let senderId = null;
-    let senderType = 'anonymous';
     
-    // Determine sender information
+    // If user is authenticated, use their ID as sender
     if (authUser) {
       senderId = authUser.id;
-      senderType = authUser.role?.toLowerCase() || 'user';
+    } else {
+      // For non-authenticated users, we need to create a guest record or handle differently
+      // For now, we'll allow messages without a user account
+      senderId = null;
     }
 
-    // Determine recipient type
-    let recipientType = 'user';
-    if (recipientId) {
-      try {
-        const { data: recipientData } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', recipientId)
-          .single();
-        
-        if (recipientData) {
-          recipientType = recipientData.role?.toLowerCase() || 'user';
-        }
-      } catch (error) {
-        console.error('Error fetching recipient role:', error);
-      }
-    }
-
-    // Generate thread ID
-    const threadId = generateThreadId(senderId, recipientId, itemType, contentId);
-
-    // Prepare anonymous sender data if not authenticated
-    const anonymousSender = !authUser ? {
-      name,
-      email,
-      phone: phone || null
-    } : null;
-
-    // Prepare the contact message data with enhanced fields
+    // Prepare the contact message data
     const contactMessageData = {
       sender_id: senderId,
       recipient_id: recipientId || null,
-      sender_type: senderType,
-      recipient_type: recipientType,
-      anonymous_sender: anonymousSender,
       sender_name: name,
       sender_email: email,
       sender_phone: phone || null,
       subject: subject.trim(),
       message: message.trim(),
-      message_type: messageType,
       status: 'unread',
-      priority,
-      tags,
-      content_type: itemType,
-      content_id: contentId || null,
-      thread_id: threadId,
-      parent_message_id: parentMessageId || null,
+      item_type: itemType,
+      item_id: contentId || null,
       metadata: metadata || {},
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()

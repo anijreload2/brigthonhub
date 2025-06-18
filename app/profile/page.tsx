@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   User, 
@@ -37,6 +37,11 @@ export default function ProfilePage() {
   const { user, updateUser } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const [messageStats, setMessageStats] = useState({
+    unreadCount: 0,
+    totalCount: 0,
+    recentMessages: []
+  });
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -49,6 +54,30 @@ export default function ProfilePage() {
     businessAddress: user?.profile?.businessAddress || '',
     businessPhone: user?.profile?.businessPhone || ''
   });
+
+  useEffect(() => {
+    if (user) {
+      fetchMessageStats();
+    }
+  }, [user]);
+
+  const fetchMessageStats = async () => {
+    try {
+      const response = await fetch('/api/contact-messages?limit=5');
+      if (response.ok) {
+        const data = await response.json();
+        const messages = data.messages || [];
+        
+        setMessageStats({
+          unreadCount: messages.filter((msg: any) => msg.status === 'unread' && msg.recipient_id === user?.id).length,
+          totalCount: messages.length,
+          recentMessages: messages.slice(0, 3)
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching message stats:', error);
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -358,7 +387,14 @@ export default function ProfilePage() {
                 {[
                   { icon: Heart, title: 'Favorites', count: '12', color: 'text-red-500' },
                   { icon: ShoppingCart, title: 'Orders', count: '8', color: 'text-blue-500' },
-                  { icon: MessageSquare, title: 'Inquiries', count: '15', color: 'text-green-500' },
+                  { 
+                    icon: MessageSquare, 
+                    title: 'Messages', 
+                    count: messageStats.totalCount.toString(), 
+                    unread: messageStats.unreadCount,
+                    color: 'text-green-500',
+                    link: '/messages'
+                  },
                   { icon: Calendar, title: 'Appointments', count: '3', color: 'text-purple-500' }
                 ].map((stat, index) => {
                   const Icon = stat.icon;
@@ -369,13 +405,26 @@ export default function ProfilePage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                     >
-                      <Card className="border-0 shadow-md">
+                      <Card className={`border-0 shadow-md ${stat.link ? 'cursor-pointer hover:shadow-lg transition-shadow' : ''}`}
+                            onClick={stat.link ? () => window.location.href = stat.link : undefined}>
                         <CardContent className="p-6 text-center">
-                          <Icon className={`w-8 h-8 ${stat.color} mx-auto mb-3`} />
+                          <div className="relative">
+                            <Icon className={`w-8 h-8 ${stat.color} mx-auto mb-3`} />
+                            {stat.unread && stat.unread > 0 && (
+                              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {stat.unread}
+                              </span>
+                            )}
+                          </div>
                           <div className="text-2xl font-bold text-gray-900 mb-1">
                             {stat.count}
                           </div>
                           <div className="text-gray-600">{stat.title}</div>
+                          {stat.unread && stat.unread > 0 && (
+                            <div className="text-xs text-red-600 mt-1">
+                              {stat.unread} unread
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     </motion.div>
@@ -383,29 +432,80 @@ export default function ProfilePage() {
                 })}
               </div>
 
-              <Card className="border-0 shadow-md">
-                <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { action: 'Viewed property', item: 'Luxury Villa in Lekki', time: '2 hours ago' },
-                      { action: 'Added to favorites', item: 'Executive Office Desk', time: '1 day ago' },
-                      { action: 'Placed order', item: 'Fresh Tomatoes (10 baskets)', time: '3 days ago' },
-                      { action: 'Sent inquiry', item: 'Restaurant Interior Design', time: '1 week ago' }
-                    ].map((activity, index) => (
-                      <div key={index} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                        <div>
-                          <p className="font-medium text-gray-900">{activity.action}</p>
-                          <p className="text-sm text-gray-600">{activity.item}</p>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="border-0 shadow-md">
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {[
+                        { action: 'Viewed property', item: 'Luxury Villa in Lekki', time: '2 hours ago' },
+                        { action: 'Added to favorites', item: 'Executive Office Desk', time: '1 day ago' },
+                        { action: 'Placed order', item: 'Fresh Tomatoes (10 baskets)', time: '3 days ago' },
+                        { action: 'Sent inquiry', item: 'Restaurant Interior Design', time: '1 week ago' }
+                      ].map((activity, index) => (
+                        <div key={index} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                          <div>
+                            <p className="font-medium text-gray-900">{activity.action}</p>
+                            <p className="text-sm text-gray-600">{activity.item}</p>
+                          </div>
+                          <span className="text-sm text-gray-500">{activity.time}</span>
                         </div>
-                        <span className="text-sm text-gray-500">{activity.time}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-md">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Recent Messages</CardTitle>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => window.location.href = '/messages'}
+                    >
+                      View All
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {messageStats.recentMessages.length > 0 ? (
+                        messageStats.recentMessages.map((message: any, index: number) => (
+                          <div key={index} className="flex items-start justify-between py-3 border-b border-gray-100 last:border-0">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <p className="font-medium text-gray-900 text-sm truncate">
+                                  {message.subject}
+                                </p>
+                                {message.status === 'unread' && (
+                                  <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                    New
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-600">
+                                From: {message.sender_name || message.sender_email || 'Unknown'}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                                {message.message}
+                              </p>
+                            </div>
+                            <span className="text-xs text-gray-500 ml-2">
+                              {new Date(message.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <MessageSquare className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                          <p>No recent messages</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             <TabsContent value="preferences" className="space-y-6">
@@ -484,6 +584,7 @@ export default function ProfilePage() {
                         type="checkbox"
                         defaultChecked={index < 3}
                         className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                        title={`Toggle ${notification.label}`}
                       />
                     </div>
                   ))}

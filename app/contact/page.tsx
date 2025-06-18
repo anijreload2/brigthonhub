@@ -37,27 +37,21 @@ export default function ContactPage() {
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
-      // Send message to admin using internal messaging API
-      const response = await fetch('/api/internal-messages', {
+    setIsSubmitting(true);    try {
+      // Send message to admin using unified contact messaging API
+      const response = await fetch('/api/contact-messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          recipientId: 'admin-001', // Send to admin
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone,
           subject: `Contact Form: ${formData.subject}`,
-          message: `
-Name: ${formData.firstName} ${formData.lastName}
-Email: ${formData.email}
-Phone: ${formData.phone || 'Not provided'}
-Subject: ${formData.subject}
-
-Message:
-${formData.message}
-          `.trim()
+          message: formData.message,
+          item_type: 'general',
+          message_type: 'inquiry'
         }),
       });
 

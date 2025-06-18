@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/components/auth/auth-provider';
+import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,10 +10,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { 
   MessageCircle, Send, ArrowLeft, Search, 
   Filter, MoreVertical, Archive, Trash2,
-  Circle, CheckCircle, Clock, User,  Phone, Mail, MapPin, AlertCircle, Plus
+  Circle, CheckCircle, Clock, User,
+  Phone, Mail, MapPin
 } from 'lucide-react';
 import { format } from 'date-fns';
-import ComposeMessageModal from '@/components/messages/ComposeMessageModal';
 
 interface ContactMessage {
   id: string;
@@ -21,16 +22,9 @@ interface ContactMessage {
   subject: string;
   message: string;
   status: 'unread' | 'read' | 'replied' | 'archived';
-  item_type: 'property' | 'food' | 'store' | 'project' | 'blog' | 'general' | null;
-  item_id: string | null;
-  thread_id: string | null;
-  parent_message_id: string | null;
-  priority: 'low' | 'normal' | 'high' | 'urgent';
-  tags: string[];
-  message_type: 'inquiry' | 'response' | 'notification' | 'general';
-  sender_name: string | null;
-  sender_email: string | null;
-  sender_phone: string | null;
+  item_type: 'property' | 'food' | 'store' | 'project' | 'blog';
+  item_id: string;
+  thread_id: string;
   created_at: string;
   updated_at: string;
   // Joined data
@@ -69,20 +63,6 @@ const MESSAGE_STATUS_ICONS = {
   archived: Archive
 };
 
-const PRIORITY_COLORS = {
-  low: 'bg-gray-100 text-gray-700',
-  normal: 'bg-blue-100 text-blue-700',
-  high: 'bg-orange-100 text-orange-700',
-  urgent: 'bg-red-100 text-red-700'
-};
-
-const PRIORITY_ICONS = {
-  low: Circle,
-  normal: Circle,
-  high: AlertCircle,
-  urgent: AlertCircle
-};
-
 function MessagesPageContent() {
   const { user } = useAuth();
   const router = useRouter();
@@ -92,10 +72,10 @@ function MessagesPageContent() {
   const [selectedThread, setSelectedThread] = useState<MessageThread | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [newMessage, setNewMessage] = useState('');
   const [viewMode, setViewMode] = useState<'inbox' | 'thread'>('inbox');
-  const [showComposeModal, setShowComposeModal] = useState(false);
 
   // Auto-select thread from URL parameter
   const threadId = searchParams?.get('thread');
@@ -117,31 +97,31 @@ function MessagesPageContent() {
       }
     }
   }, [threadId, threads]);
+
   const fetchMessages = async () => {
     if (!user) return;
 
     try {
       setLoading(true);
-      
-      // Use the new unified contact-messages API
-      const response = await fetch('/api/contact-messages', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+        // Fetch all messages where user is sender or recipient
+      const { data: messagesData, error } = await supabase
+        .from('user_messages')
+        .select(`
+          *,
+          sender:users!user_messages_sender_id_fkey(name, email, phone),
+          recipient:users!user_messages_recipient_id_fkey(name, email, phone)
+        `)
+        .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
+        .order('created_at', { ascending: false });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch messages');
-      }
+      if (error) throw error;
 
-      const data = await response.json();
-      const messages = data.messages || [];
+      const messages = messagesData || [];
       setMessages(messages);
 
       // Group messages into threads
       const threadsMap = new Map<string, MessageThread>();
-      messages.forEach((message: ContactMessage) => {
+        messages.forEach(message => {
         // Use the thread_id from the database, or create one if missing
         const threadKey = message.thread_id || `${[message.sender_id, message.recipient_id].sort().join('-')}-${message.item_type}-${message.item_id}`;
         
@@ -180,6 +160,7 @@ function MessagesPageContent() {
       setLoading(false);
     }
   };
+
   const sendMessage = async () => {
     if (!user || !selectedThread || !newMessage.trim()) return;
 
@@ -187,27 +168,20 @@ function MessagesPageContent() {
     try {
       const recipientId = selectedThread.participants.find(p => p !== user.id);
       const lastMessage = selectedThread.last_message;
-      
-      const response = await fetch('/api/contact-messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+        const { error } = await supabase
+        .from('user_messages')
+        .insert({
+          sender_id: user.id,
           recipient_id: recipientId,
           subject: `Re: ${lastMessage.subject}`,
           message: newMessage.trim(),
+          status: 'unread',
           item_type: lastMessage.item_type,
           item_id: lastMessage.item_id,
-          thread_id: lastMessage.thread_id,
-          parent_message_id: lastMessage.id,
-          message_type: 'response'
-        })
-      });
+          thread_id: lastMessage.thread_id
+        });
 
-      if (!response.ok) {
-        throw new Error('Failed to send message');
-      }
+      if (error) throw error;
 
       setNewMessage('');
       await fetchMessages(); // Refresh to show new message
@@ -217,74 +191,42 @@ function MessagesPageContent() {
       setSending(false);
     }
   };
+
   const markAsRead = async (messageId: string) => {
-    try {
-      const response = await fetch('/api/contact-messages', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          messageIds: [messageId],
-          updates: { status: 'read' }
-        })
-      });
+    try {      const { error } = await supabase
+        .from('user_messages')
+        .update({ status: 'read', updated_at: new Date().toISOString() })
+        .eq('id', messageId)
+        .eq('recipient_id', user?.id); // Only mark as read if current user is recipient
 
-      if (!response.ok) {
-        throw new Error('Failed to mark message as read');
-      }
-
+      if (error) throw error;
       await fetchMessages();
     } catch (error) {
       console.error('Error marking message as read:', error);
     }
   };
+
   const updateMessageStatus = async (messageId: string, status: string) => {
-    try {
-      const response = await fetch('/api/contact-messages', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          messageIds: [messageId],
-          updates: { status }
-        })
-      });
+    try {      const { error } = await supabase
+        .from('user_messages')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', messageId);
 
-      if (!response.ok) {
-        throw new Error('Failed to update message status');
-      }
-
+      if (error) throw error;
       await fetchMessages();
     } catch (error) {
       console.error('Error updating message status:', error);
     }
   };
+
   const getOtherParticipant = (thread: MessageThread) => {
     const otherUserId = thread.participants.find(p => p !== user?.id);
     const lastMessage = thread.last_message;
     
-    // Check if we have sender data from API joins
-    if (lastMessage.sender_id === otherUserId && lastMessage.sender) {
-      return lastMessage.sender;
-    } else if (lastMessage.recipient_id === otherUserId && lastMessage.recipient) {
-      return lastMessage.recipient;
-    }
-    
-    // Fallback to message fields for anonymous/guest users
     if (lastMessage.sender_id === otherUserId) {
-      return {
-        name: lastMessage.sender_name,
-        email: lastMessage.sender_email,
-        phone: lastMessage.sender_phone
-      };
+      return lastMessage.sender;
     } else {
-      return {
-        name: 'Unknown User',
-        email: lastMessage.sender_email || 'Unknown',
-        phone: lastMessage.sender_phone
-      };
+      return lastMessage.recipient;
     }
   };
 
@@ -345,7 +287,8 @@ function MessagesPageContent() {
                     ? `Conversation with ${getOtherParticipant(selectedThread!)?.name || 'User'}`
                     : 'Manage your conversations with vendors and customers'
                   }
-                </p>              </div>
+                </p>
+              </div>
             </div>
             {threads.length > 0 && (
               <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -353,10 +296,6 @@ function MessagesPageContent() {
                 <span>{threads.reduce((sum, thread) => sum + thread.unread_count, 0)} unread</span>
               </div>
             )}
-            <Button onClick={() => setShowComposeModal(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              New Message
-            </Button>
           </div>
         </div>
       </div>
@@ -411,10 +350,10 @@ function MessagesPageContent() {
               </div>
             ) : (
               <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div className="divide-y divide-gray-200">                  {filteredThreads.map((thread) => {
+                <div className="divide-y divide-gray-200">
+                  {filteredThreads.map((thread) => {
                     const otherParticipant = getOtherParticipant(thread);
                     const StatusIcon = MESSAGE_STATUS_ICONS[thread.last_message.status];
-                    const PriorityIcon = PRIORITY_ICONS[thread.last_message.priority || 'normal'];
                     
                     return (
                       <div
@@ -444,12 +383,6 @@ function MessagesPageContent() {
                                     {otherParticipant?.name || 'Unknown User'}
                                   </h3>
                                   <div className="flex items-center space-x-2">
-                                    {thread.last_message.priority && thread.last_message.priority !== 'normal' && (
-                                      <span className={`px-2 py-1 text-xs rounded-full ${PRIORITY_COLORS[thread.last_message.priority]}`}>
-                                        <PriorityIcon className="w-3 h-3 inline mr-1" />
-                                        {thread.last_message.priority}
-                                      </span>
-                                    )}
                                     {thread.unread_count > 0 && (
                                       <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
                                         {thread.unread_count}
@@ -464,31 +397,17 @@ function MessagesPageContent() {
                               </div>
                             </div>
                             <div className="mb-2">
-                              <div className="flex items-center justify-between mb-1">
-                                <h4 className="text-sm font-medium text-gray-900 truncate">
-                                  {thread.last_message.subject}
-                                </h4>
-                                {thread.last_message.item_type && (
-                                  <span className="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded-full">
-                                    {thread.last_message.item_type}
-                                  </span>
-                                )}
-                              </div>
+                              <h4 className="text-sm font-medium text-gray-900 mb-1">
+                                {thread.last_message.subject}
+                              </h4>
                               <p className="text-sm text-gray-600 line-clamp-2">
                                 {thread.last_message.message}
                               </p>
                             </div>
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-2">
-                                <span className={`px-2 py-1 text-xs rounded-full ${MESSAGE_STATUS_COLORS[thread.last_message.status]}`}>
-                                  {thread.last_message.status.charAt(0).toUpperCase() + thread.last_message.status.slice(1)}
-                                </span>
-                                {thread.last_message.tags && thread.last_message.tags.length > 0 && (
-                                  <span className="text-xs text-gray-500">
-                                    #{thread.last_message.tags[0]}
-                                  </span>
-                                )}
-                              </div>
+                              <span className={`px-2 py-1 text-xs rounded-full ${MESSAGE_STATUS_COLORS[thread.last_message.status]}`}>
+                                {thread.last_message.status.charAt(0).toUpperCase() + thread.last_message.status.slice(1)}
+                              </span>
                               <span className="text-xs text-gray-500">
                                 {format(new Date(thread.last_message.created_at), 'MMM d, h:mm a')}
                               </span>
@@ -584,16 +503,10 @@ function MessagesPageContent() {
                   </Button>
                 </div>
               </div>
-            </div>          )
+            </div>
+          )
         )}
       </div>
-
-      {/* Compose Message Modal */}
-      <ComposeMessageModal
-        isOpen={showComposeModal}
-        onClose={() => setShowComposeModal(false)}
-        onMessageSent={fetchMessages}
-      />
     </div>  );
 }
 

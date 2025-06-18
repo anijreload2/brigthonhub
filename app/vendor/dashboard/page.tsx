@@ -11,7 +11,7 @@ import {
   PlusCircle, Edit, Eye, Clock, 
   CheckCircle, XCircle, ArrowLeft,
   MessageSquare, BarChart3, Settings,
-  Image as ImageIcon
+  Image as ImageIcon, Mail, Phone
 } from 'lucide-react';
 import VendorImageManager from '@/components/vendor/VendorImageManager';
 
@@ -28,11 +28,39 @@ interface VendorApplication {
   admin_notes?: string;
 }
 
+interface VendorListing {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  price: number | null;
+  currency: string;
+  location: string;
+  status: 'active' | 'inactive' | 'sold' | 'expired';
+  images: string[];
+  view_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
 interface VendorStats {
   total_listings: number;
   active_listings: number;
   total_contacts: number;
   pending_messages: number;
+}
+
+interface VendorMessage {
+  id: string;
+  sender_name: string;
+  sender_email: string;
+  sender_phone?: string;
+  subject: string;
+  message: string;
+  content_type: string;
+  content_id?: string;
+  status: string;
+  created_at: string;
 }
 
 const VENDOR_CATEGORIES = {
@@ -44,8 +72,9 @@ const VENDOR_CATEGORIES = {
 
 export default function VendorDashboard() {
   const { user } = useAuth();
-  const router = useRouter();
-  const [applications, setApplications] = useState<VendorApplication[]>([]);
+  const router = useRouter();  const [applications, setApplications] = useState<VendorApplication[]>([]);
+  const [listings, setListings] = useState<VendorListing[]>([]);
+  const [messages, setMessages] = useState<VendorMessage[]>([]);
   const [stats, setStats] = useState<VendorStats | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
@@ -77,15 +106,66 @@ export default function VendorDashboard() {
         .order('submitted_at', { ascending: false });
 
       if (appsError) throw appsError;
-      setApplications(applicationsData || []);
+      setApplications(applicationsData || []);      // Fetch vendor listings
+      const { data: listingsData, error: listingsError } = await supabase
+        .from('vendor_listings')
+        .select('*')
+        .eq('vendor_id', user.id)
+        .order('created_at', { ascending: false });
 
-      // Fetch vendor stats (placeholder for now)
-      setStats({
-        total_listings: 0,
-        active_listings: 0,
-        total_contacts: 0,
-        pending_messages: 0
-      });
+      if (listingsError) {
+        console.error('Error fetching listings:', listingsError);
+      } else {
+        setListings(listingsData || []);
+      }      // Fetch vendor messages directly from Supabase
+      try {
+        console.log('🔍 Fetching messages for vendor ID:', user.id);
+        
+        const { data: messagesData, error: messagesError } = await supabase
+          .from('contact_messages')
+          .select('*')
+          .eq('recipient_id', user.id)
+          .order('created_at', { ascending: false });        if (messagesError) {
+          console.error('❌ Error fetching messages:', messagesError);
+          console.error('Error details:', messagesError.message, messagesError.code, messagesError.hint);
+          setMessages([]);        } else {
+          console.log('✅ Successfully fetched messages count:', messagesData?.length || 0);
+          console.log('📋 Messages data:', messagesData);
+          setMessages(messagesData || []);
+          
+          // Calculate stats with the fetched messages
+          const totalListings = listingsData?.length || 0;
+          const activeListings = listingsData?.filter(l => l.status === 'active').length || 0;
+          const unreadMessages = messagesData?.filter((m: VendorMessage) => m.status === 'unread').length || 0;
+          const totalMessages = messagesData?.length || 0;
+
+          console.log('📊 Stats calculation:');
+          console.log('  Total listings:', totalListings);
+          console.log('  Active listings:', activeListings);
+          console.log('  Total messages:', totalMessages);
+          console.log('  Unread messages:', unreadMessages);
+
+          setStats({
+            total_listings: totalListings,
+            active_listings: activeListings,
+            total_contacts: totalMessages,
+            pending_messages: unreadMessages
+          });        }
+      } catch (error) {
+        console.error('❌ Unexpected error fetching messages:', error);
+        setMessages([]);
+        
+        // Set basic stats even if messages failed to load
+        const totalListings = listingsData?.length || 0;
+        const activeListings = listingsData?.filter(l => l.status === 'active').length || 0;
+        
+        setStats({
+          total_listings: totalListings,
+          active_listings: activeListings,
+          total_contacts: 0,
+          pending_messages: 0
+        });
+      }
 
     } catch (error) {
       console.error('Error fetching vendor data:', error);
@@ -104,7 +184,6 @@ export default function VendorDashboard() {
         return <Clock className="w-5 h-5 text-yellow-600" />;
     }
   };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'approved':
@@ -113,6 +192,58 @@ export default function VendorDashboard() {
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-yellow-100 text-yellow-800';
+    }
+  };  const markAsRead = async (messageId: string) => {
+    try {
+      console.log('📧 Marking message as read:', messageId);
+      
+      if (!user) {
+        console.error('❌ No user found');
+        alert('Please log in to mark messages as read.');
+        return;
+      }
+      
+      // Update message status directly via Supabase
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .update({ status: 'read' })
+        .eq('id', messageId)
+        .eq('recipient_id', user.id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('❌ Database error:', error);
+        alert('Failed to mark message as read. Please try again.');
+        return;
+      }
+      
+      if (!data) {
+        console.error('❌ Message not found or unauthorized');
+        alert('Message not found or you are not authorized to mark it as read.');
+        return;
+      }
+      
+      console.log('✅ Message marked as read successfully');
+      
+      // Update local state
+      const updatedMessages = messages.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, status: 'read' }
+          : msg
+      );
+      
+      setMessages(updatedMessages);
+      
+      // Update pending messages count based on updated messages
+      const unreadCount = updatedMessages.filter(m => m.status === 'unread').length;
+      setStats(prev => prev ? { ...prev, pending_messages: unreadCount } : null);
+      
+      console.log('✅ Message marked as read, new unread count:', unreadCount);
+      
+    } catch (error) {
+      console.error('❌ Error marking message as read:', error);
+      alert('Error marking message as read. Please try again.');
     }
   };
 
@@ -280,9 +411,8 @@ export default function VendorDashboard() {
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
                           <MessageSquare className="w-8 h-8 text-purple-600" />
-                        </div>
-                        <div className="ml-4">
-                          <p className="text-sm text-gray-600">Total Contacts</p>
+                        </div>                        <div className="ml-4">
+                          <p className="text-sm text-gray-600">Total Messages</p>
                           <p className="text-2xl font-semibold text-gray-900">
                             {stats.total_contacts}
                           </p>
@@ -344,11 +474,11 @@ export default function VendorDashboard() {
                     >
                       <PlusCircle className="w-6 h-6" />
                       <span>Apply for New Category</span>
-                    </Button>
-                    <Button 
+                    </Button>                    <Button 
                       variant="outline" 
                       className="h-auto p-4 flex flex-col items-center space-y-2"
-                      disabled
+                      disabled={approvedCategories.length === 0}
+                      onClick={() => router.push('/vendor/listings/create')}
                     >
                       <Edit className="w-6 h-6" />
                       <span>Create New Listing</span>
@@ -432,33 +562,257 @@ export default function VendorDashboard() {
                   )}
                 </div>
               </div>
-            )}
+            )}            {activeTab === 'listings' && (
+              <div className="bg-white rounded-lg shadow-sm">
+                <div className="p-6 border-b">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">My Listings</h2>
+                      <p className="text-gray-600 mt-1">Manage your product and service listings</p>
+                    </div>
+                    <Button 
+                      onClick={() => router.push('/vendor/listings/create')}
+                      disabled={approvedCategories.length === 0}
+                    >
+                      <PlusCircle className="w-4 h-4 mr-2" />
+                      Create Listing
+                    </Button>
+                  </div>
+                </div>
 
-            {activeTab === 'listings' && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="text-center py-12">
-                  <Store className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Listings Coming Soon</h3>
-                  <p className="text-gray-600">
-                    The listing management feature is currently under development.
-                  </p>
+                <div className="p-6">
+                  {listings.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Store className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Listings Yet</h3>
+                      <p className="text-gray-600 mb-4">
+                        Create your first listing to start showcasing your products or services.
+                      </p>
+                      <Button 
+                        onClick={() => router.push('/vendor/listings/create')}
+                        disabled={approvedCategories.length === 0}
+                      >
+                        <PlusCircle className="w-4 h-4 mr-2" />
+                        Create Your First Listing
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {listings.map((listing) => {
+                        const categoryInfo = VENDOR_CATEGORIES[listing.category as keyof typeof VENDOR_CATEGORIES];
+                        const IconComponent = categoryInfo?.icon || Store;
+                        
+                        return (
+                          <div key={listing.id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                            {/* Listing Image */}
+                            <div className="h-48 bg-gray-200 overflow-hidden">
+                              {listing.images && listing.images.length > 0 ? (
+                                <img 
+                                  src={listing.images[0]} 
+                                  alt={listing.title}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.src = '/placeholder-image.jpg';
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                  <IconComponent className="w-12 h-12 text-gray-400" />
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Listing Info */}
+                            <div className="p-4">
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1">
+                                  <h4 className="font-semibold text-gray-900 mb-1 line-clamp-2">{listing.title}</h4>
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-${categoryInfo?.color || 'gray'}-100 text-${categoryInfo?.color || 'gray'}-800`}>
+                                      <IconComponent className="w-3 h-3 mr-1" />
+                                      {categoryInfo?.name || listing.category}
+                                    </span>
+                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                      listing.status === 'active' ? 'bg-green-100 text-green-800' :
+                                      listing.status === 'sold' ? 'bg-purple-100 text-purple-800' :
+                                      listing.status === 'expired' ? 'bg-red-100 text-red-800' :
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {listing.status}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {listing.price && (
+                                <p className="text-lg font-bold text-green-600 mb-2">
+                                  {new Intl.NumberFormat('en-NG', {
+                                    style: 'currency',
+                                    currency: listing.currency || 'NGN',
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0,
+                                  }).format(listing.price)}
+                                </p>
+                              )}
+                              
+                              {listing.location && (
+                                <p className="text-sm text-gray-600 mb-2">{listing.location}</p>
+                              )}
+                              
+                              <p className="text-sm text-gray-600 mb-3 line-clamp-2">{listing.description}</p>
+                              
+                              <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+                                <span className="flex items-center">
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  {listing.view_count || 0} views
+                                </span>
+                                <span>
+                                  {new Date(listing.created_at).toLocaleDateString()}
+                                </span>
+                              </div>
+                                {/* Action Buttons */}
+                              <div className="flex space-x-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="flex-1"
+                                  onClick={() => router.push(`/vendor/listings/edit/${listing.id}`)}
+                                >
+                                  <Edit className="w-4 h-4 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="flex-1"
+                                  onClick={() => router.push(`/properties/vendor_${listing.id}`)}
+                                >
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  View
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
-            )}            {activeTab === 'images' && (
+            )}{activeTab === 'images' && (
               <VendorImageManager 
                 vendorId={user?.id || ''} 
                 vendorCategories={approvedCategories}
               />
-            )}
+            )}            {activeTab === 'messages' && (
+              <div className="bg-white rounded-lg shadow-sm">
+                <div className="p-6 border-b">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">Messages</h2>
+                      <p className="text-gray-600 mt-1">Customer inquiries about your listings</p>
+                    </div>
+                    {stats?.pending_messages && stats.pending_messages > 0 && (
+                      <span className="bg-red-100 text-red-800 text-sm font-medium px-2 py-1 rounded-full">
+                        {stats.pending_messages} unread
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-            {activeTab === 'messages' && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="text-center py-12">
-                  <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Messages Coming Soon</h3>
-                  <p className="text-gray-600">
-                    The messaging system is currently under development.
-                  </p>
+                <div className="p-6">
+                  {messages.length === 0 ? (
+                    <div className="text-center py-12">
+                      <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Messages Yet</h3>
+                      <p className="text-gray-600">
+                        When customers send you messages about your listings, they'll appear here.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {messages.map((message) => (
+                        <div 
+                          key={message.id} 
+                          className={`border rounded-lg p-4 hover:shadow-md transition-shadow ${
+                            message.status === 'unread' ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-3 mb-1">
+                                <h4 className="font-semibold text-gray-900">{message.subject}</h4>
+                                {message.status === 'unread' && (
+                                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
+                                    New
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                                <span>From: {message.sender_name}</span>
+                                <span>•</span>
+                                <span>{message.sender_email}</span>
+                                {message.sender_phone && (
+                                  <>
+                                    <span>•</span>
+                                    <span>{message.sender_phone}</span>
+                                  </>
+                                )}
+                              </div>                              <div className="text-sm text-gray-500 mt-1">
+                                {new Date(message.created_at).toLocaleDateString()} at {new Date(message.created_at).toLocaleTimeString()}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="mb-3">
+                            <p className="text-gray-700 leading-relaxed">{message.message}</p>
+                          </div>
+                          
+                          {message.content_type && message.content_type !== 'general' && (
+                            <div className="flex items-center text-sm text-gray-500 mb-3">
+                              <span className="capitalize">{message.content_type}</span>
+                              {message.content_id && (
+                                <>
+                                  <span className="mx-2">•</span>
+                                  <span>Inquiry about listing</span>
+                                </>
+                              )}
+                            </div>
+                          )}
+                          
+                          <div className="flex space-x-3">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => window.location.href = `mailto:${message.sender_email}?subject=Re: ${message.subject}`}
+                            >
+                              <Mail className="w-4 h-4 mr-1" />
+                              Reply by Email
+                            </Button>
+                            {message.sender_phone && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => window.location.href = `tel:${message.sender_phone}`}
+                              >
+                                <Phone className="w-4 h-4 mr-1" />
+                                Call
+                              </Button>
+                            )}
+                            {message.status === 'unread' && (
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => markAsRead(message.id)}
+                              >
+                                Mark as Read
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
