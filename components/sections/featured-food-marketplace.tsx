@@ -24,9 +24,8 @@ interface FoodItem {
   stock: number;
   images: string[];
   nutritionalInfo?: any;
-  origin?: string;
-  isActive: boolean;
-  createdAt: string;
+  origin?: string;  isActive: boolean;
+  created_at: string;
 }
 
 export default function FeaturedFoodMarketplace() {

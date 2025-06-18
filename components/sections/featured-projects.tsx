@@ -29,9 +29,8 @@ interface Project {
   endDate?: string;
   location?: string;
   clientName?: string;
-  testimonial?: string;
-  isActive: boolean;
-  createdAt: string;
+  testimonial?: string;  isActive: boolean;
+  created_at: string;
 }
 
 export default function FeaturedProjects() {

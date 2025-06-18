@@ -25,11 +25,10 @@ interface Property {
   bedrooms?: number;
   bathrooms?: number;
   area?: number;
-  images: string[];
-  propertyType: string;
+  images: string[];  propertyType: string;
   listingType: string;
   isActive: boolean;
-  createdAt: string;
+  created_at: string;
 }
 
 export default function FeaturedProperties() {

@@ -58,7 +58,7 @@ interface Property {
     date: string;
   }[];
   isActive: boolean;
-  createdAt: string;
+  created_at: string;
 }
 
 interface PropertyDetailPageProps {
@@ -546,7 +546,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                 
                 <div className="text-sm text-gray-600">
                   <p>Property ID: {property.id.slice(0, 8)}</p>
-                  <p>Listed: {new Date(property.createdAt).toLocaleDateString()}</p>
+                  <p>Listed: {new Date(property.created_at).toLocaleDateString()}</p>
                 </div>
               </CardContent>
             </Card>
