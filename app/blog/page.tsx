@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BlogPost, BlogCategory } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
+import { BookmarkButton } from '@/components/ui/bookmark-button';
 
 export default function BlogPage() {
 
@@ -224,6 +225,15 @@ export default function BlogPage() {
                             <Badge className="absolute top-2 left-2 bg-purple-600 text-white">
                               Featured
                             </Badge>
+                            <div className="absolute top-2 right-2">
+                              <BookmarkButton
+                                itemId={post.id}
+                                itemType="blog"
+                                title={post.title || 'Blog post'}
+                                variant="ghost"
+                                className="bg-white/90 hover:bg-white"
+                              />
+                            </div>
                           </div>
                         )}
                       </CardHeader>

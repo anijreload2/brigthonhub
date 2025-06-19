@@ -24,6 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { StoreProduct, StoreCategory } from '@/lib/types';
 import { CURRENCY } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
+import { BookmarkButton } from '@/components/ui/bookmark-button';
 
 export default function StorePage() {
   const [products, setProducts] = useState<StoreProduct[]>([]);
@@ -251,6 +252,15 @@ export default function StorePage() {
                                 {product.brand}
                               </Badge>
                             )}
+                            <div className="absolute top-2 right-2">
+                              <BookmarkButton
+                                itemId={product.id}
+                                itemType="store"
+                                title={product.name}
+                                variant="ghost"
+                                className="bg-white/90 hover:bg-white"
+                              />
+                            </div>
                           </div>
                         )}
                       </CardHeader>

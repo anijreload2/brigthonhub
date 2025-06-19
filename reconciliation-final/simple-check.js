@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Load environment variables from parent directory
-require('dotenv').config({ path: '../.env.local' });
+require('dotenv').config({ path: './.env.local' });
 
 console.log('🔧 Environment check:');
 console.log('URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Found' : 'Missing');
@@ -22,11 +22,13 @@ const supabase = createClient(
 async function checkTables() {
   try {
     console.log('\n🔍 Checking known tables directly...\n');
-    
-    const knownTables = [
+      const knownTables = [
       'users', 'projects', 'properties', 'contact_messages', 
       'vendor_applications', 'testimonials', 'food_items',
-      'user_profiles', 'blogs', 'messages', 'categories'
+      'user_profiles', 'blogs', 'messages', 'categories',
+      'user_bookmarks', 'store', 'vendor_listings',
+      'blog_categories', 'food_categories', 'store_categories',
+      'project_categories'
     ];
     
     const results = {

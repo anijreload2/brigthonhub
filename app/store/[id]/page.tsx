@@ -27,8 +27,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BookmarkButton } from '@/components/ui/bookmark-button';
 import { CURRENCY } from '@/lib/constants';
 
 interface StoreProduct {
@@ -66,11 +69,17 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const [relatedProducts, setRelatedProducts] = useState<StoreProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [quantity, setQuantity] = useState(1);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);  const [quantity, setQuantity] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -146,10 +155,42 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     alert(`Proceeding to checkout with ${quantity} ${product?.name}`);
   };
   */
-
   const handleContactSeller = () => {
-    // Contact seller logic here
-    alert(`Contact form for ${product?.name} will open here`);
+    setShowContactForm(true);
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const response = await fetch('/api/contact-messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: contactForm.name,
+          email: contactForm.email,
+          phone: contactForm.phone,
+          subject: `Product Inquiry: ${product?.name}`,
+          message: contactForm.message,
+          item_type: 'store_product',
+          item_id: product?.id,
+          message_type: 'inquiry',
+          recipient_email: product?.sellerEmail || null
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      alert('Message sent successfully! The seller will get back to you soon.');
+      setShowContactForm(false);
+      setContactForm({ name: '', email: '', phone: '', message: '' });
+    } catch (error) {
+      alert('Failed to send message. Please try again.');
+    }
   };
 
   if (loading) {
@@ -429,10 +470,41 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                 <Package className="w-5 h-5 mr-2" />
                 Contact Seller
               </Button>
+              
+              {/* Action Buttons Row */}
+              <div className="flex space-x-2">
+                <BookmarkButton
+                  itemId={product.id}
+                  itemType="store"
+                  title={product.name}
+                  className="flex-1"
+                  variant="outline"
+                />
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    if (navigator.share) {
+                      navigator.share({
+                        title: product.name,
+                        text: `Check out this product: ${product.name}`,
+                        url: window.location.href,
+                      });
+                    } else {
+                      navigator.clipboard.writeText(window.location.href);
+                      alert('Link copied to clipboard!');
+                    }
+                  }}
+                  className="flex-1"
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share
+                </Button>
+              </div>
+              
               <div className="text-center text-sm text-gray-500">
                 Contact seller directly for pricing and availability
               </div>
-            </div>            {/* Features */}
+            </div>{/* Features */}
             <div className="grid grid-cols-2 gap-4 pt-4">
               <div className="flex items-center space-x-2 text-sm">
                 <Truck className="w-4 h-4 text-green-500" />
@@ -572,8 +644,80 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                 </div>
               </TabsContent>
             </Tabs>
-          </CardContent>
-        </Card>
+          </CardContent>        </Card>
+
+        {/* Contact Form */}
+        {showContactForm && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>
+                Contact Seller for {product.name}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleContactSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Your Name
+                  </label>
+                  <Input
+                    id="name"
+                    placeholder="Enter your name"
+                    value={contactForm.name}
+                    onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Your Email
+                  </label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                    Your Phone
+                  </label>
+                  <Input
+                    id="phone"
+                    placeholder="Enter your phone number"
+                    value={contactForm.phone}
+                    onChange={(e) => setContactForm({...contactForm, phone: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                    Message
+                  </label>
+                  <Textarea
+                    id="message"
+                    placeholder="I'm interested in this product. Please provide more details about pricing, availability, and delivery options..."
+                    value={contactForm.message}
+                    onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
+                    rows={4}
+                  />
+                </div>
+                <div className="flex space-x-2">
+                  <Button type="submit" className="flex-1">Send Message</Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setShowContactForm(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (

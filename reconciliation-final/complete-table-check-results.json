@@ -1,0 +1,95 @@
+{
+  "users": {
+    "exists": true,
+    "columns": 0,
+    "records": 5
+  },
+  "user_profiles": {
+    "exists": true,
+    "columns": 0,
+    "records": 3
+  },
+  "user_bookmarks": {
+    "exists": true,
+    "columns": 0,
+    "records": 0
+  },
+  "properties": {
+    "exists": true,
+    "columns": 0,
+    "records": 4
+  },
+  "projects": {
+    "exists": true,
+    "columns": 0,
+    "records": 5
+  },
+  "contact_messages": {
+    "exists": true,
+    "columns": 0,
+    "records": 4
+  },
+  "blogs": {
+    "exists": true,
+    "columns": 0,
+    "records": 0
+  },
+  "store": {
+    "exists": false,
+    "error": "relation \"public.store\" does not exist"
+  },
+  "food_categories": {
+    "exists": true,
+    "columns": 0,
+    "records": 18
+  },
+  "store_categories": {
+    "exists": true,
+    "columns": 0,
+    "records": 7
+  },
+  "blog_categories": {
+    "exists": true,
+    "columns": 0,
+    "records": 10
+  },
+  "project_categories": {
+    "exists": true,
+    "columns": 0,
+    "records": 7
+  },
+  "vendor_listings": {
+    "exists": true,
+    "columns": 0,
+    "records": 1
+  },
+  "vendor_applications": {
+    "exists": true,
+    "columns": 0,
+    "records": 2
+  },
+  "testimonials": {
+    "exists": true,
+    "columns": 0,
+    "records": 0
+  },
+  "categories": {
+    "exists": true,
+    "columns": 0,
+    "records": 0
+  },
+  "messages": {
+    "exists": true,
+    "columns": 0,
+    "records": 0
+  },
+  "featured": {
+    "exists": false,
+    "error": "relation \"public.featured\" does not exist"
+  },
+  "site_settings": {
+    "exists": true,
+    "columns": 0,
+    "records": 15
+  }
+}

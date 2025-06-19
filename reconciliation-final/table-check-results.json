@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-06-18T13:14:29.798Z",
+  "timestamp": "2025-06-19T14:27:50.658Z",
   "existing_tables": {
     "users": {
       "exists": true,
@@ -65,31 +65,32 @@
         "contact_name",
         "contact_phone",
         "contact_email",
-        "contact_address"
+        "contact_address",
+        "contractor_id"
       ],
-      "column_count": 35,
+      "column_count": 36,
       "has_data": true,
       "sample_data": {
-        "id": "proj-002",
-        "title": "Modern Office Building - Victoria Island",
-        "description": "State-of-the-art 10-story office building with modern amenities and green building features.",
-        "category_id": "proj-cat-002",
+        "id": "proj-2",
+        "title": "Corporate Office Complex",
+        "description": "Design and construction of a 5-story office building with modern facilities",
+        "category_id": "proj-cat-2",
         "before_images": [
-          "https://i.pinimg.com/originals/a6/98/03/a698032885ec57de1edfb680492f6353.jpg"
+          "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=600&h=400&fit=crop"
         ],
         "after_images": [
-          "https://i.pinimg.com/originals/72/b8/51/72b851578f184f0f2f5b6fddb8937aa5.jpg"
+          "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop"
         ],
-        "status": "IN_PROGRESS",
-        "budget": 800000000,
-        "start_date": "2024-03-01T00:00:00",
-        "end_date": null,
+        "status": "COMPLETED",
+        "budget": 85000000,
+        "start_date": "2023-06-01T00:00:00",
+        "end_date": "2024-01-15T00:00:00",
         "location": "Victoria Island, Lagos",
-        "client_name": "FirstBank of Nigeria",
-        "testimonial": null,
+        "client_name": "TechFlow Industries",
+        "testimonial": "Professional service from start to finish. Our new office space has transformed our business operations.",
         "is_active": true,
-        "created_at": "2025-06-15T17:03:27.516",
-        "updated_at": "2025-06-15T17:03:27.516",
+        "created_at": "2025-06-16T00:05:25.591",
+        "updated_at": "2025-06-16T00:05:25.591",
         "project_type": null,
         "timeline_phases": null,
         "team_members": null,
@@ -108,7 +109,8 @@
         "contact_name": null,
         "contact_phone": null,
         "contact_email": null,
-        "contact_address": null
+        "contact_address": null,
+        "contractor_id": null
       }
     },
     "properties": {
@@ -148,9 +150,13 @@
         "property_tax",
         "hoa_fees",
         "views_count",
-        "lead_count"
+        "lead_count",
+        "area_sqft",
+        "status",
+        "user_id",
+        "vendor_id"
       ],
-      "column_count": 35,
+      "column_count": 39,
       "has_data": true,
       "sample_data": {
         "id": "prop-001",
@@ -178,7 +184,7 @@
         ],
         "coordinates": null,
         "is_active": true,
-        "agent_id": "admin-001",
+        "agent_id": "17a46b4f-f09d-4db3-ad49-99326360acb8",
         "created_at": "2025-06-15T17:03:27.516",
         "updated_at": "2025-06-15T17:03:27.516",
         "virtual_tour_url": null,
@@ -196,7 +202,11 @@
         "property_tax": null,
         "hoa_fees": null,
         "views_count": 0,
-        "lead_count": 0
+        "lead_count": 0,
+        "area_sqft": null,
+        "status": "active",
+        "user_id": null,
+        "vendor_id": null
       }
     },
     "contact_messages": {
@@ -235,9 +245,11 @@
         "read_at",
         "anonymous_sender",
         "item_type",
-        "item_id"
+        "item_id",
+        "name",
+        "email"
       ],
-      "column_count": 34,
+      "column_count": 36,
       "has_data": true,
       "sample_data": {
         "id": "584391dd-c875-4eda-bd59-4f26077d521e",
@@ -273,7 +285,9 @@
         "read_at": null,
         "anonymous_sender": null,
         "item_type": "property",
-        "item_id": null
+        "item_id": null,
+        "name": null,
+        "email": null
       }
     },
     "vendor_applications": {
@@ -345,7 +359,7 @@
         "nutritional_info": null,
         "origin": null,
         "is_active": true,
-        "vendor_id": "admin-001",
+        "vendor_id": "a03e5884-c43b-41ad-90d5-00c4b3f3f662",
         "created_at": "2025-06-15T17:03:27.516",
         "updated_at": "2025-06-15T17:03:27.516",
         "supplier_info": null,
@@ -385,33 +399,27 @@
         "preferences",
         "notifications",
         "created_at",
-        "updated_at"
+        "updated_at",
+        "role"
       ],
-      "column_count": 14,
+      "column_count": 15,
       "has_data": true,
       "sample_data": {
-        "id": "profile-admin-001",
-        "user_id": "admin-001",
-        "first_name": "BrightonHub",
-        "last_name": "Admin",
-        "avatar": "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=150",
-        "bio": "System Administrator for BrightonHub platform. Managing real estate, food, and project operations.",
-        "business_name": "BrightonHub Management",
-        "business_address": "Victoria Island, Lagos, Nigeria",
-        "business_phone": "+234-800-BRIGHTON",
-        "location": "Lagos, Nigeria",
-        "preferences": {
-          "theme": "light",
-          "language": "en",
-          "notifications": true
-        },
-        "notifications": {
-          "sms": true,
-          "push": true,
-          "email": true
-        },
-        "created_at": "2025-06-15T19:15:21.48",
-        "updated_at": "2025-06-15T19:15:21.481"
+        "id": "profile-1750019413209-3ffulp5iq",
+        "user_id": "user-1750019413209-5eiljdiqf",
+        "first_name": "Olusegun",
+        "last_name": "Ajayi2",
+        "avatar": null,
+        "bio": null,
+        "business_name": null,
+        "business_address": null,
+        "business_phone": null,
+        "location": null,
+        "preferences": null,
+        "notifications": null,
+        "created_at": "2025-06-15T20:30:13.509",
+        "updated_at": "2025-06-15T20:30:13.509",
+        "role": "USER"
       }
     },
     "blogs": {
@@ -441,6 +449,6 @@
     "total_checked": 11,
     "existing_count": 11,
     "missing_count": 0,
-    "total_columns": 161
+    "total_columns": 169
   }
 }

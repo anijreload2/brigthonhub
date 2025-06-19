@@ -10,7 +10,6 @@ import {
   Bed, 
   Bath, 
   Square, 
-  Heart,
   Eye,
   Share2,
   Phone,
@@ -21,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { CURRENCY } from '@/lib/constants';
+import { BookmarkButton } from '@/components/ui/bookmark-button';
 
 interface PropertyCardProps {
   property: Property;
@@ -28,7 +28,6 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property, viewMode = 'grid' }: PropertyCardProps) {
-  const [isFavorited, setIsFavorited] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Reset image index if it's out of bounds
@@ -50,12 +49,6 @@ export function PropertyCard({ property, viewMode = 'grid' }: PropertyCardProps)
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price);
-  };
-
-  const handleFavorite = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsFavorited(!isFavorited);
   };
 
   const handleShare = (e: React.MouseEvent) => {
@@ -89,14 +82,13 @@ export function PropertyCard({ property, viewMode = 'grid' }: PropertyCardProps)
               </Badge>
             </div>
             <div className="absolute top-3 right-3 flex space-x-2">
-              <Button
-                size="sm"
-                variant="secondary"
+              <BookmarkButton
+                itemId={property.id}
+                itemType="property"
+                title={property.title}
+                variant="ghost"
                 className="w-8 h-8 p-0 bg-white/90 hover:bg-white"
-                onClick={handleFavorite}
-              >
-                <Heart className={`w-4 h-4 ${isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
-              </Button>
+              />
               <Button
                 size="sm"
                 variant="secondary"
@@ -204,14 +196,13 @@ export function PropertyCard({ property, viewMode = 'grid' }: PropertyCardProps)
           </Badge>
         </div>
         <div className="absolute top-3 right-3 flex space-x-2">
-          <Button
-            size="sm"
-            variant="secondary"
+          <BookmarkButton
+            itemId={property.id}
+            itemType="property"
+            title={property.title}
+            variant="ghost"
             className="w-8 h-8 p-0 bg-white/90 hover:bg-white"
-            onClick={handleFavorite}
-          >
-            <Heart className={`w-4 h-4 ${isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
-          </Button>
+          />
           <Button
             size="sm"
             variant="secondary"

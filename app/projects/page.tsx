@@ -24,6 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Project, ProjectCategory, ProjectStatus } from '@/lib/types';
 import { CURRENCY } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
+import { BookmarkButton } from '@/components/ui/bookmark-button';
 
 // Type mapping for database response (snake_case) to UI (camelCase)
 interface ProjectResponse {
@@ -281,10 +282,18 @@ export default function ProjectsPage() {
                               fill
                               className="object-cover transition-transform duration-300 hover:scale-105"
                               priority={false}
-                            />
-                            <Badge className={`absolute top-2 left-2 ${getStatusColor(project.status || '')} text-white`}>
+                            />                            <Badge className={`absolute top-2 left-2 ${getStatusColor(project.status || '')} text-white`}>
                               {project.status?.replace('_', ' ').toUpperCase()}
                             </Badge>
+                            <div className="absolute top-2 right-2">
+                              <BookmarkButton
+                                itemId={project.id}
+                                itemType="project"
+                                title={project.title || 'Project'}
+                                variant="ghost"
+                                className="w-8 h-8 p-0 bg-white/90 hover:bg-white"
+                              />
+                            </div>
                           </div>
                         )}
                       </CardHeader>

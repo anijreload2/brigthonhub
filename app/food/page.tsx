@@ -24,6 +24,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FoodItem, FoodCategory } from '@/lib/types';
 import { CURRENCY } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
+import { BookmarkButton } from '@/components/ui/bookmark-button';
 
 export default function FoodPage() {
   const [items, setItems] = useState<FoodItem[]>([]);
@@ -249,10 +250,17 @@ export default function FoodPage() {
                               fill
                               className="object-cover transition-transform duration-300 hover:scale-105"
                               priority={false}
-                            />
-                            <Badge className="absolute top-2 left-2 bg-green-600 text-white">
+                            />                            <Badge className="absolute top-2 left-2 bg-green-600 text-white">
                               Fresh
                             </Badge>
+                            <div className="absolute top-2 right-2">                              <BookmarkButton
+                                itemId={item.id}
+                                itemType="food"
+                                title={item.name}
+                                variant="ghost"
+                                className="bg-white/90 hover:bg-white"
+                              />
+                            </div>
                           </div>
                         )}
                       </CardHeader>

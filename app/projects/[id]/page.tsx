@@ -22,7 +22,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
+import { BookmarkButton } from '@/components/ui/bookmark-button';
 
 interface Project {
   id: string;
@@ -62,10 +65,15 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {c
   const [relatedProjects, setRelatedProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'description' | 'specifications' | 'team' | 'reviews'>('description');
-  const [activeImageTab, setActiveImageTab] = useState<'before' | 'after'>('before');
+  const [activeTab, setActiveTab] = useState<'description' | 'specifications' | 'team' | 'reviews'>('description');  const [activeImageTab, setActiveImageTab] = useState<'before' | 'after'>('before');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -110,13 +118,45 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {c
       );
     }
   };
-
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'completed': return 'bg-green-500';
       case 'in-progress': return 'bg-blue-500';
       case 'planning': return 'bg-yellow-500';
       default: return 'bg-gray-500';
+    }
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const response = await fetch('/api/contact-messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: contactForm.name,
+          email: contactForm.email,
+          phone: contactForm.phone,
+          subject: `Project Inquiry: ${project?.title}`,
+          message: contactForm.message,
+          item_type: 'project',
+          item_id: project?.id,
+          message_type: 'inquiry',
+          recipient_email: project?.contact_email || null
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      alert('Message sent successfully! The project team will get back to you soon.');
+      setContactForm({ name: '', email: '', phone: '', message: '' });
+    } catch (error) {
+      alert('Failed to send message. Please try again.');
     }
   };
 
@@ -526,9 +566,47 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {c
                       <span className="font-medium text-sm">{project.contact_address}</span>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </CardContent>              </Card>
             )}
+
+            {/* Action Buttons */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Actions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex space-x-2">
+                    <BookmarkButton
+                      itemId={project.id}
+                      itemType="project"
+                      title={project.title}
+                      className="flex-1"
+                      variant="outline"
+                    />
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        if (navigator.share) {
+                          navigator.share({
+                            title: project.title,
+                            text: `Check out this project: ${project.title}`,
+                            url: window.location.href,
+                          });
+                        } else {
+                          navigator.clipboard.writeText(window.location.href);
+                          alert('Link copied to clipboard!');
+                        }
+                      }}
+                      className="flex-1"
+                    >
+                      <Share2 className="w-4 h-4 mr-2" />
+                      Share
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Contact Form */}
             <Card>
@@ -536,49 +614,53 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {c
                 <CardTitle>Contact Project Team</CardTitle>
               </CardHeader>
               <CardContent>
-                <form className="space-y-4">
+                <form onSubmit={handleContactSubmit} className="space-y-4">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                       Your Name
                     </label>
-                    <input
-                      type="text"
+                    <Input
                       id="name"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="Enter your name"
+                      value={contactForm.name}
+                      onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
+                      required
                     />
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                       Your Email
                     </label>
-                    <input
-                      type="email"
+                    <Input
                       id="email"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      type="email"
                       placeholder="Enter your email"
+                      value={contactForm.email}
+                      onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
+                      required
                     />
                   </div>
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
                       Your Phone
                     </label>
-                    <input
-                      type="tel"
+                    <Input
                       id="phone"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="Enter your phone number"
+                      value={contactForm.phone}
+                      onChange={(e) => setContactForm({...contactForm, phone: e.target.value})}
                     />
                   </div>
                   <div>
                     <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
                       Message
                     </label>
-                    <textarea
+                    <Textarea
                       id="message"
-                      rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="Tell us about your project requirements..."
+                      value={contactForm.message}
+                      onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
+                      rows={4}
                     />
                   </div>
                   <Button type="submit" className="w-full">

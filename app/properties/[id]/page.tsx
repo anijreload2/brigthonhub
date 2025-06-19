@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { BookmarkButton } from '@/components/ui/bookmark-button';
 // import { PropertyCard } from '@/components/properties/property-card';
 
 interface Property {
@@ -73,7 +74,6 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'description' | 'specifications' | 'agent' | 'reviews'>('description');
   const [showContactForm, setShowContactForm] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
@@ -159,13 +159,6 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
       // Error handled by showing error message to user
       alert('Failed to send message. Please try again.');
     }
-  };
-
-  const handleBookmark = async () => {
-    // TODO: Check if user is logged in and implement bookmark functionality
-    setIsBookmarked(!isBookmarked);
-    // Show feedback
-    alert(isBookmarked ? 'Property removed from bookmarks!' : 'Property bookmarked!');
   };
 
   const handleShare = async () => {
@@ -317,14 +310,13 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                     </div>
                   </div>
                   <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
+                    <BookmarkButton
+                      itemId={property.id}
+                      itemType="property"
+                      title={property.title}
                       size="sm"
-                      onClick={handleBookmark}
-                      className={isBookmarked ? 'text-red-500' : ''}
-                    >
-                      <Heart className={`w-4 h-4 ${isBookmarked ? 'fill-red-500' : ''}`} />
-                    </Button>
+                      variant="outline"
+                    />
                     <Button variant="outline" size="sm" onClick={handleShare}>
                       <Share2 className="w-4 h-4" />
                     </Button>
@@ -542,6 +534,25 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                     <Phone className="w-4 h-4 mr-2" />
                     {property.agent ? `Contact ${property.agent.name}` : 'Contact Agent'}
                   </Button>
+                  
+                  {/* Action Buttons Row */}
+                  <div className="flex space-x-2">
+                    <BookmarkButton
+                      itemId={property.id}
+                      itemType="property"
+                      title={property.title}
+                      className="flex-1"
+                      variant="outline"
+                    />
+                    <Button 
+                      variant="outline" 
+                      onClick={handleShare}
+                      className="flex-1"
+                    >
+                      <Share2 className="w-4 h-4 mr-2" />
+                      Share
+                    </Button>
+                  </div>
                 </div>
                 
                 <div className="text-sm text-gray-600">
