@@ -178,7 +178,7 @@ function MessagesPageContent() {
       
       setThreads(threadsArray);
     } catch (error) {
-      console.error('Error fetching messages:', error);
+
     } finally {
       setLoading(false);
     }
@@ -191,7 +191,7 @@ function MessagesPageContent() {
       const lastMessage = selectedThread.last_message;
       
       if (!lastMessage) {
-        console.error('No last message found in thread');
+
         return;
       }
       
@@ -219,7 +219,7 @@ function MessagesPageContent() {
       setNewMessage('');
       await fetchMessages(); // Refresh to show new message
     } catch (error) {
-      console.error('Error sending message:', error);
+
     } finally {
       setSending(false);
     }
@@ -242,7 +242,7 @@ function MessagesPageContent() {
 
       await fetchMessages();
     } catch (error) {
-      console.error('Error marking message as read:', error);
+
     }
   };  const updateMessageStatus = async (messageId: string, status: string) => {
     try {
@@ -263,7 +263,7 @@ function MessagesPageContent() {
 
       await fetchMessages();
     } catch (error) {
-      console.error('Error updating message status:', error);
+
     }
   };
   const getOtherParticipant = (thread: MessageThread) => {

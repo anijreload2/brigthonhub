@@ -14,16 +14,6 @@ function getEnvVars() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  if (typeof window !== 'undefined') {
-    // Client-side: log for debugging
-    console.log('Client-side env check:', {
-      hasUrl: !!supabaseUrl,
-      hasAnonKey: !!supabaseAnonKey,
-      url: supabaseUrl,
-      anonKeyPreview: supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'missing'
-    })
-  }
-
   // Ensure required environment variables are present
   if (!supabaseUrl || !supabaseAnonKey) {
     const missing = []
@@ -108,17 +98,11 @@ function getSupabaseClient(): SupabaseClient<Database> {  if (typeof window !== 
       storage: storageAvailable ? undefined : customStorage,
     }
   })
-
   // Store in global to ensure singleton
   if (typeof window !== 'undefined') {
     globalThis.__supabase = client
-    console.log('✅ Supabase client created successfully (browser)', {
-      storageAvailable,
-      persistSession: storageAvailable
-    })
   } else {
     global.__supabase = client
-    console.log('✅ Supabase client created successfully (server)')
   }
 
   return client

@@ -53,15 +53,13 @@ export default function FeaturedProjects() {
           throw new Error('Failed to fetch projects');
         }
         const data = await response.json();
-        console.log('💼 Projects API Response:', data); // Debug log
-        
-        // Handle both old format (array) and new format (object with projects array)
+
+          // Handle both old format (array) and new format (object with projects array)
         const projectsData = Array.isArray(data) ? data : (data.projects || []);
-        console.log('💼 Projects Data:', projectsData); // Debug log
         setProjects(projectsData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
-        console.error('❌ Error fetching projects:', err);
+
       } finally {
         setLoading(false);
       }

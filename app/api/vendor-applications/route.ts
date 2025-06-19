@@ -16,7 +16,7 @@ async function getSupabaseUser(request: NextRequest) {
     const { data: { user }, error } = await adminClient.auth.getUser(token);
     
     if (error || !user) {
-      console.error('Supabase auth error:', error);
+
       return null;
     }    // Get user role from our user_profiles table (not users table)
     const { data: userData, error: userError } = await adminClient
@@ -26,7 +26,7 @@ async function getSupabaseUser(request: NextRequest) {
       .single();
 
     if (userError || !userData) {
-      console.error('Error fetching user data:', userError);
+
       return null;
     }    return {
       id: userData.user_id,
@@ -35,7 +35,7 @@ async function getSupabaseUser(request: NextRequest) {
       role: userData.role
     };
   } catch (error) {
-    console.error('Error verifying Supabase token:', error);
+
     return null;
   }
 }
@@ -43,35 +43,24 @@ async function getSupabaseUser(request: NextRequest) {
 // GET /api/vendor-applications - Get all vendor applications (admin only)
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 GET /api/vendor-applications - Starting request');
-    
     // Try to get authenticated user from either system
     let authUser = getAuthUser(request); // Custom JWT
-    console.log('📝 Custom JWT auth result:', authUser ? 'Found user' : 'No user found');
-    
     if (!authUser) {
-      console.log('🔍 Trying Supabase auth...');
       authUser = await getSupabaseUser(request); // Supabase token
-      console.log('📝 Supabase auth result:', authUser ? `Found user: ${authUser.email}` : 'No user found');
     }
-    
     if (!authUser) {
-      console.log('❌ No authenticated user found');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('✅ Authenticated user:', { id: authUser.id, email: authUser.email, role: authUser.role });
-
     // Check if user is admin
     if (authUser.role !== 'ADMIN') {
-      console.log('❌ User is not admin, role:', authUser.role);
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
-    }    console.log('✅ User is admin, proceeding with query...');
+    }
 
     const url = new URL(request.url);
     const status = url.searchParams.get('status');
     const limit = url.searchParams.get('limit') || '50';
-    const offset = url.searchParams.get('offset') || '0';    console.log('📊 Query parameters:', { status, limit, offset });
+    const offset = url.searchParams.get('offset') || '0';
 
     // Use admin client to bypass RLS since user is already authenticated as admin
     const adminClient = getAdminClient();
@@ -87,18 +76,14 @@ export async function GET(request: NextRequest) {
       query = query.eq('status', status);
     }
 
-    console.log('🔍 Executing database query...');
     const { data: applications, error } = await query;
 
     if (error) {
-      console.error('❌ Database error:', error);
       return NextResponse.json({ error: 'Failed to fetch vendor applications' }, { status: 500 });
-    }    console.log('✅ Query successful, found', applications?.length || 0, 'applications');
+    }
+    
     return NextResponse.json({ applications });
-
   } catch (error) {
-    console.error('❌ Unexpected error in vendor applications GET API:', error);
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -165,17 +150,15 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error creating vendor application:', error);
+
       return NextResponse.json({ error: 'Failed to create vendor application' }, { status: 500 });
     }
 
     return NextResponse.json({ 
       application,
-      message: 'Vendor application submitted successfully' 
-    }, { status: 201 });
+      message: 'Vendor application submitted successfully'    }, { status: 201 });
 
   } catch (error) {
-    console.error('Error in vendor applications API:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -222,7 +205,7 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error updating vendor application:', error);
+
       return NextResponse.json({ error: 'Failed to update vendor application' }, { status: 500 });
     }
 
@@ -260,9 +243,7 @@ export async function PUT(request: NextRequest) {
       application,
       message: `Vendor application ${status} successfully` 
     });
-
   } catch (error) {
-    console.error('Error in vendor applications API:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

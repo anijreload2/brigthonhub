@@ -55,7 +55,7 @@ function LoginForm() {
       
       // Don't redirect here - let useEffect handle it when user state updates
     } catch (error) {
-      console.error('Login error:', error);
+
       toast({
         title: 'Login failed',
         description: error instanceof Error ? error.message : 'Please check your credentials and try again.',

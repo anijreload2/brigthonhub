@@ -28,15 +28,11 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ onAdd, onEdit, onView, onDele
             name
           )
         `)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching projects:', error);
-      } else {
+        .order('created_at', { ascending: false });      if (!error) {
         setProjects(data || []);
       }
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }
@@ -47,15 +43,11 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ onAdd, onEdit, onView, onDele
         .from('project_categories')
         .select('*')
         .eq('is_active', true)
-        .order('name');
-
-      if (error) {
-        console.error('Error fetching categories:', error);
-      } else {
+        .order('name');      if (!error) {
         setCategories(data || []);
       }
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      // Error handled silently
     }
   };
 

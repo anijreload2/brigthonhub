@@ -40,14 +40,14 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query;
 
     if (error) {
-      console.error('Error fetching messages:', error);
+
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ messages: data }, { status: 200 });
 
   } catch (error) {
-    console.error('Messages API error:', error);
+
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -116,14 +116,14 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error creating message:', error);
+
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ message: data }, { status: 201 });
 
   } catch (error) {
-    console.error('Messages POST API error:', error);
+
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -153,14 +153,14 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error updating message:', error);
+
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ message: data }, { status: 200 });
 
   } catch (error) {
-    console.error('Messages PATCH API error:', error);
+
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

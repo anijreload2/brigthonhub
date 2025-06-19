@@ -25,9 +25,7 @@ const formatSafeDate = (dateString: string, formatStr: string = 'MMM d, h:mm a')
     const date = new Date(dateString);
     if (!isValid(date)) return 'Invalid date';
     return format(date, formatStr);
-  } catch (error) {
-    console.error('Date formatting error:', error, 'Date string:', dateString);
-    return 'Invalid date';
+  } catch (error) {    return 'Invalid date';
   }
 };
 
@@ -164,7 +162,7 @@ function AdminMessagesPageContent() {
     try {
       setLoading(true);
       
-      console.log('🔍 Fetching messages for admin ID:', user.id);
+
       
       // Use the new unified contact-messages API with admin access (sees all messages)
       const response = await authenticatedFetch('/api/contact-messages?role=admin', {
@@ -173,15 +171,13 @@ function AdminMessagesPageContent() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ API Error Response:', response.status, errorText);
+
         throw new Error(`Failed to fetch messages: ${response.status}`);
       }
 
       const data = await response.json();
       const fetchedMessages = data.messages || [];
-      
-      console.log('✅ Successfully fetched messages count:', fetchedMessages.length);
-      console.log('📋 Messages data:', fetchedMessages);
+  
       
       setMessages(fetchedMessages);      // Calculate admin-specific stats
       const oneWeekAgo = new Date();
@@ -232,7 +228,7 @@ function AdminMessagesPageContent() {
       
       setThreads(threadsArray);
     } catch (error) {
-      console.error('Error fetching messages:', error);
+
     } finally {
       setLoading(false);
     }
@@ -269,7 +265,7 @@ function AdminMessagesPageContent() {
       setNewMessage('');
       await fetchMessages(); // Refresh to show new message
     } catch (error) {
-      console.error('Error sending message:', error);
+
     } finally {
       setSending(false);
     }
@@ -293,7 +289,7 @@ function AdminMessagesPageContent() {
 
       await fetchMessages();
     } catch (error) {
-      console.error('Error marking message as read:', error);
+
     }
   };
 
@@ -319,7 +315,7 @@ function AdminMessagesPageContent() {
       setSelectedMessages([]);
       await fetchMessages();
     } catch (error) {
-      console.error('Error updating messages:', error);
+
     }
   };
 

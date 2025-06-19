@@ -47,7 +47,7 @@ export default function FoodPage() {
           .order('name');
 
         if (categoriesError) {
-          console.error('Error fetching food categories:', categoriesError);
+
         } else {
           setCategories(categoriesData || []);
         }        // Fetch food items
@@ -63,12 +63,12 @@ export default function FoodPage() {
           .order('created_at', { ascending: false });
 
         if (itemsError) {
-          console.error('Error fetching food items:', itemsError);
+
         } else {
           setItems(itemsData || []);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+
       } finally {
         setLoading(false);
       }

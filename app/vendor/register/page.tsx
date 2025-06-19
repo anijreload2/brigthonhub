@@ -150,7 +150,7 @@ export default function VendorRegisterPage() {
         }
       }, 3000);
     } catch (error) {
-      console.error('Error submitting vendor application:', error);
+
       alert('Failed to submit application. Please try again.');
     } finally {
       setIsSubmitting(false);

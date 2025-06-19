@@ -114,23 +114,19 @@ export default function VendorDashboard() {
         .order('created_at', { ascending: false });
 
       if (listingsError) {
-        console.error('Error fetching listings:', listingsError);
+
       } else {
         setListings(listingsData || []);
       }      // Fetch vendor messages directly from Supabase
       try {
-        console.log('🔍 Fetching messages for vendor ID:', user.id);
+
         
         const { data: messagesData, error: messagesError } = await supabase
           .from('contact_messages')
           .select('*')
           .eq('recipient_id', user.id)
           .order('created_at', { ascending: false });        if (messagesError) {
-          console.error('❌ Error fetching messages:', messagesError);
-          console.error('Error details:', messagesError.message, messagesError.code, messagesError.hint);
           setMessages([]);        } else {
-          console.log('✅ Successfully fetched messages count:', messagesData?.length || 0);
-          console.log('📋 Messages data:', messagesData);
           setMessages(messagesData || []);
           
           // Calculate stats with the fetched messages
@@ -139,12 +135,6 @@ export default function VendorDashboard() {
           const unreadMessages = messagesData?.filter((m: VendorMessage) => m.status === 'unread').length || 0;
           const totalMessages = messagesData?.length || 0;
 
-          console.log('📊 Stats calculation:');
-          console.log('  Total listings:', totalListings);
-          console.log('  Active listings:', activeListings);
-          console.log('  Total messages:', totalMessages);
-          console.log('  Unread messages:', unreadMessages);
-
           setStats({
             total_listings: totalListings,
             active_listings: activeListings,
@@ -152,7 +142,7 @@ export default function VendorDashboard() {
             pending_messages: unreadMessages
           });        }
       } catch (error) {
-        console.error('❌ Unexpected error fetching messages:', error);
+
         setMessages([]);
         
         // Set basic stats even if messages failed to load
@@ -168,7 +158,7 @@ export default function VendorDashboard() {
       }
 
     } catch (error) {
-      console.error('Error fetching vendor data:', error);
+
     } finally {
       setLoading(false);
     }
@@ -195,10 +185,10 @@ export default function VendorDashboard() {
     }
   };  const markAsRead = async (messageId: string) => {
     try {
-      console.log('📧 Marking message as read:', messageId);
+
       
       if (!user) {
-        console.error('❌ No user found');
+
         alert('Please log in to mark messages as read.');
         return;
       }
@@ -213,18 +203,18 @@ export default function VendorDashboard() {
         .single();
       
       if (error) {
-        console.error('❌ Database error:', error);
+
         alert('Failed to mark message as read. Please try again.');
         return;
       }
       
       if (!data) {
-        console.error('❌ Message not found or unauthorized');
+
         alert('Message not found or you are not authorized to mark it as read.');
         return;
       }
       
-      console.log('✅ Message marked as read successfully');
+
       
       // Update local state
       const updatedMessages = messages.map(msg => 
@@ -239,10 +229,10 @@ export default function VendorDashboard() {
       const unreadCount = updatedMessages.filter(m => m.status === 'unread').length;
       setStats(prev => prev ? { ...prev, pending_messages: unreadCount } : null);
       
-      console.log('✅ Message marked as read, new unread count:', unreadCount);
+
       
     } catch (error) {
-      console.error('❌ Error marking message as read:', error);
+
       alert('Error marking message as read. Please try again.');
     }
   };

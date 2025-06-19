@@ -90,11 +90,9 @@ const HeroWithHeader: React.FC = () => {
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle search logic here
-    console.log('Search:', searchTerm, 'Category:', searchCategory);
   };
 
   const currentSlideData = slides[currentSlide];

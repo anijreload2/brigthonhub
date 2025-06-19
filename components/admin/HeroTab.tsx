@@ -21,19 +21,15 @@ const HeroTab: React.FC<HeroTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('content_blocks')
-        .select('*')
+        .from('content_blocks')        .select('*')
         .order('page_location', { ascending: true })
         .order('sort_order', { ascending: true });
 
-      if (error) {
-        console.error('Error fetching content blocks:', error);
-      } else {
-        console.log('Fetched content blocks:', data);
+      if (!error) {
         setContentBlocks(data || []);
       }
     } catch (error) {
-      console.error('Error fetching content blocks:', error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }
@@ -90,10 +86,8 @@ const HeroTab: React.FC<HeroTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
       if (error1 || error2) throw error1 || error2;
 
       // Refresh data
-      fetchContentBlocks();
-      alert('Block order updated successfully');
+      fetchContentBlocks();      alert('Block order updated successfully');
     } catch (error: any) {
-      console.error('Error updating sort order:', error);
       alert(`Error: ${error.message}`);
     }
   };
@@ -112,9 +106,7 @@ const HeroTab: React.FC<HeroTabProps> = ({ onAdd, onEdit, onView, onDelete }) =>
       ));
       
       alert(`Content block ${!is_active ? 'activated' : 'deactivated'} successfully`);
-    } catch (error: any) {
-      console.error('Error updating content block:', error);
-      alert(`Error: ${error.message}`);
+    } catch (error: any) {      alert(`Error: ${error.message}`);
     }
   };
 

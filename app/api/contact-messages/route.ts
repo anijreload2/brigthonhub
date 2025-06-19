@@ -17,7 +17,7 @@ async function getSupabaseUser(request: NextRequest) {
     const { data: { user }, error } = await adminClient.auth.getUser(token);
     
     if (error || !user) {
-      console.error('Supabase auth error:', error);
+
       return null;
     }
 
@@ -29,7 +29,7 @@ async function getSupabaseUser(request: NextRequest) {
       .single();
 
     if (userError || !userData) {
-      console.error('Error fetching user data:', userError);
+
       return null;
     }
 
@@ -40,7 +40,7 @@ async function getSupabaseUser(request: NextRequest) {
       role: userData.role
     };
   } catch (error) {
-    console.error('Error verifying Supabase token:', error);
+
     return null;
   }
 }
@@ -195,7 +195,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Database error:', error);
       return NextResponse.json(
         { error: 'Failed to save message' },
         { status: 500 }
@@ -467,7 +466,7 @@ async function handleBulkMessage(authUser: any, body: any) {
     .select();
 
   if (error) {
-    console.error('Bulk message error:', error);
+
     return NextResponse.json(
       { error: 'Failed to send bulk messages' },
       { status: 500 }
@@ -522,7 +521,7 @@ async function handleBulkAction(authUser: any, messageIds: string[], action: str
   const { data, error } = await query.select();
 
   if (error) {
-    console.error('Bulk action error:', error);
+
     return NextResponse.json(
       { error: 'Failed to perform bulk action' },
       { status: 500 }
@@ -557,7 +556,7 @@ async function fetchItemContext(contentType: string, contentId: string) {
     
     return data;
   } catch (error) {
-    console.error('Error fetching item context:', error);
+
     return null;
   }
 }
@@ -601,7 +600,7 @@ async function sendEmailNotification(message: any, itemContext: any) {
       .eq('id', message.id);
 
   } catch (error) {
-    console.error('Failed to send email notification:', error);
+
   }
 }
 

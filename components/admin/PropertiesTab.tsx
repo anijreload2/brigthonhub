@@ -21,14 +21,11 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ onAdd, onEdit, onView, on
       setLoading(true);      const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .order('created_at', { ascending: false });if (error) {
-        console.error('Error fetching properties:', error);
-      } else {
-        console.log('Fetched properties:', data); // Debug log
+        .order('created_at', { ascending: false });      if (!error) {
         setProperties(data || []);
       }
     } catch (error) {
-      console.error('Error fetching properties:', error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }

@@ -163,7 +163,7 @@ export default function ContactForm({
       }, 2000);
 
     } catch (error) {
-      console.error('Error sending message:', error);
+      // Error handled by showing error message to user
       setSubmitStatus('error');
       setErrorMessage('Failed to send message. Please try again.');
     } finally {

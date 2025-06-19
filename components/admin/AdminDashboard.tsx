@@ -75,9 +75,7 @@ const AdminDashboard: React.FC = () => {
     setShowModal(true);
   };  const handleDelete = async (table: string, id: string, refreshCallback?: () => void) => {
     if (confirm('Are you sure you want to delete this item?')) {
-      try {
-        console.log(`🗑️ Attempting to delete from ${table} with ID: ${id}`);
-        
+      try {        
         if (table === 'users') {
           // For users, we need to delete both user and user_profile (handled by CASCADE)
           const { error } = await supabase
@@ -86,27 +84,17 @@ const AdminDashboard: React.FC = () => {
             .eq('id', id);
 
           if (error) {
-            console.error('❌ Error deleting user:', error);
             alert(`Error deleting user: ${error.message}`);
           } else {
-            console.log('✅ User deleted successfully');
             alert('User deleted successfully!');
             refreshData();
           }        } else {
-          // Regular deletion for other tables
-          console.log(`🔍 Before delete - checking ${table} with ID: ${id}`);
-          
+          // Regular deletion for other tables          
           // First, verify the record exists
           const { data: beforeDelete, error: checkError } = await supabase
             .from(table)
             .select('*')
             .eq('id', id);
-          
-          if (checkError) {
-            console.error(`❌ Error checking record before delete:`, checkError);
-          } else {
-            console.log(`📋 Record before delete:`, beforeDelete);
-          }
 
           // Now attempt deletion
           const { data, error } = await supabase
@@ -116,50 +104,29 @@ const AdminDashboard: React.FC = () => {
             .select(); // Add select to see what was deleted
 
           if (error) {
-            console.error(`❌ Error deleting from ${table}:`, error);
             alert(`Error deleting item: ${error.message}`);
           } else {
-            console.log(`✅ Successfully deleted from ${table}:`, data);
-            
             // Verify the record is actually gone
             const { data: afterDelete, error: verifyError } = await supabase
               .from(table)
               .select('*')
               .eq('id', id);
             
-            if (verifyError) {
-              console.error(`❌ Error verifying deletion:`, verifyError);
-            } else {
-              console.log(`🔍 Records with same ID after delete:`, afterDelete);
-              if (afterDelete && afterDelete.length > 0) {
-                console.error(`🚨 PROBLEM: Record still exists after deletion!`);
-              } else {
-                console.log(`✅ Confirmed: Record successfully deleted`);
-              }
-            }
-            
             alert('Item deleted successfully');
             refreshData();
           }
         }
       } catch (error) {
-        console.error(`💥 Exception while deleting from ${table}:`, error);
         alert('Error deleting item');
       }
     }
   };
-
   // Create wrapper functions for tab components
   const createDeleteHandler = (table: string) => (data: any) => {
-    console.log('Delete handler called with table:', table);
-    console.log('Delete handler called with data:', data);
-    
     // Handle both cases: data object with id property, or just the id string
     const id = typeof data === 'string' ? data : data?.id;
-    console.log('Extracted ID:', id);
     
     if (!id) {
-      console.error('No ID found in data:', data);
       alert('Error: No ID found for deletion');
       return;
     }
@@ -275,9 +242,7 @@ const AdminDashboard: React.FC = () => {
             ]
           }
         });
-        
-      } catch (error) {
-        console.error('Error fetching admin data:', error);
+          } catch (error) {
         // Fallback to mock data if there's an error
         setAdminData({
           stats: {

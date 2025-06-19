@@ -51,15 +51,13 @@ export default function FeaturedProperties() {
           throw new Error('Failed to fetch properties');
         }
         const data = await response.json();
-        console.log('🏠 Properties API Response:', data); // Debug log
-        
-        // Handle both old format (array) and new format (object with properties array)
+
+          // Handle both old format (array) and new format (object with properties array)
         const propertiesData = Array.isArray(data) ? data : (data.properties || []);
-        console.log('🏠 Properties Data:', propertiesData); // Debug log
         setProperties(propertiesData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
-        console.error('❌ Error fetching properties:', err);
+
       } finally {
         setLoading(false);
       }

@@ -76,7 +76,7 @@ export default function ProfilePage() {
         });
       }
     } catch (error) {
-      console.error('Error fetching message stats:', error);
+
     }
   };
 

@@ -90,7 +90,7 @@ export default function HomePage() {
         const response = await fetch('/api/testimonials');
         if (response.ok) {
           const data = await response.json();
-          console.log('Testimonials API response:', data); // Debug log
+
           
           // Filter for featured testimonials or take first 3
           const displayTestimonials = data.testimonials
@@ -105,16 +105,15 @@ export default function HomePage() {
             displayTestimonials.push(...remaining);
           }
           
-          console.log('Display testimonials:', displayTestimonials); // Debug log
-          console.log('First testimonial structure:', displayTestimonials[0]); // Debug log
+
           setTestimonials(displayTestimonials);
         } else {
-          console.warn('Testimonials API failed, using fallback data');
+
           // Only use fallback if API fails
           setTestimonials([]);
         }
       } catch (error) {
-        console.error('Error fetching testimonials:', error);
+
         // Only use fallback if there's an actual error
         setTestimonials([]);
       } finally {

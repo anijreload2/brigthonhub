@@ -72,9 +72,6 @@ export const metadata: Metadata = {
   },
 };
 
-import AuthDebug from '@/components/auth-debug';
-import { EnvDebug } from '@/components/env-debug';
-
 export default function RootLayout({
   children,
 }: {
@@ -98,8 +95,6 @@ export default function RootLayout({
               <Footer />
             </div>
             <Toaster />
-            <EnvDebug />
-            <AuthDebug />
           </AuthProvider>
         </ThemeProvider>
       </body>

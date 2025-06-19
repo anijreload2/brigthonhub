@@ -188,7 +188,7 @@ export default function CreateListing() {
         setSelectedCategory(categories[0]);
       }
     } catch (error) {
-      console.error('Error fetching approved categories:', error);
+      // Error handled by showing error state
       toast.error('Failed to load your approved categories');
     } finally {
       setLoading(false);
@@ -222,7 +222,7 @@ export default function CreateListing() {
         });
 
       if (error) {
-        console.error('Storage error:', error);
+        // Storage error handled by showing error message
         throw error;
       }
 
@@ -232,7 +232,7 @@ export default function CreateListing() {
 
       setImages(prev => [...prev, publicUrl]);
       toast.success('Image uploaded successfully');    } catch (error) {
-      console.error('Error uploading image:', error);
+      // Error handled by showing error message to user
       
       // Provide more specific error messages
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -307,7 +307,7 @@ export default function CreateListing() {
       toast.success('Listing created successfully!');
       router.push('/vendor/dashboard?tab=listings');
     } catch (error) {
-      console.error('Error creating listing:', error);
+      // Error handled by showing error message to user
       toast.error(error instanceof Error ? error.message : 'Failed to create listing');
     } finally {
       setSubmitting(false);

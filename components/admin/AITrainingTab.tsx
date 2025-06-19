@@ -16,19 +16,15 @@ const AITrainingTab: React.FC<AITrainingTabProps> = ({ onAdd, onEdit, onView, on
   const [filterLanguage, setFilterLanguage] = useState('all');
   const [trainingData, setTrainingData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const fetchTrainingData = async () => {
-    try {
+  const fetchTrainingData = async () => {    try {
       setLoading(true);
       const response = await fetch('/api/ai-training-data');
       if (response.ok) {
         const result = await response.json();
-        console.log('Fetched AI training data:', result.trainingData);
         setTrainingData(result.trainingData || []);
-      } else {
-        console.error('Error fetching AI training data: HTTP', response.status);
       }
     } catch (error) {
-      console.error('Error fetching AI training data:', error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }
@@ -66,9 +62,7 @@ const AITrainingTab: React.FC<AITrainingTabProps> = ({ onAdd, onEdit, onView, on
         item.id === id ? { ...item, is_active: !is_active } : item
       ));
       
-      alert(`Training data ${!is_active ? 'activated' : 'deactivated'} successfully`);
-    } catch (error: any) {
-      console.error('Error updating training data:', error);
+      alert(`Training data ${!is_active ? 'activated' : 'deactivated'} successfully`);    } catch (error: any) {
       alert(`Error: ${error.message}`);
     }
   };

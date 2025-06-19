@@ -66,15 +66,15 @@ export default function VendorApplicationsTab() {
   }, []);  const fetchApplications = async () => {
     try {
       setLoading(true);
-      console.log('🔍 Fetching vendor applications with status:', statusFilter);
+
       
       const response = await authenticatedFetch(`/api/vendor-applications?status=${statusFilter}`);
       const result = await response.json();
       
-      console.log('✅ Successfully fetched applications:', result);
+
       setApplications(result.applications || []);
     } catch (error) {
-      console.error('❌ Error fetching vendor applications:', error);
+
       setApplications([]);
     } finally {
       setLoading(false);
@@ -119,7 +119,7 @@ export default function VendorApplicationsTab() {
       setSelectedApplication(null);
       setReviewNotes('');
     } catch (error) {
-      console.error('Error reviewing application:', error);
+
     } finally {
       setIsReviewing(false);
     }

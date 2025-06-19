@@ -95,9 +95,7 @@ export default function ComposeMessageModal({
       });
 
       onMessageSent();
-      onClose();
-    } catch (error) {
-      console.error('Error sending message:', error);
+      onClose();    } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to send message');
     } finally {
       setSending(false);

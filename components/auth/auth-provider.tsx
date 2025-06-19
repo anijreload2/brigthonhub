@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session?.user?.email);
+
       
       if (session?.user) {
         await fetchUserProfile(session.user);
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserProfile = async (supabaseUser: SupabaseUser) => {
     try {
-      console.log('Fetching user profile for:', supabaseUser.email);
+
       
       // Get user data from our users table using email
       const { data: userData, error } = await supabase
@@ -62,19 +62,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('email', supabaseUser.email)
         .single();
 
-      console.log('User data fetch result:', { userData, error });
+
 
       if (error || !userData) {
         // If user doesn't exist in our database, create them
         if (error?.code === 'PGRST116') { // Not found error
-          console.log('User not found in database, creating new record');
+
           await createUserRecord(supabaseUser);
           return;
         }
-        console.error('Failed to fetch user profile:', error);
+
         setUser(null);
       } else {
-        console.log('Setting user data:', userData);
+
         setUser({
           id: userData.id,
           email: userData.email,
@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -114,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
       if (userError) {
-        console.error('Failed to create user record:', userError);
+
         return;
       }
 
@@ -131,13 +131,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
       if (profileError) {
-        console.error('Failed to create user profile:', profileError);
+
       }
 
       // Fetch the newly created user
       await fetchUserProfile(supabaseUser);
     } catch (error) {
-      console.error('Error creating user record:', error);
+
     }
   };
 
@@ -180,7 +180,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      console.error('Logout error:', error);
+
     }
     // User state will be cleared automatically by the auth state change listener
   };

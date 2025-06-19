@@ -48,15 +48,13 @@ export default function FeaturedFoodMarketplace() {
           throw new Error('Failed to fetch food items');
         }
         const data = await response.json();
-        console.log('🍽️ Food API Response:', data); // Debug log
-        
-        // Handle both old format (array) and new format (object with foodItems array)
+
+          // Handle both old format (array) and new format (object with foodItems array)
         const foodData = Array.isArray(data) ? data : (data.foodItems || []);
-        console.log('🍽️ Food Data:', foodData); // Debug log
         setFoodItems(foodData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
-        console.error('❌ Error fetching food items:', err);
+
       } finally {
         setLoading(false);
       }

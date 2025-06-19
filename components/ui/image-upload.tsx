@@ -90,7 +90,7 @@ export default function ImageUpload({
         setUploadedImages(data.images || []);
       }
     } catch (error) {
-      console.error('Error loading images:', error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }

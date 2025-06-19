@@ -48,7 +48,7 @@ export default function StorePage() {
           .order('name');
 
         if (categoriesError) {
-          console.error('Error fetching store categories:', categoriesError);
+
         } else {
           setCategories(categoriesData || []);
         }
@@ -67,12 +67,12 @@ export default function StorePage() {
           .order('name');
 
         if (productsError) {
-          console.error('Error fetching store products:', productsError);
+
         } else {
           setProducts(productsData || []);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+
       } finally {
         setLoading(false);
       }

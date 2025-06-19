@@ -212,7 +212,7 @@ export default function EditListing() {
       });
 
     } catch (error) {
-      console.error('Error fetching listing:', error);
+      // Error handled by showing error message to user
       toast.error('Failed to load listing');
       router.push('/vendor/dashboard');
     } finally {
@@ -246,7 +246,7 @@ export default function EditListing() {
         });
 
       if (error) {
-        console.error('Storage error:', error);
+        // Storage error handled by showing error message
         throw error;
       }
 
@@ -256,7 +256,7 @@ export default function EditListing() {
 
       setImages(prev => [...prev, publicUrl]);
       toast.success('Image uploaded successfully');    } catch (error) {
-      console.error('Error uploading image:', error);
+      // Error handled by showing error message to user
       
       // Provide more specific error messages
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -323,7 +323,7 @@ export default function EditListing() {
       toast.success('Listing updated successfully!');
       router.push('/vendor/dashboard?tab=listings');
     } catch (error) {
-      console.error('Error updating listing:', error);
+      // Error handled by showing error message to user
       toast.error('Failed to update listing');
     } finally {
       setSubmitting(false);

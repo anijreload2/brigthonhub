@@ -45,18 +45,13 @@ export default function AnalyticsTab() {
       
       const startDate = new Date();
       const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 90;
-      startDate.setDate(endDate.getDate() - days);
-      startDate.setHours(0, 0, 0, 0); // Start of day
-
-      console.log('Date range:', { startDate: startDate.toISOString(), endDate: endDate.toISOString() });
+      startDate.setDate(endDate.getDate() - days);      startDate.setHours(0, 0, 0, 0); // Start of day
 
       // Fetch total messages with error handling
       const { count: totalMessages, error: totalMessagesError } = await supabase
         .from('contact_messages')
-        .select('*', { count: 'exact', head: true });
-
-      if (totalMessagesError) {
-        console.error('Error fetching total messages:', totalMessagesError);
+        .select('*', { count: 'exact', head: true });      if (totalMessagesError) {
+        // Error handled silently
       }
 
       // Fetch vendor applications data

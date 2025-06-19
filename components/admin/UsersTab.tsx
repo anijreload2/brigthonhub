@@ -37,16 +37,11 @@ const UsersTab: React.FC<UsersTabProps> = ({ onAdd, onEdit, onView, onDelete }) 
             notifications
           )
         `)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching users:', error);
-      } else {
-        console.log('Fetched users:', data); // Debug log
+        .order('created_at', { ascending: false });      if (!error) {
         setUsers(data || []);
       }
     } catch (error) {
-      console.error('Error fetching users:', error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }

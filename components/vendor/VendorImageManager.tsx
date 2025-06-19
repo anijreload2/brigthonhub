@@ -102,9 +102,8 @@ export default function VendorImageManager({ vendorId, vendorCategories }: Vendo
                     contentId={vendorId}
                     maxImages={5}
                     allowMultiple={true}
-                    showPreview={true}
-                    onUploadSuccess={(image) => {
-                      console.log('Profile image uploaded:', image);
+                    showPreview={true}                    onUploadSuccess={(image) => {
+                      // Image uploaded successfully
                     }}
                   />
                 </CardContent>
@@ -143,9 +142,8 @@ export default function VendorImageManager({ vendorId, vendorCategories }: Vendo
                             contentType={config.contentType}
                             maxImages={20}
                             allowMultiple={true}
-                            showPreview={true}
-                            onUploadSuccess={(image) => {
-                              console.log(`${category} image uploaded:`, image);
+                            showPreview={true}                            onUploadSuccess={(image) => {
+                              // Image uploaded successfully
                             }}
                           />
                         </div>

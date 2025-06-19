@@ -156,7 +156,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
       setShowContactForm(false);
       setContactForm({ name: '', email: '', phone: '', message: '' });
     } catch (error) {
-      console.error('Error sending message:', error);
+      // Error handled by showing error message to user
       alert('Failed to send message. Please try again.');
     }
   };

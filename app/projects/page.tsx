@@ -70,7 +70,7 @@ export default function ProjectsPage() {
           .order('name');
 
         if (categoriesError) {
-          console.error('Error fetching project categories:', categoriesError);
+
         } else {
           setCategories(categoriesData || []);
         }
@@ -89,12 +89,12 @@ export default function ProjectsPage() {
           .order('created_at', { ascending: false });
 
         if (projectsError) {
-          console.error('Error fetching projects:', projectsError);
+
         } else {
           setProjects(projectsData || []);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+
       } finally {
         setLoading(false);
       }

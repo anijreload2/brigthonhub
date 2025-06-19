@@ -52,12 +52,12 @@ const PropertiesPage = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching properties:', error);
+
       } else {
         setProperties(data || []);
       }
     } catch (error) {
-      console.error('Error fetching properties:', error);
+
     } finally {
       setLoading(false);
     }
@@ -72,12 +72,12 @@ const PropertiesPage = () => {
         .order('name');
 
       if (error) {
-        console.error('Error fetching categories:', error);
+
       } else {
         setCategories(data || []);
       }
     } catch (error) {
-      console.error('Error fetching categories:', error);
+
     }
   };
 
